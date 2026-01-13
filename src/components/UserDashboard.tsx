@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Wrench, Award, ArrowRight, LogOut } from 'lucide-react';
+import { BookOpen, Wrench, Award, ArrowRight, LogOut, CheckCircle, Lock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAppStore } from '@/store/useAppStore';
+import { baseCapabilities } from '@/data/baseCapabilities';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -30,6 +31,13 @@ export default function UserDashboard() {
   const completedModules = trainingProgress.completedModules.length;
   const totalModules = 4; // From trainingData
   const progressPercent = (completedModules / totalModules) * 100;
+
+  // Get user's granted capabilities with details
+  const userCapabilities = hasLicense
+    ? baseCapabilities.filter(cap => 
+        currentUser.license!.grantedCapabilities.includes(cap.id)
+      )
+    : [];
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -142,6 +150,86 @@ export default function UserDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Authority Panel */}
+        {hasLicense && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                Jouw Geautoriseerde Werkgebieden
+              </CardTitle>
+              <CardDescription>
+                Hieronder zie je welke AI-toepassingen je mag gebruiken en onder welke voorwaarden.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Toegestane Capabilities */}
+              {userCapabilities.map(capability => (
+                <div key={capability.id} className="p-4 border rounded-lg bg-primary/5">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{capability.name}</span>
+                    </div>
+                    <Badge variant={capability.riskLevel === 'minimal' ? 'secondary' : 'destructive'}>
+                      {capability.riskLevel === 'minimal' ? 'Minimaal Risico' : 'Verhoogd Risico'}
+                    </Badge>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Use cases: {capability.useCases?.join(', ')}
+                  </p>
+
+                  <div className="flex items-start gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-muted-foreground">
+                        Status: {capability.complianceStatus}
+                      </p>
+                      {capability.restrictions && (
+                        <p className="text-muted-foreground">
+                          {capability.restrictions}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Vergrendelde Capabilities */}
+              {baseCapabilities
+                .filter(cap => cap.locked && !userCapabilities.find(uc => uc.id === cap.id))
+                .map(capability => (
+                  <div key={capability.id} className="p-4 border rounded-lg bg-muted/50 opacity-75">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-muted-foreground">{capability.name}</span>
+                      </div>
+                      <Badge variant="destructive">
+                        Verhoogd Risico
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-start gap-2 text-sm">
+                      <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                      <div>
+                        <p className="text-muted-foreground">
+                          🔒 Vereist Gevorderd Training + Org Approval
+                        </p>
+                        {capability.restrictions && (
+                          <p className="text-muted-foreground">
+                            Let op: {capability.restrictions}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-6">
