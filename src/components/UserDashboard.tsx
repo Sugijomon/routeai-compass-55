@@ -83,9 +83,22 @@ export default function UserDashboard() {
                     <Award className="h-5 w-5 text-primary" />
                     <span className="font-semibold text-primary">Actief</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Geldig tot {new Date(currentUser.license!.expiresAt).toLocaleDateString('nl-NL')}
-                  </p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Niveau:</span>
+                    <span className="font-medium capitalize">
+                      {currentUser.license!.trainingLevel}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Geldig tot:</span>
+                    <span className="font-medium">
+                      {new Date(currentUser.license!.expiresAt).toLocaleDateString('nl-NL')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Werkgebieden:</span>
+                    <span className="font-medium">{currentUser.license!.grantedCapabilities.length}</span>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -114,11 +127,11 @@ export default function UserDashboard() {
             </CardContent>
           </Card>
 
-          {/* Capabilities */}
+          {/* Werkgebieden */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Capabilities
+                Werkgebieden
               </CardTitle>
             </CardHeader>
             <CardContent>
