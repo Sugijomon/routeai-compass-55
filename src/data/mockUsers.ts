@@ -2,37 +2,24 @@ import { User } from '../types';
 import { getDefaultCapabilities } from './baseCapabilities';
 
 export const MOCK_USERS: User[] = [
-{
-  id: 'user-1',
-  name: 'Jan Smit',
-  email: 'jan.smit@bedrijf.nl',
-  role: 'user',
-  department: 'Marketing & Communicatie',
-  
-  // ✅ LICENSE MOET DIT HEBBEN:
-  license: {
-    id: 'lic-001',
-    userId: 'user-1',
-    trainingLevel: 'basis',  // ← DIT MOET ER ZIJN!
-    issuedAt: '2025-12-15T10:00:00Z',
-    expiresAt: '2026-12-15T10:00:00Z',
-    grantedCapabilities: [
-      'text-redactie',      // ← NIEUWE IDs
-      'brainstorm-ideeen'   // ← NIEUWE IDs
-    ],
-    status: 'active',
+  {
+    id: 'user-1',
+    name: 'Jan Smit',
+    email: 'jan.smit@bedrijf.nl',
+    role: 'user',
+    organisationId: 'org-1',
+    license: {
+      certificateNumber: 'NL-2025-00137',
+      userId: 'user-1',
+      trainingLevel: 'basis',
+      issuedAt: '2025-12-15T10:00:00Z',
+      expiresAt: '2026-12-15T10:00:00Z',
+      grantedCapabilities: ['text-redactie', 'brainstorm-ideeen'],
+      status: 'active',
+      assessmentScore: 85,
+      completedAt: '2025-12-15T10:00:00Z',
+    },
   },
-  
-  // ✅ TRAINING PROGRESS MOET DIT HEBBEN:
-  trainingProgress: {
-    completedModules: ['module-1', 'module-2', 'module-3', 'module-4'], // 4/4!
-    assessmentScore: 85,
-    certificateIssued: true,
-    startedAt: '2025-12-10T09:00:00Z',
-    completedAt: '2025-12-15T10:00:00Z', // ← Completed date!
-  }
-}
-  
   {
     id: 'user-2',
     name: 'Lisa de Vries',
