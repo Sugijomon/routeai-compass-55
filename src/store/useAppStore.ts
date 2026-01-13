@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User, UserRole, TrainingProgress, AILicense } from "@/types";
-import { mockUsers } from "@/data/mockUsers";
-import { baseCapabilities } from "@/data/baseCapabilities";
-import { trainingModules } from "@/data/trainingData";
+import { User, AILicense } from "@/types";
+import { MOCK_USERS } from "@/data/mockUsers";
+import { BASE_CAPABILITIES, getDefaultCapabilities } from "@/data/baseCapabilities";
+
+type UserRole = 'user' | 'org_admin';
 
 interface AppState {
   // Current user
@@ -30,12 +31,24 @@ interface AppState {
   canUserAccessTool: (userId: string, toolId: string) => boolean;
 }
 
+// Track training progress separately (not on User type)
+interface TrainingProgressMap {
+  [userId: string]: {
+    completedModules: string[];
+    assessmentScore: number | null;
+    startedAt?: string;
+    completedAt?: string;
+  };
+}
+
+let trainingProgressStore: TrainingProgressMap = {};
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       // Initial state
       currentUser: null,
-      users: mockUsers,
+      users: [...MOCK_USERS],
 
       // Set current user
       setCurrentUser: (user) => set({ currentUser: user }),
@@ -51,83 +64,77 @@ export const useAppStore = create<AppState>()(
       },
 
       // Start training
-      startTraining: (userId) =>
-        set((state) => ({
-          users: state.users.map((user) => {
-            if (user.id === userId) {
-              return {
-                ...user,
-                trainingProgress: {
-                  completedModules: [],
-                  assessmentScore: null,
-                  certificateIssued: false,
-                  startedAt: new Date().toISOString(),
-                },
-              };
-            }
-            return user;
-          }),
-        })),
+      startTraining: (userId) => {
+        trainingProgressStore[userId] = {
+          completedModules: [],
+          assessmentScore: null,
+          startedAt: new Date().toISOString(),
+        };
+      },
 
       // Complete a training module
-      completeModule: (userId, moduleId) =>
-        set((state) => ({
-          users: state.users.map((user) => {
-            if (user.id === userId && user.trainingProgress) {
-              const completedModules = [...user.trainingProgress.completedModules];
-              if (!completedModules.includes(moduleId)) {
-                completedModules.push(moduleId);
-              }
-              return {
-                ...user,
-                trainingProgress: {
-                  ...user.trainingProgress,
-                  completedModules,
-                },
-              };
-            }
-            return user;
-          }),
-        })),
+      completeModule: (userId, moduleId) => {
+        if (!trainingProgressStore[userId]) {
+          trainingProgressStore[userId] = {
+            completedModules: [],
+            assessmentScore: null,
+            startedAt: new Date().toISOString(),
+          };
+        }
+        const progress = trainingProgressStore[userId];
+        if (!progress.completedModules.includes(moduleId)) {
+          progress.completedModules.push(moduleId);
+        }
+      },
 
       // Submit assessment
-      submitAssessment: (userId, score) =>
-        set((state) => ({
-          users: state.users.map((user) => {
-            if (user.id === userId && user.trainingProgress) {
-              const passed = score >= 80; // 80% pass rate
-              return {
-                ...user,
-                trainingProgress: {
-                  ...user.trainingProgress,
-                  assessmentScore: score,
-                  certificateIssued: passed,
-                  completedAt: passed ? new Date().toISOString() : undefined,
-                },
-              };
-            }
-            return user;
-          }),
-        })),
+      submitAssessment: (userId, score) => {
+        if (!trainingProgressStore[userId]) {
+          trainingProgressStore[userId] = {
+            completedModules: [],
+            assessmentScore: null,
+            startedAt: new Date().toISOString(),
+          };
+        }
+        const progress = trainingProgressStore[userId];
+        progress.assessmentScore = score;
+        
+        const passed = score >= 80;
+        if (passed) {
+          progress.completedAt = new Date().toISOString();
+          // Also issue license
+          get().issueLicense(userId);
+        }
+      },
 
       // Issue license after successful training
       issueLicense: (userId) =>
         set((state) => ({
           users: state.users.map((user) => {
             if (user.id === userId) {
-              // Create a basic license with all base capabilities
+              const now = new Date();
+              const expiresAt = new Date(now);
+              expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+              
               const license: AILicense = {
-                id: `lic-${Date.now()}`,
+                certificateNumber: `NL-${now.getFullYear()}-${Math.floor(Math.random() * 90000) + 10000}`,
                 userId: user.id,
-                issuedAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
-                grantedCapabilities: baseCapabilities.map((cap) => cap.id),
+                issuedAt: now.toISOString(),
+                expiresAt: expiresAt.toISOString(),
+                grantedCapabilities: getDefaultCapabilities(),
                 status: "active",
+                assessmentScore: trainingProgressStore[userId]?.assessmentScore || 80,
+                completedAt: now.toISOString(),
               };
-              return {
-                ...user,
-                license,
-              };
+              
+              const updatedUser = { ...user, license };
+              
+              // Update currentUser if this is them
+              if (state.currentUser?.id === userId) {
+                set({ currentUser: updatedUser });
+              }
+              
+              return updatedUser;
             }
             return user;
           }),
@@ -157,11 +164,11 @@ export const useAppStore = create<AppState>()(
 
         // Map common usages to required capabilities
         const usageToCapability: Record<string, string> = {
-          "text-generation": "text-operations",
-          ideation: "ideation",
-          analysis: "analysis",
-          brainstorming: "ideation",
-          "data-analysis": "analysis",
+          "text-generation": "cap-text-ops",
+          ideation: "cap-ideation",
+          analysis: "cap-basic-analysis",
+          brainstorming: "cap-ideation",
+          "data-analysis": "cap-basic-analysis",
         };
 
         const requiredCap = usageToCapability[usage];
@@ -177,7 +184,6 @@ export const useAppStore = create<AppState>()(
           return false;
         }
         // For now, if user has a license, they can access all tools
-        // In future, can add tool-specific capability requirements
         return true;
       },
     }),
@@ -190,3 +196,11 @@ export const useAppStore = create<AppState>()(
     },
   ),
 );
+
+// Helper to get training progress
+export function getTrainingProgress(userId: string) {
+  return trainingProgressStore[userId] || {
+    completedModules: [],
+    assessmentScore: null,
+  };
+}
