@@ -5,21 +5,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useAppStore, getTrainingProgress } from '@/store/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useAppStore();
 
+  React.useEffect(() => {
+    console.log('=== USER DATA DEBUG ===');
+    console.log('Current user:', currentUser);
+    console.log('License:', currentUser?.license);
+    console.log('Training Progress:', currentUser?.trainingProgress);
+    console.log('Completed Modules:', currentUser?.trainingProgress?.completedModules);
+    console.log('Granted Capabilities:', currentUser?.license?.grantedCapabilities);
+    console.log('=====================');
+  }, [currentUser]);
+
   if (!currentUser) {
     return null;
   }
 
-  const trainingProgress = getTrainingProgress(currentUser.id);
-
-  console.log('Current user:', currentUser);
-  console.log('License:', currentUser?.license);
-  console.log('Training:', trainingProgress);
+  const trainingProgress = currentUser.trainingProgress || { completedModules: [], assessmentScore: null, certificateIssued: false };
   const hasLicense = currentUser.license?.status === 'active';
   const completedModules = trainingProgress.completedModules.length;
   const totalModules = 4; // From trainingData
