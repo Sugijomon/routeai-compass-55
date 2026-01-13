@@ -12,19 +12,6 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useAppStore();
 
-  React.useEffect(() => {
-    console.log("User granted capabilities:", currentUser?.license?.grantedCapabilities);
-    console.log("Base capabilities:", baseCapabilities);
-    console.log("User capabilities (filtered):", userCapabilities);
-    console.log("=== USER DATA DEBUG ===");
-    console.log("Current user:", currentUser);
-    console.log("License:", currentUser?.license);
-    console.log("Training Progress:", currentUser?.trainingProgress);
-    console.log("Completed Modules:", currentUser?.trainingProgress?.completedModules);
-    console.log("Granted Capabilities:", currentUser?.license?.grantedCapabilities);
-    console.log("=====================");
-  }, [currentUser]);
-
   if (!currentUser) {
     return null;
   }
@@ -43,6 +30,11 @@ export default function UserDashboard() {
   const userCapabilities = hasLicense
     ? baseCapabilities.filter((cap) => currentUser.license!.grantedCapabilities.includes(cap.id))
     : [];
+
+  // Debug logging
+  console.log('Granted IDs:', currentUser?.license?.grantedCapabilities);
+  console.log('Base caps IDs:', baseCapabilities.map(c => c.id));
+  console.log('Matched caps:', userCapabilities.map(c => c.name));
 
   const handleLogout = () => {
     setCurrentUser(null);
