@@ -1,55 +1,33 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { User, BaseCapability, Tool } from '../types';
-import { MOCK_USERS } from '../data/mockUsers';
-import { BASE_CAPABILITIES, getDefaultCapabilities } from '../data/baseCapabilities';
-import { MOCK_TOOLS } from '../data/mockTools';
-import { TRAINING_MODULES, ASSESSMENT_QUESTIONS } from '../data/trainingData';
-
-interface TrainingProgress {
-  userId: string;
-  completedModules: string[];
-  currentModule: string | null;
-  assessmentAttempts: number;
-  lastAttemptScore: number | null;
-}
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { User, UserRole, TrainingProgress, AILicense } from "@/types";
+import { mockUsers } from "@/data/mockUsers";
+import { baseCapabilities } from "@/data/baseCapabilities";
+import { trainingModules } from "@/data/trainingData";
 
 interface AppState {
-  // === AUTH SIMULATION ===
+  // Current user
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
 
-  // === MASTER DATA (read-only) ===
-  capabilities: BaseCapability[];
-  tools: Tool[];
-  trainingModules: typeof TRAINING_MODULES;
-  assessmentQuestions: typeof ASSESSMENT_QUESTIONS;
+  // Users data
+  users: User[];
+  getUserById: (id: string) => User | undefined;
+  getUserByRole: (role: UserRole) => User | undefined;
 
-  // === TRAINING PROGRESS ===
-  trainingProgress: TrainingProgress[];
+  // Training
+  startTraining: (userId: string) => void;
   completeModule: (userId: string, moduleId: string) => void;
-  startAssessment: (userId: string) => void;
-  submitAssessment: (userId: string, score: number, answers: Record<string, string>[]) => void;
+  submitAssessment: (userId: string, score: number) => void;
 
-  // === AUTHORITY CHECKING ===
+  // License management
+  issueLicense: (userId: string) => void;
+
+  // Authority checking
   userHasCapability: (userId: string, capabilityId: string) => boolean;
-  getUserCapabilities: (userId: string) => BaseCapability[];
-  checkUsageAuthority: (userId: string, usage: {
-    purpose: string;
-    dataType: string;
-    automationLevel: string;
-  }) => {
-    allowed: boolean;
-    reason: string;
-    matchedCapability?: BaseCapability;
-  };
-
-  // === TOOL ACCESS ===
-  getUserTools: (userId: string) => Tool[];
-  canUserAccessTool: (userId: string, toolId: string) => {
-    canAccess: boolean;
-    reason: string;
-  };
+  getUserCapabilities: (userId: string) => string[];
+  checkUsageAuthority: (userId: string, usage: string) => boolean;
+  canUserAccessTool: (userId: string, toolId: string) => boolean;
 }
 
 export const useAppStore = create<AppState>()(
@@ -57,191 +35,158 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       // Initial state
       currentUser: null,
-      capabilities: BASE_CAPABILITIES,
-      tools: MOCK_TOOLS,
-      trainingModules: TRAINING_MODULES,
-      assessmentQuestions: ASSESSMENT_QUESTIONS,
-      trainingProgress: [],
+      users: mockUsers,
 
-      // === AUTH ===
-      setCurrentUser: (user) => {
-        set({ currentUser: user });
+      // Set current user
+      setCurrentUser: (user) => set({ currentUser: user }),
+
+      // Get user by ID
+      getUserById: (id) => {
+        return get().users.find((u) => u.id === id);
       },
 
-      // === TRAINING ===
-      completeModule: (userId, moduleId) => {
-        const progress = [...get().trainingProgress];
-        let userProgress = progress.find(p => p.userId === userId);
-
-        if (!userProgress) {
-          userProgress = {
-            userId,
-            completedModules: [],
-            currentModule: null,
-            assessmentAttempts: 0,
-            lastAttemptScore: null
-          };
-          progress.push(userProgress);
-        }
-
-        if (!userProgress.completedModules.includes(moduleId)) {
-          userProgress.completedModules = [...userProgress.completedModules, moduleId];
-        }
-
-        set({ trainingProgress: progress });
+      // Get user by role (voor login simulatie)
+      getUserByRole: (role) => {
+        return get().users.find((u) => u.role === role);
       },
 
-      startAssessment: (userId) => {
-        const progress = [...get().trainingProgress];
-        const userProgress = progress.find(p => p.userId === userId);
-
-        if (userProgress) {
-          userProgress.assessmentAttempts += 1;
-        }
-
-        set({ trainingProgress: progress });
-      },
-
-      submitAssessment: (userId, score, _answers) => {
-        const progress = [...get().trainingProgress];
-        const userProgress = progress.find(p => p.userId === userId);
-
-        if (userProgress) {
-          userProgress.lastAttemptScore = score;
-
-          // Als geslaagd (>= 80%), update user license
-          if (score >= 80) {
-            const users = [...MOCK_USERS];
-            const user = users.find(u => u.id === userId);
-
-            if (user) {
-              const now = new Date();
-              const expires = new Date(now);
-              expires.setFullYear(expires.getFullYear() + 1);
-
-              user.license = {
-                certificateNumber: `NL-${now.getFullYear()}-${Math.floor(Math.random() * 90000) + 10000}`,
-                userId,
-                status: 'active',
-                assessmentScore: score,
-                completedAt: now.toISOString(),
-                grantedCapabilities: getDefaultCapabilities(), // EXPLICIET!
-                issuedAt: now.toISOString(),
-                expiresAt: expires.toISOString(),
-                issuedBy: 'system'
+      // Start training
+      startTraining: (userId) =>
+        set((state) => ({
+          users: state.users.map((user) => {
+            if (user.id === userId) {
+              return {
+                ...user,
+                trainingProgress: {
+                  completedModules: [],
+                  assessmentScore: null,
+                  certificateIssued: false,
+                  startedAt: new Date().toISOString(),
+                },
               };
-
-              // Update current user if this is them
-              if (get().currentUser?.id === userId) {
-                set({ currentUser: { ...user } });
-              }
             }
-          }
-        }
+            return user;
+          }),
+        })),
 
-        set({ trainingProgress: progress });
-      },
+      // Complete a training module
+      completeModule: (userId, moduleId) =>
+        set((state) => ({
+          users: state.users.map((user) => {
+            if (user.id === userId && user.trainingProgress) {
+              const completedModules = [...user.trainingProgress.completedModules];
+              if (!completedModules.includes(moduleId)) {
+                completedModules.push(moduleId);
+              }
+              return {
+                ...user,
+                trainingProgress: {
+                  ...user.trainingProgress,
+                  completedModules,
+                },
+              };
+            }
+            return user;
+          }),
+        })),
 
-      // === AUTHORITY CHECKING ===
+      // Submit assessment
+      submitAssessment: (userId, score) =>
+        set((state) => ({
+          users: state.users.map((user) => {
+            if (user.id === userId && user.trainingProgress) {
+              const passed = score >= 80; // 80% pass rate
+              return {
+                ...user,
+                trainingProgress: {
+                  ...user.trainingProgress,
+                  assessmentScore: score,
+                  certificateIssued: passed,
+                  completedAt: passed ? new Date().toISOString() : undefined,
+                },
+              };
+            }
+            return user;
+          }),
+        })),
+
+      // Issue license after successful training
+      issueLicense: (userId) =>
+        set((state) => ({
+          users: state.users.map((user) => {
+            if (user.id === userId) {
+              // Create a basic license with all base capabilities
+              const license: AILicense = {
+                id: `lic-${Date.now()}`,
+                userId: user.id,
+                issuedAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+                grantedCapabilities: baseCapabilities.map((cap) => cap.id),
+                status: "active",
+              };
+              return {
+                ...user,
+                license,
+              };
+            }
+            return user;
+          }),
+        })),
+
+      // Check if user has a specific capability
       userHasCapability: (userId, capabilityId) => {
-        const users = MOCK_USERS;
-        const user = users.find(u => u.id === userId);
-
-        if (!user?.license || user.license.status !== 'active') {
+        const user = get().getUserById(userId);
+        if (!user || !user.license || user.license.status !== "active") {
           return false;
         }
-
         return user.license.grantedCapabilities.includes(capabilityId);
       },
 
+      // Get all capabilities for a user
       getUserCapabilities: (userId) => {
-        const users = MOCK_USERS;
-        const user = users.find(u => u.id === userId);
-
-        if (!user?.license || user.license.status !== 'active') {
+        const user = get().getUserById(userId);
+        if (!user || !user.license || user.license.status !== "active") {
           return [];
         }
-
-        const allCapabilities = get().capabilities;
-        return allCapabilities.filter(cap =>
-          user.license!.grantedCapabilities.includes(cap.id)
-        );
+        return user.license.grantedCapabilities;
       },
 
+      // Check if user can perform a specific usage
       checkUsageAuthority: (userId, usage) => {
         const userCapabilities = get().getUserCapabilities(userId);
 
-        if (userCapabilities.length === 0) {
-          return {
-            allowed: false,
-            reason: 'Geen geldig AI-rijbewijs. Voltooi eerst de training.'
-          };
-        }
-
-        // Check each capability to see if it matches
-        for (const cap of userCapabilities) {
-          const matchesAllowed =
-            cap.allowedWhen.dataTypes.includes(usage.dataType) &&
-            cap.allowedWhen.automationLevel.includes(usage.automationLevel);
-
-          const violatesProhibited =
-            cap.prohibitedWhen.dataTypes.includes(usage.dataType);
-
-          if (matchesAllowed && !violatesProhibited) {
-            return {
-              allowed: true,
-              reason: `Toegestaan onder capability "${cap.name}"`,
-              matchedCapability: cap
-            };
-          }
-        }
-
-        return {
-          allowed: false,
-          reason: 'Gebruik valt buiten je huidige capabilities. RouteAI-beoordeling vereist.'
+        // Map common usages to required capabilities
+        const usageToCapability: Record<string, string> = {
+          "text-generation": "text-operations",
+          ideation: "ideation",
+          analysis: "analysis",
+          brainstorming: "ideation",
+          "data-analysis": "analysis",
         };
+
+        const requiredCap = usageToCapability[usage];
+        if (!requiredCap) return false;
+
+        return userCapabilities.includes(requiredCap);
       },
 
-      // === TOOL ACCESS ===
-      getUserTools: (userId) => {
-        const users = MOCK_USERS;
-        const user = users.find(u => u.id === userId);
-
-        if (!user?.license || user.license.status !== 'active') {
-          return [];
-        }
-
-        // Voor MVP: users met license krijgen toegang tot eerste 4 tools
-        return get().tools.slice(0, 4);
-      },
-
+      // Check if user can access a specific tool
       canUserAccessTool: (userId, toolId) => {
-        const users = MOCK_USERS;
-        const user = users.find(u => u.id === userId);
-
-        if (!user?.license || user.license.status !== 'active') {
-          return {
-            canAccess: false,
-            reason: 'Geen geldig AI-rijbewijs'
-          };
+        const user = get().getUserById(userId);
+        if (!user || !user.license || user.license.status !== "active") {
+          return false;
         }
-
-        const userTools = get().getUserTools(userId);
-        const hasTool = userTools.some(t => t.id === toolId);
-
-        return {
-          canAccess: hasTool,
-          reason: hasTool ? 'Toegang goedgekeurd' : 'Tool niet beschikbaar voor jouw rol'
-        };
-      }
+        // For now, if user has a license, they can access all tools
+        // In future, can add tool-specific capability requirements
+        return true;
+      },
     }),
     {
-      name: 'routeai-storage',
+      name: "routeai-storage",
       partialize: (state) => ({
-        // Persist alleen training progress
-        // currentUser NIET opslaan (fresh login every time)
-        trainingProgress: state.trainingProgress
-      })
-    }
-  )
+        currentUser: state.currentUser,
+        users: state.users,
+      }),
+    },
+  ),
 );
