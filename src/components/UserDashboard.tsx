@@ -16,6 +16,10 @@ export default function UserDashboard() {
   }
 
   const trainingProgress = getTrainingProgress(currentUser.id);
+
+  console.log('Current user:', currentUser);
+  console.log('License:', currentUser?.license);
+  console.log('Training:', trainingProgress);
   const hasLicense = currentUser.license?.status === 'active';
   const completedModules = trainingProgress.completedModules.length;
   const totalModules = 4; // From trainingData
