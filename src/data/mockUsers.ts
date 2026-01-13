@@ -2,25 +2,36 @@ import { User } from '../types';
 import { getDefaultCapabilities } from './baseCapabilities';
 
 export const MOCK_USERS: User[] = [
-  {
-    id: 'user-1',
-    name: 'Jan Smit',
-    email: 'jan@acmebv.nl',
-    role: 'user',
-    organisationId: 'org-1',
-    license: {
-      certificateNumber: 'NL-2025-00142',
-      userId: 'user-1',
-      status: 'active',
-      assessmentScore: 87,
-      completedAt: '2025-01-10T14:30:00Z',
-      trainingLevel: 'basis',
-      grantedCapabilities: getDefaultCapabilities(),
-      issuedAt: '2025-01-10T14:35:00Z',
-      expiresAt: '2026-01-10T14:35:00Z',
-      issuedBy: 'admin-1'
-    }
+{
+  id: 'user-1',
+  name: 'Jan Smit',
+  email: 'jan.smit@bedrijf.nl',
+  role: 'user',
+  department: 'Marketing & Communicatie',
+  
+  // ✅ LICENSE MOET DIT HEBBEN:
+  license: {
+    id: 'lic-001',
+    userId: 'user-1',
+    trainingLevel: 'basis',  // ← DIT MOET ER ZIJN!
+    issuedAt: '2025-12-15T10:00:00Z',
+    expiresAt: '2026-12-15T10:00:00Z',
+    grantedCapabilities: [
+      'text-redactie',      // ← NIEUWE IDs
+      'brainstorm-ideeen'   // ← NIEUWE IDs
+    ],
+    status: 'active',
   },
+  
+  // ✅ TRAINING PROGRESS MOET DIT HEBBEN:
+  trainingProgress: {
+    completedModules: ['module-1', 'module-2', 'module-3', 'module-4'], // 4/4!
+    assessmentScore: 85,
+    certificateIssued: true,
+    startedAt: '2025-12-10T09:00:00Z',
+    completedAt: '2025-12-15T10:00:00Z', // ← Completed date!
+  }
+}
   
   {
     id: 'user-2',
