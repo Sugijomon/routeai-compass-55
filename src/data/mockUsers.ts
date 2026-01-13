@@ -15,7 +15,7 @@ export const MOCK_USERS: User[] = [
       trainingLevel: 'basis',
       issuedAt: '2025-12-15T10:00:00Z',
       expiresAt: '2026-12-15T10:00:00Z',
-      grantedCapabilities: ['cap-text-redactie', 'cap-brainstorm-ideeen'],
+      grantedCapabilities: ['text-redactie', 'brainstorm-ideeen'],
       status: 'active',
       assessmentScore: 85,
       completedAt: '2025-12-15T10:00:00Z',
