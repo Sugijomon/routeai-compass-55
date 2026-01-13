@@ -1,12 +1,21 @@
 import { BaseCapability } from '../types';
 
-export const BASE_CAPABILITIES: BaseCapability[] = [
+export const baseCapabilities: BaseCapability[] = [
   {
-    id: 'cap-text-ops',
-    slug: 'text-operations',
-    name: 'Tekst Operaties',
+    id: 'cap-text-redactie',
+    slug: 'text-redactie',
+    name: 'Tekst & Redactie',
     description: 'Basis tekstverwerking zonder gevoelige data',
     category: 'text_operations',
+    
+    // EU AI Act compliance
+    riskLevel: 'minimal',
+    requiredTrainingLevel: 'basis',
+    useCases: ['Samenvatten', 'Herschrijven', 'Vertalen', 'Grammatica controle'],
+    restrictions: 'Geen persoonlijke of gevoelige data',
+    complianceStatus: 'EU AI Act Compliant',
+    allowedDomains: ['marketing', 'communicatie', 'documentatie'],
+    locked: false,
     
     allowedWhen: {
       dataTypes: ['public', 'internal_non_sensitive'],
@@ -38,11 +47,20 @@ export const BASE_CAPABILITIES: BaseCapability[] = [
   },
   
   {
-    id: 'cap-ideation',
-    slug: 'ideation',
-    name: 'Ideation & Brainstormen',
+    id: 'cap-brainstorm-ideeen',
+    slug: 'brainstorm-ideeen',
+    name: 'Brainstorming & Ideeën',
     description: 'Creatief proces met AI als inspiratiebron',
     category: 'ideation',
+    
+    // EU AI Act compliance
+    riskLevel: 'minimal',
+    requiredTrainingLevel: 'basis',
+    useCases: ['Conceptontwikkeling', 'Creatieve sessies', 'Probleemoplossing'],
+    restrictions: 'Alleen als inspiratie, geen finale beslissingen',
+    complianceStatus: 'EU AI Act Compliant',
+    allowedDomains: ['innovatie', 'product', 'marketing'],
+    locked: false,
     
     allowedWhen: {
       dataTypes: ['public', 'internal_non_sensitive'],
@@ -73,11 +91,20 @@ export const BASE_CAPABILITIES: BaseCapability[] = [
   },
   
   {
-    id: 'cap-basic-analysis',
-    slug: 'basic-analysis',
-    name: 'Basis Data-Analyse',
+    id: 'cap-data-analyse',
+    slug: 'data-analyse',
+    name: 'Data-analyse',
     description: 'Analyse van geanonimiseerde/geaggregeerde data',
     category: 'analysis',
+    
+    // EU AI Act compliance
+    riskLevel: 'high',
+    requiredTrainingLevel: 'gevorderd',
+    useCases: ['Trend analyse', 'Rapportage', 'Inzicht generatie'],
+    restrictions: 'Vereist gevorderde training + organisatie goedkeuring. Alleen geaggregeerde data.',
+    complianceStatus: 'Aanvullende Maatregelen Vereist',
+    allowedDomains: ['finance', 'operations', 'strategy'],
+    locked: true,
     
     allowedWhen: {
       dataTypes: ['aggregated', 'anonymized', 'public'],
@@ -108,12 +135,23 @@ export const BASE_CAPABILITIES: BaseCapability[] = [
   }
 ];
 
-// Helper functie
+// Export ook als BASE_CAPABILITIES voor backwards compatibility
+export const BASE_CAPABILITIES = baseCapabilities;
+
+// Helper functies
 export function getCapabilityById(id: string): BaseCapability | undefined {
-  return BASE_CAPABILITIES.find(cap => cap.id === id);
+  return baseCapabilities.find(cap => cap.id === id);
 }
 
 export function getDefaultCapabilities(): string[] {
-  // Standaard krijgt iedereen met een rijbewijs deze 3
-  return ['cap-text-ops', 'cap-ideation', 'cap-basic-analysis'];
+  // Standaard krijgt iedereen met een rijbewijs deze 2 (data-analyse is locked)
+  return ['cap-text-redactie', 'cap-brainstorm-ideeen'];
+}
+
+export function getUnlockedCapabilities(): BaseCapability[] {
+  return baseCapabilities.filter(cap => !cap.locked);
+}
+
+export function getLockedCapabilities(): BaseCapability[] {
+  return baseCapabilities.filter(cap => cap.locked);
 }

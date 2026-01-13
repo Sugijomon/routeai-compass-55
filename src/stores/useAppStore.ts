@@ -182,9 +182,10 @@ export const useAppStore = create<AppState>()(
               license: {
                 certificateNumber: certNumber,
                 userId,
-                status: 'active',
+                status: 'active' as const,
                 assessmentScore: score,
                 completedAt: now.toISOString(),
+                trainingLevel: 'basis' as const,
                 grantedCapabilities: capabilities,
                 issuedAt: now.toISOString(),
                 expiresAt: expiresAt.toISOString(),

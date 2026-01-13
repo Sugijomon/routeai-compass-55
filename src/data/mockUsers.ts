@@ -14,7 +14,8 @@ export const MOCK_USERS: User[] = [
       status: 'active',
       assessmentScore: 87,
       completedAt: '2025-01-10T14:30:00Z',
-      grantedCapabilities: getDefaultCapabilities(), // Expliciet!
+      trainingLevel: 'basis',
+      grantedCapabilities: getDefaultCapabilities(),
       issuedAt: '2025-01-10T14:35:00Z',
       expiresAt: '2026-01-10T14:35:00Z',
       issuedBy: 'admin-1'
@@ -33,6 +34,7 @@ export const MOCK_USERS: User[] = [
       status: 'active',
       assessmentScore: 93,
       completedAt: '2025-01-05T10:15:00Z',
+      trainingLevel: 'gevorderd',
       grantedCapabilities: getDefaultCapabilities(),
       issuedAt: '2025-01-05T10:20:00Z',
       expiresAt: '2026-01-05T10:20:00Z',
