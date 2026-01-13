@@ -1,7 +1,46 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, UserProgress, TrainingProgress } from '@/types';
-import { mockUsers, mockUserProgress } from '@/data/mockUsers';
+import { User, UserProgress } from '@/types';
+import { MOCK_USERS } from '@/data/mockUsers';
+import { getDefaultCapabilities } from '@/data/baseCapabilities';
+
+// Initial user progress for mock users
+const initialUserProgress: UserProgress[] = [
+  {
+    userId: 'user-1',
+    trainingProgress: [
+      { moduleId: 'module-1', completed: true, completedAt: '2025-01-10T10:00:00Z' },
+      { moduleId: 'module-2', completed: true, completedAt: '2025-01-10T11:00:00Z' },
+      { moduleId: 'module-3', completed: true, completedAt: '2025-01-10T13:00:00Z' },
+      { moduleId: 'module-4', completed: true, completedAt: '2025-01-10T14:00:00Z' },
+    ],
+    assessmentAttempts: 1,
+    lastAssessmentScore: 87,
+    lastAssessmentAt: '2025-01-10T14:30:00Z',
+  },
+  {
+    userId: 'user-2',
+    trainingProgress: [
+      { moduleId: 'module-1', completed: true, completedAt: '2025-01-05T08:00:00Z' },
+      { moduleId: 'module-2', completed: true, completedAt: '2025-01-05T09:00:00Z' },
+      { moduleId: 'module-3', completed: true, completedAt: '2025-01-05T09:30:00Z' },
+      { moduleId: 'module-4', completed: true, completedAt: '2025-01-05T10:00:00Z' },
+    ],
+    assessmentAttempts: 1,
+    lastAssessmentScore: 93,
+    lastAssessmentAt: '2025-01-05T10:15:00Z',
+  },
+  {
+    userId: 'user-3',
+    trainingProgress: [
+      { moduleId: 'module-1', completed: true, completedAt: '2025-01-12T10:00:00Z' },
+      { moduleId: 'module-2', completed: false },
+      { moduleId: 'module-3', completed: false },
+      { moduleId: 'module-4', completed: false },
+    ],
+    assessmentAttempts: 0,
+  },
+];
 
 interface AppState {
   // Current user simulation
@@ -32,8 +71,8 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       currentUserId: 'user-1',
       currentRole: 'user',
-      users: mockUsers,
-      userProgress: mockUserProgress,
+      users: MOCK_USERS,
+      userProgress: initialUserProgress,
       
       setCurrentUser: (userId) => {
         const user = get().users.find(u => u.id === userId);
@@ -124,32 +163,16 @@ export const useAppStore = create<AppState>()(
           })
         }));
         
-        // If passed (75%+), issue license
+        // If passed (75%+), issue license with default capabilities
         if (score >= 75) {
-          const baseCapabilities = [
-            'cap-text-summary',
-            'cap-text-rewrite',
-            'cap-ideation',
-            'cap-draft-creation',
-            'cap-translation',
-          ];
-          
-          // Add more capabilities based on score
-          if (score >= 85) {
-            baseCapabilities.push('cap-data-analysis', 'cap-research');
-          }
-          if (score >= 95) {
-            baseCapabilities.push('cap-code-assistance');
-          }
-          
-          get().issueLicense(currentUserId, baseCapabilities, score);
+          get().issueLicense(currentUserId, getDefaultCapabilities(), score);
         }
       },
       
       issueLicense: (userId, capabilities, score) => {
         const now = new Date();
         const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
-        const certNumber = `RAI-${now.getFullYear()}-${String(get().users.filter(u => u.license).length + 1).padStart(3, '0')}`;
+        const certNumber = `NL-${now.getFullYear()}-${String(get().users.filter(u => u.license).length + 1).padStart(5, '0')}`;
         
         set(state => ({
           users: state.users.map(u => {
