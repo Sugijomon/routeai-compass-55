@@ -2,7 +2,7 @@ import { BaseCapability } from '../types';
 
 export const baseCapabilities: BaseCapability[] = [
   {
-    id: 'cap-text-redactie',
+    id: 'text-redactie',
     slug: 'text-redactie',
     name: 'Tekst & Redactie',
     description: 'Basis tekstverwerking zonder gevoelige data',
@@ -47,7 +47,7 @@ export const baseCapabilities: BaseCapability[] = [
   },
   
   {
-    id: 'cap-brainstorm-ideeen',
+    id: 'brainstorm-ideeen',
     slug: 'brainstorm-ideeen',
     name: 'Brainstorming & Ideeën',
     description: 'Creatief proces met AI als inspiratiebron',
@@ -91,7 +91,7 @@ export const baseCapabilities: BaseCapability[] = [
   },
   
   {
-    id: 'cap-data-analyse',
+    id: 'data-analyse',
     slug: 'data-analyse',
     name: 'Data-analyse',
     description: 'Analyse van geanonimiseerde/geaggregeerde data',
@@ -145,7 +145,7 @@ export function getCapabilityById(id: string): BaseCapability | undefined {
 
 export function getDefaultCapabilities(): string[] {
   // Standaard krijgt iedereen met een rijbewijs deze 2 (data-analyse is locked)
-  return ['cap-text-redactie', 'cap-brainstorm-ideeen'];
+  return ['text-redactie', 'brainstorm-ideeen'];
 }
 
 export function getUnlockedCapabilities(): BaseCapability[] {
