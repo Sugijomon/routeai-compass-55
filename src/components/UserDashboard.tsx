@@ -1,10 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Wrench, Award, ArrowRight, LogOut, CheckCircle, Lock, AlertCircle } from "lucide-react";
+import { BookOpen, Wrench, Award, ArrowRight, LogOut, CheckCircle, Lock, AlertCircle, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAppStore } from "@/store/useAppStore";
 import { baseCapabilities } from "@/data/baseCapabilities";
 
@@ -89,6 +90,26 @@ export default function UserDashboard() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Niveau:</span>
                     <span className="font-medium capitalize">{currentUser.license!.trainingLevel}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Scope:</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-xs">
+                              Dit rijbewijs geldt alleen voor productiviteits-tools 
+                              met niet-gevoelige bedrijfsdata. Voor medische, juridische 
+                              of financiële toepassingen is aanvullende training vereist.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <span className="font-medium">Productiviteits-tools (Low Risk)</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Geldig tot:</span>
