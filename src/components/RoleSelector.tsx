@@ -26,7 +26,7 @@ export default function RoleSelector() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-500 to-blue-600 p-4">
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -43,12 +43,12 @@ export default function RoleSelector() {
         <div className="grid md:grid-cols-2 gap-6">
           {/* Gebruiker Card */}
           <Card 
-            className="bg-white shadow-lg hover:scale-[1.02] hover:shadow-xl transition-all duration-300 cursor-pointer" 
+            className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer" 
             onClick={handleUserLogin}
           >
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-teal-100 flex items-center justify-center">
-                <User className="h-10 w-10 text-teal-600" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-teal-600" />
               </div>
               <CardTitle className="text-gray-900">Inloggen als Gebruiker</CardTitle>
               <CardDescription>
@@ -56,7 +56,7 @@ export default function RoleSelector() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white py-6 text-lg">
                 Doorgaan als Jan Smit
               </Button>
             </CardContent>
@@ -64,12 +64,12 @@ export default function RoleSelector() {
 
           {/* Beheerder Card */}
           <Card 
-            className="bg-white shadow-lg hover:scale-[1.02] hover:shadow-xl transition-all duration-300 cursor-pointer" 
+            className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer" 
             onClick={handleAdminLogin}
           >
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-teal-100 flex items-center justify-center">
-                <Shield className="h-10 w-10 text-teal-600" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
+                <Shield className="w-8 h-8 text-teal-600" />
               </div>
               <CardTitle className="text-gray-900">Inloggen als Beheerder</CardTitle>
               <CardDescription>
@@ -77,7 +77,7 @@ export default function RoleSelector() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white py-6 text-lg">
                 Doorgaan als Lisa de Vries
               </Button>
             </CardContent>
