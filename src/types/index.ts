@@ -4,6 +4,65 @@
 export type TrainingLevel = 'basis' | 'gevorderd' | 'expert';
 export type RiskLevel = 'minimal' | 'limited' | 'high' | 'unacceptable';
 
+// AI Label System Types
+export type RouteAIOordeel = 'vertrouwd' | 'vertrouwd-met-instructies' | 'verhoogde-aandacht' | 'niet-aanbevolen';
+export type BetrouwbaarheidScore = 1 | 2 | 3 | 4 | 5;
+
+export interface LightLabel {
+  routeAIOordeel: RouteAIOordeel;
+  privacy: {
+    score: BetrouwbaarheidScore;
+    summary: string;
+  };
+  training: {
+    requiredLevel: TrainingLevel;
+    summary: string;
+  };
+  betrouwbaarheid: {
+    score: BetrouwbaarheidScore;
+    summary: string;
+  };
+  spelregels: string[];
+}
+
+export interface FullNutritionLabel {
+  identiteit: {
+    naam: string;
+    vendor: string;
+    versie: string;
+    releaseDate: string;
+  };
+  aiActClassificatie: {
+    category: 'GPAI' | 'GPAI-SR' | 'High-Risk' | 'Limited-Risk' | 'Minimal-Risk';
+    systemicRisk: boolean;
+    annexCategory?: string;
+    transparencyObligations: string[];
+  };
+  technischeDetails: {
+    modelType: string;
+    trainingDataCutoff?: string;
+    contextWindow?: string;
+    capabilities: string[];
+  };
+  privacyCompliance: {
+    dataProcessingLocation: string;
+    gdprCompliant: boolean;
+    dataRetention: string;
+    thirdPartySharing: boolean;
+  };
+  benchmarks: {
+    accuracy?: number;
+    hallucinationRate?: string;
+    biasAssessment?: string;
+  };
+  governanceOordeel: {
+    oordeel: RouteAIOordeel;
+    rationale: string;
+    reviewDate: string;
+    reviewedBy: string;
+  };
+}
+
 export interface BaseCapability {
   id: string;
   slug: string;
@@ -91,6 +150,11 @@ export interface Tool {
   logoUrl: string;
   description: string;
   
+  // AI Label System
+  lightLabel?: LightLabel;
+  fullNutritionLabel?: FullNutritionLabel;
+  
+  // Use cases
   useCases: {
     title: string;
     description: string;
@@ -99,6 +163,10 @@ export interface Tool {
   }[];
   
   importantNotes: string[];
+  
+  // Restrictions
+  restricted?: boolean;
+  requiredCapability?: string;
 }
 
 export interface TrainingModule {
