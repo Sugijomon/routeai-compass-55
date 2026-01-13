@@ -1,39 +1,49 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Training from "./pages/Training";
-import Assessment from "./pages/Assessment";
-import License from "./pages/License";
-import Tools from "./pages/Tools";
-import AdminTeam from "./pages/AdminTeam";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import RoleSelector from "@/components/RoleSelector";
+import UserDashboard from "@/components/UserDashboard";
+import AdminDashboard from "@/components/AdminDashboard";
+import TrainingFlow from "@/components/TrainingFlow";
+import ToolCatalog from "@/components/ToolCatalog";
+import ToolDetail from "@/components/ToolDetail";
+import { useAppStore } from "@/store/useAppStore";
 
-const queryClient = new QueryClient();
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Welcome / Login Screen */}
+        <Route path="/" element={<RoleSelector />} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/training" element={<Training />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/license" element={<License />} />
-          <Route path="/tools" element={<Tools />} />
-          <Route path="/admin/team" element={<AdminTeam />} />
-          <Route path="/admin/licenses" element={<AdminTeam />} />
-          <Route path="/admin/reports" element={<AdminTeam />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        {/* Dashboard - routes to correct dashboard based on user role */}
+        <Route path="/dashboard" element={<DashboardRouter />} />
+
+        {/* Training Flow */}
+        <Route path="/training" element={<TrainingFlow />} />
+
+        {/* Tool Catalog */}
+        <Route path="/tools" element={<ToolCatalog />} />
+        <Route path="/tools/:toolId" element={<ToolDetail />} />
+
+        {/* Catch all - redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Helper component to route to correct dashboard based on user role
+function DashboardRouter() {
+  const { currentUser } = useAppStore();
+
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (currentUser.role === "org_admin") {
+    return <AdminDashboard />;
+  }
+
+  return <UserDashboard />;
+}
 
 export default App;
