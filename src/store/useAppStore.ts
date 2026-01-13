@@ -125,6 +125,7 @@ export const useAppStore = create<AppState>()(
                 status: "active",
                 assessmentScore: trainingProgressStore[userId]?.assessmentScore || 80,
                 completedAt: now.toISOString(),
+                trainingLevel: 'basis',
               };
               
               const updatedUser = { ...user, license };

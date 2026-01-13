@@ -1,12 +1,24 @@
 // RouteAI Type Definitions
 // Core governance model: RBAC (who manages) + AI License (what they can do)
 
+export type TrainingLevel = 'basis' | 'gevorderd' | 'expert';
+export type RiskLevel = 'minimal' | 'limited' | 'high' | 'unacceptable';
+
 export interface BaseCapability {
   id: string;
   slug: string;
   name: string;
   description: string;
   category: 'text_operations' | 'ideation' | 'analysis' | 'specialized';
+  
+  // EU AI Act compliance fields
+  riskLevel: RiskLevel;
+  requiredTrainingLevel: TrainingLevel;
+  useCases: string[];
+  restrictions: string;
+  complianceStatus: string;
+  allowedDomains: string[];
+  locked: boolean;
   
   // EXPLICIET: Wat mag wel
   allowedWhen: {
@@ -36,6 +48,7 @@ export interface AILicense {
   // Training & Assessment
   assessmentScore: number;
   completedAt: string;
+  trainingLevel: TrainingLevel;
   
   // KERN: Expliciete capabilities
   grantedCapabilities: string[];
