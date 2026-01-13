@@ -64,7 +64,7 @@ const Index = () => {
           </div>
           <h3 className="font-semibold mb-2">RouteAI Framework</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Dit platform helpt je organisatie om AI verantwoord en compliant te gebruiken volgens de EU AI Act.
+            Dit platform helpt je organisatie om AI verantwoord te gebruiken volgens de vereisten van de EU AI Act.
           </p>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
