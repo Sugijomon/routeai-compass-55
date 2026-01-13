@@ -7,6 +7,7 @@ export const MOCK_USERS: User[] = [
     name: 'Jan Smit',
     email: 'jan.smit@bedrijf.nl',
     role: 'user',
+    department: 'Marketing',
     organisationId: 'org-1',
     license: {
       certificateNumber: 'NL-2025-00137',
@@ -19,12 +20,20 @@ export const MOCK_USERS: User[] = [
       assessmentScore: 85,
       completedAt: '2025-12-15T10:00:00Z',
     },
+    trainingProgress: {
+      completedModules: ['module-1', 'module-2', 'module-3', 'module-4'],
+      assessmentScore: 85,
+      certificateIssued: true,
+      startedAt: '2025-12-14T09:00:00Z',
+      completedAt: '2025-12-15T10:00:00Z',
+    },
   },
   {
     id: 'user-2',
     name: 'Lisa de Vries',
     email: 'lisa@acmebv.nl',
     role: 'org_admin',
+    department: 'IT',
     organisationId: 'org-1',
     license: {
       certificateNumber: 'NL-2025-00138',
@@ -37,7 +46,14 @@ export const MOCK_USERS: User[] = [
       issuedAt: '2025-01-05T10:20:00Z',
       expiresAt: '2026-01-05T10:20:00Z',
       issuedBy: 'system'
-    }
+    },
+    trainingProgress: {
+      completedModules: ['module-1', 'module-2', 'module-3', 'module-4'],
+      assessmentScore: 93,
+      certificateIssued: true,
+      startedAt: '2025-01-04T08:00:00Z',
+      completedAt: '2025-01-05T10:15:00Z',
+    },
   },
   
   {
@@ -45,8 +61,14 @@ export const MOCK_USERS: User[] = [
     name: 'Piet Jansen',
     email: 'piet@acmebv.nl',
     role: 'user',
+    department: 'Finance',
     organisationId: 'org-1',
-    license: null // Nog geen rijbewijs behaald
+    license: null,
+    trainingProgress: {
+      completedModules: [],
+      assessmentScore: null,
+      certificateIssued: false,
+    },
   }
 ];
 

@@ -126,10 +126,22 @@ export interface User {
   name: string;
   email: string;
   role: 'user' | 'org_admin';
+  department: string;
   organisationId: string;
   
   // License (kan null zijn als nog niet behaald)
   license: AILicense | null;
+  
+  // Training progress
+  trainingProgress?: UserTrainingProgress;
+}
+
+export interface UserTrainingProgress {
+  completedModules: string[];
+  assessmentScore: number | null;
+  certificateIssued: boolean;
+  startedAt?: string;
+  completedAt?: string;
 }
 
 export interface Organisation {
