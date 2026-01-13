@@ -11,7 +11,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Samenvatten', 'Condenseren', 'Kernpunten extraheren'],
     restrictions: 'Geen persoonlijke of gevoelige data',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['documentatie', 'communicatie', 'onderzoek'],
     locked: false,
     allowedWhen: {
@@ -47,7 +47,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Herschrijven', 'Parafraseren', 'Stijlaanpassing'],
     restrictions: 'Geen persoonlijke of gevoelige data',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['marketing', 'communicatie', 'content'],
     locked: false,
     allowedWhen: {
@@ -83,7 +83,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Brainstormen', 'Conceptontwikkeling', 'Probleemoplossing'],
     restrictions: 'Alleen als inspiratie, geen finale beslissingen',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['innovatie', 'product', 'marketing'],
     locked: false,
     allowedWhen: {
@@ -119,7 +119,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Concepten schrijven', 'Sjablonen maken', 'Eerste drafts'],
     restrictions: 'Geen definitieve documenten zonder review',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['documentatie', 'communicatie', 'projecten'],
     locked: false,
     allowedWhen: {
@@ -155,7 +155,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'gevorderd',
     useCases: ['Trend analyse', 'Rapportage', 'Inzicht generatie'],
     restrictions: 'Vereist gevorderde training + organisatie goedkeuring. Alleen geaggregeerde data.',
-    complianceStatus: 'Aanvullende Maatregelen Vereist',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 6 EU AI Act (Hoog Risico). Aanvullende maatregelen gedocumenteerd.',
     allowedDomains: ['finance', 'operations', 'strategy'],
     locked: true,
     allowedWhen: {
@@ -191,7 +191,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Vertalen', 'Lokaliseren', 'Meertalige content'],
     restrictions: 'Geen juridische of medische vertalingen',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['marketing', 'communicatie', 'product'],
     locked: false,
     allowedWhen: {
@@ -227,7 +227,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'gevorderd',
     useCases: ['Code schrijven', 'Code review', 'Debugging'],
     restrictions: 'Geen productie secrets of klantdata in prompts',
-    complianceStatus: 'Aanvullende Maatregelen Vereist',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 6 EU AI Act (Beperkt Risico). Aanvullende maatregelen gedocumenteerd.',
     allowedDomains: ['development', 'engineering', 'IT'],
     locked: true,
     allowedWhen: {
@@ -263,7 +263,7 @@ export const baseCapabilities: BaseCapability[] = [
     requiredTrainingLevel: 'basis',
     useCases: ['Onderzoek', 'Informatie verzamelen', 'Marktanalyse'],
     restrictions: 'Alleen publieke bronnen, geen finale beslissingen',
-    complianceStatus: 'EU AI Act Compliant',
+    complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['onderzoek', 'marketing', 'strategie'],
     locked: false,
     allowedWhen: {
