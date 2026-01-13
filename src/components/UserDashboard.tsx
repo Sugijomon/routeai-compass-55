@@ -1,13 +1,4 @@
-// In UserDashboard.tsx, voeg toe na de useAppStore hook:
-const { currentUser, setCurrentUser } = useAppStore();
-
-// VOEG TOE (tijdelijk voor debugging):
-React.useEffect(() => {
-  console.log('Current user:', currentUser);
-  console.log('License:', currentUser?.license);
-  console.log('Training:', currentUser?.trainingProgress);
-  console.log('Capabilities:', currentUser?.license?.grantedCapabilities);
-}, [currentUser]);import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Wrench, Award, ArrowRight, LogOut } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
