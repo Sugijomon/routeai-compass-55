@@ -36,11 +36,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{currentUser.name}</span>
-            {/* 🆕 NIEUWE TOOL CATALOG BUTTON */}
-            <Button variant="outline" size="sm" onClick={() => navigate("/tools")}>
-              <Wrench className="h-4 w-4 mr-2" />
-              Tools
-            </Button>
+            {/* Alleen Uitloggen - geen dubbele Tools button */}
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Uitloggen
@@ -101,7 +97,7 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* 🆕 QUICK ACTIONS CARD */}
+        {/* Snelle Acties - PRIMARY navigation */}
         <Card>
           <CardHeader>
             <CardTitle>Snelle Acties</CardTitle>
