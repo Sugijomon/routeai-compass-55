@@ -5,7 +5,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import ToolCatalog from "./components/ToolCatalog";
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
