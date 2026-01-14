@@ -1,10 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Users, Award, AlertTriangle, LogOut, Shield } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useAppStore } from '@/store/useAppStore';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Users, Award, AlertTriangle, LogOut, Shield, Wrench, GraduationCap } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -16,13 +16,13 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     setCurrentUser(null);
-    navigate('/');
+    navigate("/");
   };
 
   // Calculate stats
   const totalUsers = users.length;
-  const licensedUsers = users.filter(u => u.license?.status === 'active').length;
-  const pendingUsers = users.filter(u => !u.license).length;
+  const licensedUsers = users.filter((u) => u.license?.status === "active").length;
+  const pendingUsers = users.filter((u) => !u.license).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,12 +32,15 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">
-              Beheerder
-            </Badge>
+            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">Beheerder</Badge>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{currentUser.name}</span>
+            {/* 🆕 NIEUWE TOOL CATALOG BUTTON */}
+            <Button variant="outline" size="sm" onClick={() => navigate("/tools")}>
+              <Wrench className="h-4 w-4 mr-2" />
+              Tools
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Uitloggen
@@ -51,9 +54,7 @@ export default function AdminDashboard() {
         {/* Welcome Section */}
         <div>
           <h2 className="text-2xl font-bold">Beheerder Dashboard</h2>
-          <p className="text-muted-foreground">
-            Bekijk team statistieken en beheer AI-rijbewijzen
-          </p>
+          <p className="text-muted-foreground">Bekijk team statistieken en beheer AI-rijbewijzen</p>
         </div>
 
         {/* Stats Cards */}
@@ -100,6 +101,41 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        {/* 🆕 QUICK ACTIONS CARD */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Snelle Acties</CardTitle>
+            <CardDescription>Belangrijke functies direct beschikbaar</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/tools")}>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Wrench className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold">Tool Catalogus</div>
+                    <div className="text-sm text-muted-foreground">Bekijk goedgekeurde AI tools</div>
+                  </div>
+                </div>
+              </Button>
+
+              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/training")}>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <GraduationCap className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold">Training Platform</div>
+                    <div className="text-sm text-muted-foreground">Beheer trainingsmodules</div>
+                  </div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Team Members */}
         <Card>
           <CardHeader>
@@ -109,14 +145,14 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               {users.map((user) => (
-                <div 
-                  key={user.id} 
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
+                <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
                       <span className="text-sm font-medium">
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </span>
                     </div>
                     <div>
@@ -125,10 +161,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {user.role === 'org_admin' && (
-                      <Badge variant="outline">Beheerder</Badge>
-                    )}
-                    {user.license?.status === 'active' ? (
+                    {user.role === "org_admin" && <Badge variant="outline">Beheerder</Badge>}
+                    {user.license?.status === "active" ? (
                       <Badge className="bg-primary/10 text-primary border-primary/20">
                         <Award className="h-3 w-3 mr-1" />
                         Rijbewijs Actief
