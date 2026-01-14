@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Shield, AlertTriangle } from "lucide-react";
+import { Search, Shield, AlertTriangle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -31,6 +31,12 @@ export default function ToolCatalog() {
   const currentUser = useAppStore((state) => state.currentUser);
   const [searchQuery, setSearchQuery] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
+
+  // Determine correct dashboard route based on user role
+  const getDashboardRoute = () => {
+    if (currentUser?.role === "org_admin") return "/admin-dashboard";
+    return "/user-dashboard";
+  };
 
   useEffect(() => {
     // Mock tools data - replace with actual data from mockTools.ts
@@ -152,6 +158,12 @@ export default function ToolCatalog() {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" className="gap-2" onClick={() => navigate(getDashboardRoute())}>
+        <ArrowLeft className="w-4 h-4" />
+        Terug naar Dashboard
+      </Button>
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">AI Tools Catalogus</h1>
