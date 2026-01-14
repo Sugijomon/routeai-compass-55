@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// ToolCatalog.tsx - FILTERING FIX (TypeScript Compatible)
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,22 +7,40 @@ import { Search, Shield, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 
-const ToolCatalog = () => {
+// Type definitions
+interface Tool {
+  id: string;
+  name: string;
+  vendor: string;
+  category: string;
+  capabilities: string[];
+  riskLevel: "low" | "medium" | "high";
+  status: "approved" | "restricted";
+}
+
+interface User {
+  role: string;
+  license?: {
+    grantedCapabilities: string[];
+  };
+  name: string;
+}
+
+export default function ToolCatalog() {
   const navigate = useNavigate();
   const currentUser = useAppStore((state) => state.currentUser);
   const [searchQuery, setSearchQuery] = useState("");
-  const [tools, setTools] = useState([]);
+  const [tools, setTools] = useState<Tool[]>([]);
 
   useEffect(() => {
-    // Haal alle tools op (zou uit mockTools.ts moeten komen)
-    // Voor nu simuleren we het
-    const allTools = [
+    // Mock tools data - replace with actual data from mockTools.ts
+    const allTools: Tool[] = [
       {
         id: "gpt4",
         name: "GPT-4o",
         vendor: "OpenAI",
         category: "Large Language Model",
-        capabilities: ["text-redactie", "brainstorm-ideeen"], // Text & Brainstorm
+        capabilities: ["text-redactie", "brainstorm-ideeen"],
         riskLevel: "medium",
         status: "approved",
       },
@@ -30,7 +49,7 @@ const ToolCatalog = () => {
         name: "Claude Sonnet",
         vendor: "Anthropic",
         category: "Large Language Model",
-        capabilities: ["text-redactie"], // Only text
+        capabilities: ["text-redactie"],
         riskLevel: "low",
         status: "approved",
       },
@@ -39,7 +58,7 @@ const ToolCatalog = () => {
         name: "Midjourney",
         vendor: "Midjourney Inc.",
         category: "Image Generation",
-        capabilities: ["brainstorm-ideeen"], // Only brainstorm
+        capabilities: ["brainstorm-ideeen"],
         riskLevel: "low",
         status: "approved",
       },
@@ -48,7 +67,7 @@ const ToolCatalog = () => {
         name: "Excel Copilot",
         vendor: "Microsoft",
         category: "Data Analysis",
-        capabilities: ["data-analyse"], // Only data analysis!
+        capabilities: ["data-analyse"],
         riskLevel: "medium",
         status: "restricted",
       },
@@ -57,7 +76,7 @@ const ToolCatalog = () => {
         name: "Tableau AI",
         vendor: "Salesforce",
         category: "Data Visualization",
-        capabilities: ["data-analyse"], // Only data analysis!
+        capabilities: ["data-analyse"],
         riskLevel: "medium",
         status: "approved",
       },
@@ -68,24 +87,24 @@ const ToolCatalog = () => {
     setTools(filteredTools);
   }, [currentUser]);
 
-  // HELPER FUNCTIE: Filter tools op basis van user capabilities
-  const filterToolsByCapabilities = (allTools, user) => {
+  // HELPER: Filter tools based on user capabilities
+  const filterToolsByCapabilities = (allTools: Tool[], user: User | null): Tool[] => {
     if (!user) return [];
 
-    // Admins zien ALLE tools
+    // Admins see ALL tools
     if (user.role === "org_admin") {
       console.log("🔓 Admin access: showing ALL tools");
       return allTools;
     }
 
-    // Reguliere users: filter op capabilities
+    // Regular users: filter on capabilities
     const userCapabilities = user.license?.grantedCapabilities || [];
 
     console.log("🔍 Filtering tools for:", user.name);
     console.log("User capabilities:", userCapabilities);
 
     const filtered = allTools.filter((tool) => {
-      // Tool is zichtbaar als het MINSTENS ÉÉN capability heeft die de user ook heeft
+      // Tool is visible if it has AT LEAST ONE matching capability
       const hasMatchingCapability = tool.capabilities.some((toolCap) => userCapabilities.includes(toolCap));
 
       if (hasMatchingCapability) {
@@ -106,7 +125,7 @@ const ToolCatalog = () => {
   };
 
   // Risk level badge component
-  const getRiskBadge = (riskLevel) => {
+  const getRiskBadge = (riskLevel: Tool["riskLevel"]) => {
     const badges = {
       low: { color: "bg-green-100 text-green-700", icon: Shield, text: "Vertrouwd" },
       medium: { color: "bg-yellow-100 text-yellow-700", icon: AlertTriangle, text: "Verhoogde aandacht" },
@@ -124,7 +143,7 @@ const ToolCatalog = () => {
     );
   };
 
-  // Filter tools op zoekterm
+  // Filter tools on search query
   const displayedTools = tools.filter(
     (tool) =>
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -148,7 +167,7 @@ const ToolCatalog = () => {
                 <strong>User:</strong> {currentUser.name} ({currentUser.role})
               </div>
               <div>
-                <strong>Capabilities:</strong> {currentUser.license?.grantedCapabilities.join(", ") || "None"}
+                <strong>Capabilities:</strong> {currentUser.license?.grantedCapabilities?.join(", ") || "None"}
               </div>
               <div>
                 <strong>Visible tools:</strong> {displayedTools.length} of {tools.length} filtered
@@ -222,4 +241,4 @@ const ToolCatalog = () => {
       )}
     </div>
   );
-};
+}
