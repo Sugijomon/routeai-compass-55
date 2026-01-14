@@ -1,32 +1,26 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import RoleSelector from "@/components/RoleSelector";
-import UserDashboard from "@/components/UserDashboard";
-import AdminDashboard from "@/components/AdminDashboard";
-import TrainingFlow from "@/components/TrainingFlow";
-import ToolCatalog from "@/components/ToolCatalog";
-import ToolDetail from "@/components/ToolDetail";
-import { useAppStore } from "@/store/useAppStore";
+import SmartDashboard from './components/SmartDashboard';
+import AdminDashboard from './components/AdminDashboard';
+import UserDashboard from './components/UserDashboard';
+import ToolCatalog from './components/ToolCatalog';
+import RoleSelector from './components/RoleSelector';
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Welcome / Login Screen */}
-        <Route path="/" element={<RoleSelector />} />
+<Routes>
+  {/* Login */}
+  <Route path="/" element={<RoleSelector />} />
+  
+  {/* Legacy/Bookmark support - redirects to correct dashboard */}
+  <Route path="/dashboard" element={<SmartDashboard />} />
+  
+  {/* Explicit dashboard routes */}
+  <Route path="/admin-dashboard" element={<AdminDashboard />} />
+  <Route path="/user-dashboard" element={<UserDashboard />} />
+  
+  {/* Shared routes */}
+  <Route path="/tools" element={<ToolCatalog />} />
+  <Route path="/tools/:id" element={<ToolDetail />} />
+  <Route path="/training" element={<TrainingPlatform />} />
+</Routes>
 
-        {/* Dashboard - routes to correct dashboard based on user role */}
-        <Route path="/dashboard" element={<DashboardRouter />} />
-
-        {/* Training Flow */}
-        <Route path="/training" element={<TrainingFlow />} />
-
-        {/* Tool Catalog */}
-        <Route path="/tools" element={<ToolCatalog />} />
-        <Route path="/tools/:toolId" element={<ToolDetail />} />
-
-        {/* Catch all - redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
     </BrowserRouter>
   );
 }
