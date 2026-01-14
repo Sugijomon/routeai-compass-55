@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useNavigate } from "react-router-dom";
 import { MOCK_USERS } from "@/data/mockUsers";
 
-const RoleSelector = () => {
+export default function RoleSelector() {
   const setCurrentUser = useAppStore((state) => state.setCurrentUser);
   const navigate = useNavigate();
 
@@ -132,4 +132,4 @@ const RoleSelector = () => {
       </div>
     </div>
   );
-};
+}
