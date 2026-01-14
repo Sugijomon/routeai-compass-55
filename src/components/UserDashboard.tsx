@@ -1,20 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Wrench, Award, ArrowRight, LogOut, CheckCircle, Lock, AlertCircle, Info } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Shield,
-  GraduationCap,
-  Award,
-  Wrench,
-  LogOut,
-  FileText,
-  Lightbulb,
-  BarChart3,
-  CheckCircle2,
-} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAppStore } from "@/store/useAppStore";
+import { baseCapabilities } from "@/data/baseCapabilities";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -24,50 +17,30 @@ export default function UserDashboard() {
     return null;
   }
 
+  const trainingProgress = currentUser.trainingProgress || {
+    completedModules: [],
+    assessmentScore: null,
+    certificateIssued: false,
+  };
+  const hasLicense = currentUser.license?.status === "active";
+  const completedModules = trainingProgress.completedModules.length;
+  const totalModules = 4; // From trainingData
+  const progressPercent = (completedModules / totalModules) * 100;
+
+  // Get user's granted capabilities with details
+  const userCapabilities = hasLicense
+    ? baseCapabilities.filter((cap) => currentUser.license!.grantedCapabilities.includes(cap.id))
+    : [];
+
+  // Debug logging
+  console.log('Granted IDs:', currentUser?.license?.grantedCapabilities);
+  console.log('Base caps IDs:', baseCapabilities.map(c => c.id));
+  console.log('Matched caps:', userCapabilities.map(c => c.name));
+
   const handleLogout = () => {
     setCurrentUser(null);
     navigate("/");
   };
-
-  // Capability icon mapping met emoji fallback
-  const getCapabilityDisplay = (capabilityId: string) => {
-    const displays = {
-      "text-redactie": {
-        icon: FileText,
-        emoji: "✍️",
-        title: "Tekst & Redactie",
-        description: "Schrijven, redigeren, grammatica",
-        color: "from-blue-500 to-cyan-500",
-      },
-      "brainstorm-ideeen": {
-        icon: Lightbulb,
-        emoji: "💡",
-        title: "Brainstorm & Ideeën",
-        description: "Creatief denken, concepten",
-        color: "from-amber-500 to-orange-500",
-      },
-      "data-analyse": {
-        icon: BarChart3,
-        emoji: "📊",
-        title: "Data-analyse",
-        description: "Visualisatie, insights",
-        color: "from-purple-500 to-pink-500",
-      },
-    };
-    return (
-      displays[capabilityId] || {
-        icon: CheckCircle2,
-        emoji: "✓",
-        title: capabilityId,
-        description: "AI vaardigheid",
-        color: "from-gray-500 to-gray-600",
-      }
-    );
-  };
-
-  const userCapabilities = currentUser.license?.grantedCapabilities || [];
-  const trainingLevel = currentUser.license?.trainingLevel || "basis";
-  const certificateNumber = currentUser.license?.certificateNumber || "N/A";
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,9 +48,8 @@ export default function UserDashboard() {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge variant="outline">Gebruiker</Badge>
+            <Badge variant="secondary">Gebruiker</Badge>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{currentUser.name}</span>
@@ -93,9 +65,11 @@ export default function UserDashboard() {
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}
         <div>
-          <h2 className="text-3xl font-bold">Welkom, {currentUser.name.split(" ")[0]}!</h2>
-          <p className="text-muted-foreground mt-1">
-            Je AI-rijbewijs is actief. Bekijk je capabilities en tools hieronder.
+          <h2 className="text-2xl font-bold">Welkom, {currentUser.name.split(" ")[0]}!</h2>
+          <p className="text-muted-foreground">
+            {hasLicense
+              ? "Je AI-rijbewijs is actief. Bekijk je capabilities en tools hieronder."
+              : "Voltooi je training om je AI-rijbewijs te behalen."}
           </p>
         </div>
 
@@ -104,147 +78,202 @@ export default function UserDashboard() {
           {/* License Status */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                Rijbewijs Status
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Rijbewijs Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <Badge className="bg-primary/10 text-primary border-primary/20 mb-2">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Actief
-              </Badge>
-              <p className="text-xs text-muted-foreground mt-2">
-                Niveau: <span className="font-semibold capitalize">{trainingLevel}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">Scope: Productiviteits-tools (Low Risk)</p>
-              <p className="text-xs text-muted-foreground">Geldig tot: 15-12-2026</p>
+              {hasLicense ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-primary" />
+                    <span className="font-semibold text-primary">Actief</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Niveau:</span>
+                    <span className="font-medium capitalize">{currentUser.license!.trainingLevel}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Scope:</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-xs">
+                              Dit rijbewijs geldt alleen voor productiviteits-tools 
+                              met niet-gevoelige bedrijfsdata. Voor medische, juridische 
+                              of financiële toepassingen is aanvullende training vereist.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <span className="font-medium">Productiviteits-tools (Low Risk)</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Geldig tot:</span>
+                    <span className="font-medium">
+                      {new Date(currentUser.license!.expiresAt).toLocaleDateString("nl-NL")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Werkgebieden:</span>
+                    <span className="font-medium">{currentUser.license!.grantedCapabilities.length}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Badge variant="secondary">Niet behaald</Badge>
+                  <p className="text-xs text-muted-foreground">Voltooi de training om te starten</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Training Progress */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Training Voortgang
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Training Voortgang</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold">4/4</span>
-                  <span className="text-sm text-muted-foreground">modules</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary rounded-full h-2 w-full"></div>
-                </div>
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold">
+                  {completedModules}/{totalModules}
+                </span>
+                <span className="text-sm text-muted-foreground">modules</span>
               </div>
+              <Progress value={progressPercent} className="h-2" />
             </CardContent>
           </Card>
 
-          {/* AI Skills Count */}
+          {/* Werkgebieden */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                AI-vaardigheden
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Werkgebieden</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-primary">{userCapabilities.length}</span>
-                <span className="text-sm text-muted-foreground">toegekend</span>
-              </div>
+              <span className="text-2xl font-bold">{currentUser.license?.grantedCapabilities.length || 0}</span>
+              <span className="text-sm text-muted-foreground ml-2">toegekend</span>
             </CardContent>
           </Card>
         </div>
 
-        {/* AI Skills Visual Cards */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Jouw AI-vaardigheden</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Hieronder zie je welke AI-toepassingen je mag gebruiken en onder welke voorwaarden.
-            </p>
-          </CardHeader>
-          <CardContent>
-            {userCapabilities.length > 0 ? (
-              <div className="grid md:grid-cols-3 gap-6">
-                {userCapabilities.map((capId) => {
-                  const display = getCapabilityDisplay(capId);
-                  const Icon = display.icon;
-
-                  return (
-                    <div
-                      key={capId}
-                      className="flex flex-col items-center text-center p-6 rounded-lg border-2 border-muted hover:border-primary/50 transition-all hover:shadow-md bg-card"
-                    >
-                      {/* Large Icon with Gradient Background */}
-                      <div
-                        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${display.color} flex items-center justify-center mb-4 shadow-lg`}
-                      >
-                        <Icon className="w-10 h-10 text-white" />
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="font-bold text-lg mb-2">{display.title}</h3>
-
-                      {/* Description */}
-                      <p className="text-sm text-muted-foreground mb-4">{display.description}</p>
-
-                      {/* Status Badge */}
-                      <Badge className="bg-green-100 text-green-700 border-green-200">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Audit-Ready
-                      </Badge>
+        {/* Authority Panel */}
+        {hasLicense && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                Jouw Geautoriseerde Werkgebieden
+              </CardTitle>
+              <CardDescription>
+                Hieronder zie je welke AI-toepassingen je mag gebruiken en onder welke voorwaarden.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Toegestane Capabilities */}
+              {userCapabilities.map((capability) => (
+                <div key={capability.id} className="p-4 border rounded-lg bg-primary/5">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{capability.name}</span>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nog geen AI-vaardigheden toegekend.</p>
-                <p className="text-sm mt-2">Voltooi eerst de training modules.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    <Badge variant={capability.riskLevel === "minimal" ? "secondary" : "destructive"}>
+                      {capability.riskLevel === "minimal" ? "Minimaal Risico" : "Verhoogd Risico"}
+                    </Badge>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground mb-2">Use cases: {capability.useCases?.join(", ")}</p>
+
+                  <div className="flex items-start gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-muted-foreground">Status: {capability.complianceStatus}</p>
+                      {capability.restrictions && <p className="text-muted-foreground">{capability.restrictions}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Vergrendelde Capabilities */}
+              {baseCapabilities
+                .filter((cap) => cap.locked && !userCapabilities.find((uc) => uc.id === cap.id))
+                .map((capability) => (
+                  <div key={capability.id} className="p-4 border rounded-lg bg-muted/50 opacity-75">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-muted-foreground">{capability.name}</span>
+                      </div>
+                      <Badge variant="destructive">Verhoogd Risico</Badge>
+                    </div>
+
+                    <div className="flex items-start gap-2 text-sm">
+                      <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                      <div>
+                        <p className="text-muted-foreground">🔒 Vereist Gevorderd Training + Org Approval</p>
+                        {capability.restrictions && (
+                          <p className="text-muted-foreground">Let op: {capability.restrictions}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Snelle Acties</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/tools")}>
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Wrench className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Bekijk Tools</div>
-                    <div className="text-sm text-muted-foreground">Ontdek goedgekeurde AI tools</div>
-                  </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Training Card */}
+          <Card className="hover:border-primary/50 transition-colors">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-primary" />
                 </div>
+                <div>
+                  <CardTitle className="text-lg">Training</CardTitle>
+                  <CardDescription>Leer verantwoord AI gebruik</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => navigate("/training")} className="w-full">
+                {hasLicense ? "Herhaal Training" : "Start Training"}
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
+            </CardContent>
+          </Card>
 
-              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/training")}>
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Herhaalde Training</div>
-                    <div className="text-sm text-muted-foreground">Leer verantwoord AI gebruik</div>
-                  </div>
+          {/* Tools Card */}
+          <Card className={`transition-colors ${hasLicense ? "hover:border-primary/50" : "opacity-60"}`}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Wrench className="h-5 w-5 text-primary" />
                 </div>
+                <div>
+                  <CardTitle className="text-lg">AI Tools</CardTitle>
+                  <CardDescription>Bekijk beschikbare tools</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate("/tools")}
+                className="w-full"
+                variant={hasLicense ? "default" : "secondary"}
+                disabled={!hasLicense}
+              >
+                {hasLicense ? "Bekijk Tools" : "Rijbewijs vereist"}
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
