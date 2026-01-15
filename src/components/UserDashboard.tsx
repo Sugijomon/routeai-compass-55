@@ -7,7 +7,7 @@ import {
   Shield,
   GraduationCap,
   Award,
-  Wrench,
+  Sparkles,
   LogOut,
   FileText,
   Lightbulb,
@@ -219,14 +219,14 @@ export default function UserDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/tools")}>
+              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/use-cases")}>
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Wrench className="h-5 w-5 text-primary" />
+                    <Sparkles className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold">Bekijk Tools</div>
-                    <div className="text-sm text-muted-foreground">Ontdek goedgekeurde AI tools</div>
+                    <div className="font-semibold">Bekijk Toepassingen</div>
+                    <div className="text-sm text-muted-foreground">Ontdek wat je kunt doen met AI</div>
                   </div>
                 </div>
               </Button>
