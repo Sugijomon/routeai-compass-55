@@ -315,47 +315,35 @@ export default function ToolDetail() {
             </CardContent>
           </Card>
 
-          {/* Use Cases */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Use Cases</CardTitle>
-              <CardDescription>Toepassingen en vereiste capabilities</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {tool.useCases.map((useCase, index) => {
-                const hasCapability = useCase.requiredCapability 
-                  ? userCapabilities.includes(useCase.requiredCapability)
-                  : true;
-                
-                return (
-                  <div 
-                    key={index} 
-                    className={`p-4 border rounded-lg ${!hasCapability ? 'bg-muted/50' : ''}`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {hasCapability ? (
-                          <CheckCircle className="h-4 w-4 text-emerald-500" />
-                        ) : (
-                          <Lock className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <h3 className="font-medium">{useCase.title}</h3>
-                      </div>
-                      <Badge variant={getRiskBadgeVariant(useCase.riskLevel)}>
-                        {useCase.riskLevel} risk
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground ml-6">{useCase.description}</p>
-                    {useCase.requiredCapability && (
-                      <p className="text-xs text-muted-foreground ml-6 mt-2">
-                        Vereist: {useCase.requiredCapability}
-                      </p>
-                    )}
+          {/* Technical Specs - Tools don't define allowed applications */}
+          {tool.technicalSpecs && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Technische Specificaties</CardTitle>
+                <CardDescription>
+                  Eigenschappen van de tool (niet bepalend voor routes)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg bg-muted/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">Categorie</h3>
+                    <Badge variant="outline">{tool.technicalSpecs.category}</Badge>
                   </div>
-                );
-              })}
-            </CardContent>
-          </Card>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {tool.technicalSpecs.capabilities.map((cap, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {cap}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  ℹ️ Routes worden bepaald via Survey V1-V6, niet door tool eigenschappen.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Important Notes */}
           {tool.importantNotes.length > 0 && (

@@ -73,7 +73,7 @@ export interface BaseCapability {
   // EU AI Act compliance fields
   riskLevel: RiskLevel;
   requiredTrainingLevel: TrainingLevel;
-  useCases: string[];
+  // useCases removed: capabilities define training scope, not allowed applications
   restrictions: string;
   complianceStatus: string;
   allowedDomains: string[];
@@ -166,13 +166,11 @@ export interface Tool {
   lightLabel?: LightLabel;
   fullNutritionLabel?: FullNutritionLabel;
   
-  // Use cases
-  useCases: {
-    title: string;
-    description: string;
-    riskLevel: 'minimal' | 'limited' | 'high';
-    requiredCapability?: string;
-  }[];
+  // Technical specs only - tools don't define allowed applications
+  technicalSpecs?: {
+    category: string;
+    capabilities: string[];
+  };
   
   importantNotes: string[];
   

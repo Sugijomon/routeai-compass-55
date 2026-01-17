@@ -7,12 +7,14 @@ import {
   Shield,
   GraduationCap,
   Award,
-  Sparkles,
   LogOut,
   FileText,
   Lightbulb,
   BarChart3,
   CheckCircle2,
+  ClipboardCheck,
+  ArrowRight,
+  History,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -31,7 +33,7 @@ export default function UserDashboard() {
 
   // Capability icon mapping met emoji fallback
   const getCapabilityDisplay = (capabilityId: string) => {
-    const displays = {
+    const displays: Record<string, { icon: typeof FileText; emoji: string; title: string; description: string; color: string }> = {
       "text-redactie": {
         icon: FileText,
         emoji: "✍️",
@@ -67,7 +69,6 @@ export default function UserDashboard() {
 
   const userCapabilities = currentUser.license?.grantedCapabilities || [];
   const trainingLevel = currentUser.license?.trainingLevel || "basis";
-  const certificateNumber = currentUser.license?.certificateNumber || "N/A";
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,9 +96,36 @@ export default function UserDashboard() {
         <div>
           <h2 className="text-3xl font-bold">Welkom, {currentUser.name.split(" ")[0]}!</h2>
           <p className="text-muted-foreground mt-1">
-            Je AI-rijbewijs is actief. Bekijk je capabilities en tools hieronder.
+            Je AI-rijbewijs is actief. Start een nieuwe beoordeling of bekijk je leerpad.
           </p>
         </div>
+
+        {/* PRIMARY CTA - Wat wil je doen? */}
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="py-8">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <ClipboardCheck className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-2xl font-bold mb-2">Wat wil je doen?</h3>
+                <p className="text-muted-foreground">
+                  Start een nieuwe beoordeling om AI verantwoord in te zetten voor je werk.
+                </p>
+              </div>
+              <Button 
+                size="lg" 
+                className="gap-2"
+                onClick={() => navigate("/assessments/new")}
+              >
+                Start Beoordeling
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6">
@@ -165,7 +193,8 @@ export default function UserDashboard() {
           <CardHeader>
             <CardTitle className="text-2xl">Jouw AI-vaardigheden</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Hieronder zie je welke AI-toepassingen je mag gebruiken en onder welke voorwaarden.
+              Deze vaardigheden bepalen welke training je hebt voltooid, niet welke toepassingen je mag gebruiken.
+              Elke nieuwe toepassing vereist een beoordeling.
             </p>
           </CardHeader>
           <CardContent>
@@ -219,26 +248,32 @@ export default function UserDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/use-cases")}>
+              {/* Mijn beoordelingen */}
+              <Button 
+                variant="outline" 
+                className="h-20 justify-start" 
+                onClick={() => {/* TODO: navigate to assessments list */}}
+              >
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-primary" />
+                    <History className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold">Bekijk Toepassingen</div>
-                    <div className="text-sm text-muted-foreground">Ontdek wat je kunt doen met AI</div>
+                    <div className="font-semibold">Mijn beoordelingen</div>
+                    <div className="text-sm text-muted-foreground">Bekijk eerdere beoordelingen</div>
                   </div>
                 </div>
               </Button>
 
+              {/* Leren */}
               <Button variant="outline" className="h-20 justify-start" onClick={() => navigate("/training")}>
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <GraduationCap className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold">Herhaalde Training</div>
-                    <div className="text-sm text-muted-foreground">Leer verantwoord AI gebruik</div>
+                    <div className="font-semibold">Leren</div>
+                    <div className="text-sm text-muted-foreground">Trainingen en micro-lessen</div>
                   </div>
                 </div>
               </Button>
