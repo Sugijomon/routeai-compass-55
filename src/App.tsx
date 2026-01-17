@@ -4,10 +4,9 @@ import SmartDashboard from "./components/SmartDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import ToolCatalog from "./components/ToolCatalog";
-import UseCasesOverview from "./pages/UseCasesOverview";
-import UseCaseDetail from "./pages/UseCaseDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import NewAssessment from "./pages/NewAssessment";
 
 export default function App() {
   return (
@@ -45,25 +44,17 @@ export default function App() {
           } 
         />
         
-        {/* Use Cases - All authenticated users */}
+        {/* Assessment Flow - Survey V1-V6 intake */}
         <Route 
-          path="/use-cases" 
+          path="/assessments/new" 
           element={
             <ProtectedRoute>
-              <UseCasesOverview />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/use-cases/:id" 
-          element={
-            <ProtectedRoute>
-              <UseCaseDetail />
+              <NewAssessment />
             </ProtectedRoute>
           } 
         />
         
-        {/* Tool Catalog - ADMIN ONLY */}
+        {/* Tool Catalog - ADMIN ONLY (governance, not permissions) */}
         <Route 
           path="/tools" 
           element={
@@ -80,7 +71,7 @@ export default function App() {
             <ProtectedRoute>
               <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
                 <div className="text-center">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-4">🎓 Training Platform</h1>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-4">🎓 Leren</h1>
                   <p className="text-slate-600">Deze pagina wordt binnenkort beschikbaar.</p>
                 </div>
               </div>

@@ -74,25 +74,11 @@ export const MOCK_TOOLS: Tool[] = [
       }
     },
     
-    useCases: [
-      {
-        title: 'Tekst herschrijven',
-        description: 'Content verbeteren, tone aanpassen, grammatica controleren',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-text-ops'
-      },
-      {
-        title: 'Complexe analyse',
-        description: 'Documenten analyseren en samenvatten',
-        riskLevel: 'limited',
-        requiredCapability: 'cap-basic-analysis'
-      },
-      {
-        title: 'Recruitment ondersteuning',
-        description: 'CV screening en kandidaat matching',
-        riskLevel: 'high'
-      }
-    ],
+    // Technical specs only - tools don't define allowed applications
+    technicalSpecs: {
+      category: 'GPAI-SR',
+      capabilities: ['Tekst', 'Code', 'Beeld', 'Audio']
+    },
     
     importantNotes: [
       'Systemisch risico classificatie onder EU AI Act',
@@ -171,26 +157,10 @@ export const MOCK_TOOLS: Tool[] = [
       }
     },
     
-    useCases: [
-      {
-        title: 'Document samenvatten',
-        description: 'Lange rapporten of artikelen comprimeren',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-text-ops'
-      },
-      {
-        title: 'Creatief schrijven',
-        description: 'Verhalen, blogs, scripts ontwikkelen',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-ideation'
-      },
-      {
-        title: 'Data-analyse ondersteuning',
-        description: 'Patronen identificeren, inzichten genereren',
-        riskLevel: 'limited',
-        requiredCapability: 'cap-basic-analysis'
-      }
-    ],
+    technicalSpecs: {
+      category: 'GPAI',
+      capabilities: ['Tekst', 'Code', 'Analyse', 'Lange context']
+    },
     
     importantNotes: [
       'Sterke focus op veiligheid en ethics',
@@ -266,25 +236,10 @@ export const MOCK_TOOLS: Tool[] = [
       }
     },
     
-    useCases: [
-      {
-        title: 'Marketing visuals',
-        description: 'Conceptbeelden voor campagnes en social media',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-ideation'
-      },
-      {
-        title: 'Product mockups',
-        description: 'Visuele concepten voor productontwikkeling',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-ideation'
-      },
-      {
-        title: 'Deepfakes / Personen genereren',
-        description: 'Realistische beelden van personen',
-        riskLevel: 'high'
-      }
-    ],
+    technicalSpecs: {
+      category: 'Limited-Risk',
+      capabilities: ['Beeld generatie', 'Stijl transfer']
+    },
     
     importantNotes: [
       'AI-gegenereerde beelden moeten gelabeld worden (EU AI Act)',
@@ -367,26 +322,10 @@ export const MOCK_TOOLS: Tool[] = [
       }
     },
     
-    useCases: [
-      {
-        title: 'Data visualisatie',
-        description: 'Grafieken en charts genereren uit data',
-        riskLevel: 'minimal',
-        requiredCapability: 'cap-data-analyse'
-      },
-      {
-        title: 'Formule assistentie',
-        description: 'Complexe Excel formules laten genereren',
-        riskLevel: 'limited',
-        requiredCapability: 'cap-data-analyse'
-      },
-      {
-        title: 'Financiële analyses',
-        description: 'Budgetten, forecasts, rapportages',
-        riskLevel: 'high',
-        requiredCapability: 'cap-data-analyse'
-      }
-    ],
+    technicalSpecs: {
+      category: 'High-Risk',
+      capabilities: ['Formules', 'Data analyse', 'Visualisatie']
+    },
     
     importantNotes: [
       '🔒 RESTRICTED: Alleen met Data-Analyse capability',

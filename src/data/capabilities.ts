@@ -9,7 +9,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'text_operations',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Samenvatten', 'Condenseren', 'Kernpunten extraheren'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Geen persoonlijke of gevoelige data',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['documentatie', 'communicatie', 'onderzoek'],
@@ -45,7 +45,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'text_operations',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Herschrijven', 'Parafraseren', 'Stijlaanpassing'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Geen persoonlijke of gevoelige data',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['marketing', 'communicatie', 'content'],
@@ -81,7 +81,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'ideation',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Brainstormen', 'Conceptontwikkeling', 'Probleemoplossing'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Alleen als inspiratie, geen finale beslissingen',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['innovatie', 'product', 'marketing'],
@@ -117,7 +117,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'text_operations',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Concepten schrijven', 'Sjablonen maken', 'Eerste drafts'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Geen definitieve documenten zonder review',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['documentatie', 'communicatie', 'projecten'],
@@ -153,7 +153,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'analysis',
     riskLevel: 'high',
     requiredTrainingLevel: 'gevorderd',
-    useCases: ['Trend analyse', 'Rapportage', 'Inzicht generatie'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Vereist gevorderde training + organisatie goedkeuring. Alleen geaggregeerde data.',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 6 EU AI Act (Hoog Risico). Aanvullende maatregelen gedocumenteerd.',
     allowedDomains: ['finance', 'operations', 'strategy'],
@@ -189,7 +189,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'text_operations',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Vertalen', 'Lokaliseren', 'Meertalige content'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Geen juridische of medische vertalingen',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['marketing', 'communicatie', 'product'],
@@ -225,7 +225,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'specialized',
     riskLevel: 'limited',
     requiredTrainingLevel: 'gevorderd',
-    useCases: ['Code schrijven', 'Code review', 'Debugging'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Geen productie secrets of klantdata in prompts',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 6 EU AI Act (Beperkt Risico). Aanvullende maatregelen gedocumenteerd.',
     allowedDomains: ['development', 'engineering', 'IT'],
@@ -261,7 +261,7 @@ export const baseCapabilities: BaseCapability[] = [
     category: 'analysis',
     riskLevel: 'minimal',
     requiredTrainingLevel: 'basis',
-    useCases: ['Onderzoek', 'Informatie verzamelen', 'Marktanalyse'],
+    // useCases removed: capabilities define training scope, not allowed applications
     restrictions: 'Alleen publieke bronnen, geen finale beslissingen',
     complianceStatus: 'Audit-Ready: Voldoet aan Art. 4 EU AI Act. Alle bewijslast ligt klaar voor compliance verificatie.',
     allowedDomains: ['onderzoek', 'marketing', 'strategie'],

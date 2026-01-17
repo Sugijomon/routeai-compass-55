@@ -59,7 +59,7 @@ const Tools = () => {
           <div>
             <h1 className="text-2xl font-bold">AI Tool Catalogus</h1>
             <p className="text-muted-foreground">
-              Goedgekeurde AI tools met use-cases en risiconiveaus
+              Technische eigenschappen van tools (niet bepalend voor routes)
             </p>
           </div>
         </div>
@@ -124,45 +124,16 @@ const Tools = () => {
               {selectedTool === tool.id && (
                 <div className="mt-4 pt-4 border-t space-y-4 animate-fade-in">
                   <div>
-                    <p className="text-sm font-semibold mb-2">Use Cases:</p>
+                    <p className="text-sm font-semibold mb-2">Technische Details:</p>
                     <div className="space-y-2">
-                      {tool.useCases.map((useCase, i) => {
-                        const canUse = hasCapability(useCase.requiredCapability);
-                        const capability = useCase.requiredCapability 
-                          ? getCapabilityById(useCase.requiredCapability)
-                          : null;
-                        
-                        return (
-                          <div 
-                            key={i} 
-                            className={`rounded-lg p-3 ${
-                              canUse ? 'bg-secondary' : 'bg-destructive/5 border border-destructive/20'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <p className={`text-sm font-medium ${!canUse ? 'text-muted-foreground' : ''}`}>
-                                {useCase.title}
-                              </p>
-                              <Badge variant="outline" className={getRiskBadgeClass(useCase.riskLevel)}>
-                                {getRiskLabel(useCase.riskLevel)}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{useCase.description}</p>
-                            {!canUse && capability && (
-                              <p className="text-xs text-destructive mt-2 flex items-center gap-1">
-                                <AlertTriangle className="h-3 w-3" />
-                                Vereist: {capability.name}
-                              </p>
-                            )}
-                            {canUse && license && (
-                              <p className="text-xs text-primary mt-2 flex items-center gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Je mag dit
-                              </p>
-                            )}
-                          </div>
-                        );
-                      })}
+                      <div className="rounded-lg p-3 bg-secondary">
+                        <p className="text-xs text-muted-foreground">
+                          Categorie: {tool.category}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Deze tool is beschikbaar voor gebruik na een goedgekeurde beoordeling.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
