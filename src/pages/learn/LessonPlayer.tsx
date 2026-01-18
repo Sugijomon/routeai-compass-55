@@ -9,6 +9,7 @@ import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFoote
 import { ParagraphBlockPlayer } from '@/components/lesson-player/ParagraphBlockPlayer';
 import { VideoBlockPlayer } from '@/components/lesson-player/VideoBlockPlayer';
 import { QuizBlockPlayer } from '@/components/lesson-player/QuizBlockPlayer';
+import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,6 +21,14 @@ export default function LessonPlayer() {
   const getCurrentUser = useAppStore(state => state.getCurrentUser);
   const currentUser = getCurrentUser();
   const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionData, setCompletionData] = useState<{
+    score: number;
+    earnedPoints: number;
+    maxPoints: number;
+    timeSpent: number;
+    hasQuizzes: boolean;
+  } | null>(null);
 
   // Fetch lesson data
   const { data: lesson, isLoading: lessonLoading, error } = useQuery({
@@ -50,6 +59,7 @@ export default function LessonPlayer() {
     progressPercentage,
     quizAttempts,
     quizResults,
+    startedAt,
     isLoading: progressLoading,
     goNext,
     goPrevious,
@@ -59,6 +69,7 @@ export default function LessonPlayer() {
     incrementQuizAttempt,
     recordQuizResult,
     calculateFinalScore,
+    blocksCompleted,
   } = useLessonProgress({ 
     lessonId: lessonId || '', 
     blocks,
@@ -71,15 +82,8 @@ export default function LessonPlayer() {
     setCanProceedFromBlock(canProceed);
   }, []);
 
-  // Reset canProceed when block changes
-  const handleBlockChange = useCallback(() => {
-    // Default: paragraphs can proceed immediately
-    if (currentBlock?.type === 'paragraph') {
-      setCanProceedFromBlock(true);
-    } else {
-      setCanProceedFromBlock(false);
-    }
-  }, [currentBlock]);
+  // Check if current block is already completed (for quiz restoration)
+  const isBlockCompleted = currentBlock ? blocksCompleted.includes(currentBlock.id) : false;
 
   // Handle lesson completion
   const handleComplete = async () => {
@@ -94,8 +98,13 @@ export default function LessonPlayer() {
       // Calculate final score from quizzes
       const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
       
-      // Determine time spent (approximate based on when started)
-      const timeSpent = 0; // We can calculate this from started_at if needed
+      // Calculate time spent from started_at
+      let timeSpent = 0;
+      if (startedAt) {
+        const startTime = new Date(startedAt).getTime();
+        const now = Date.now();
+        timeSpent = Math.round((now - startTime) / 1000); // in seconds
+      }
 
       // Create completion record with quiz score
       const { error } = await supabase
@@ -112,18 +121,111 @@ export default function LessonPlayer() {
 
       if (error) throw error;
 
-      // Show success with score if there were quizzes
-      if (maxPoints > 0) {
-        toast.success(`Les afgerond! 🎉 Score: ${earnedPoints}/${maxPoints} punten (${percentage}%)`);
-      } else {
-        toast.success('Les afgerond! 🎉');
-      }
-      
-      navigate('/training');
+      // Update course progress if lesson is part of a course
+      await updateCourseProgress();
+
+      // Show completion modal
+      setCompletionData({
+        score: percentage,
+        earnedPoints,
+        maxPoints,
+        timeSpent,
+        hasQuizzes: maxPoints > 0,
+      });
+      setShowCompletionModal(true);
     } catch (error) {
       console.error('Error completing lesson:', error);
       toast.error('Kon les niet afronden');
     }
+  };
+
+  // Update course progress when lesson is completed
+  const updateCourseProgress = async () => {
+    if (!lessonId || !currentUser?.id) return;
+
+    try {
+      // Find if this lesson is part of any course
+      const { data: courseLesson } = await supabase
+        .from('course_lessons')
+        .select('course_id, courses!inner(id)')
+        .eq('lesson_id', lessonId)
+        .maybeSingle();
+
+      if (!courseLesson?.course_id) return;
+
+      // Get current course progress
+      const { data: existingProgress } = await supabase
+        .from('user_course_progress')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('course_id', courseLesson.course_id)
+        .maybeSingle();
+
+      // Get total lessons in course
+      const { count: totalLessons } = await supabase
+        .from('course_lessons')
+        .select('id', { count: 'exact', head: true })
+        .eq('course_id', courseLesson.course_id);
+
+      // Get completed lessons for this course
+      const { data: completedLessons } = await supabase
+        .from('user_lesson_completions')
+        .select('lesson_id')
+        .eq('user_id', currentUser.id)
+        .in('lesson_id', 
+          (await supabase
+            .from('course_lessons')
+            .select('lesson_id')
+            .eq('course_id', courseLesson.course_id)
+          ).data?.map(cl => cl.lesson_id).filter(Boolean) ?? []
+        );
+
+      const lessonsCompleted = completedLessons?.length ?? 0;
+      const lessonsRequired = totalLessons ?? 1;
+      const progressPercentage = Math.round((lessonsCompleted / lessonsRequired) * 100);
+
+      if (existingProgress) {
+        await supabase
+          .from('user_course_progress')
+          .update({
+            lessons_completed: lessonsCompleted,
+            progress_percentage: progressPercentage,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingProgress.id);
+      } else {
+        await supabase
+          .from('user_course_progress')
+          .insert({
+            user_id: currentUser.id,
+            course_id: courseLesson.course_id,
+            lessons_completed: lessonsCompleted,
+            lessons_required: lessonsRequired,
+            progress_percentage: progressPercentage,
+          });
+      }
+
+      // Check if course is complete
+      if (progressPercentage >= 100) {
+        // Record course completion
+        await supabase
+          .from('user_course_completions')
+          .upsert({
+            user_id: currentUser.id,
+            course_id: courseLesson.course_id,
+            completed_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,course_id',
+          });
+      }
+    } catch (error) {
+      console.error('Error updating course progress:', error);
+    }
+  };
+
+  const handleContinue = () => {
+    setShowCompletionModal(false);
+    navigate('/training');
   };
 
   // Loading states
@@ -194,13 +296,18 @@ export default function LessonPlayer() {
           />
         );
       case 'quiz_mc':
+        // If quiz is already completed, show it as answered
+        const existingResult = quizResults[currentBlock.id];
         return (
           <QuizBlockPlayer
+            key={currentBlock.id}
             block={currentBlock}
             attempts={quizAttempts[currentBlock.id] ?? 0}
             onAttempt={() => incrementQuizAttempt(currentBlock.id)}
             onCanProceed={handleCanProceed}
             onQuizResult={recordQuizResult}
+            alreadyCompleted={isBlockCompleted}
+            previousResult={existingResult}
           />
         );
       default:
@@ -241,8 +348,21 @@ export default function LessonPlayer() {
         onNext={goNext}
         onPrevious={goPrevious}
         onComplete={handleComplete}
-        nextEnabled={canProceedFromBlock}
+        nextEnabled={canProceedFromBlock || isBlockCompleted}
       />
+
+      {/* Completion Modal */}
+      {completionData && (
+        <LessonCompletionModal
+          open={showCompletionModal}
+          score={completionData.score}
+          earnedPoints={completionData.earnedPoints}
+          maxPoints={completionData.maxPoints}
+          timeSpent={completionData.timeSpent}
+          hasQuizzes={completionData.hasQuizzes}
+          onContinue={handleContinue}
+        />
+      )}
     </div>
   );
 }
