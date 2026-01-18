@@ -36,11 +36,11 @@ export function AddBlockDropdown({ onAddBlock }: AddBlockDropdownProps) {
             <p className="text-xs text-muted-foreground">Embedded video URL</p>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onAddBlock('quiz')}>
+        <DropdownMenuItem onClick={() => onAddBlock('quiz_mc')}>
           <HelpCircle className="mr-2 h-4 w-4" />
           <div>
-            <p className="font-medium">Quiz</p>
-            <p className="text-xs text-muted-foreground">Meerkeuzevraag</p>
+            <p className="font-medium">Quiz - Multiple Choice</p>
+            <p className="text-xs text-muted-foreground">Meerkeuzevraag met 4 opties</p>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

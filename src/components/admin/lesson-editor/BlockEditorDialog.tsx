@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Trash2 } from 'lucide-react';
-import type { LessonBlock, ParagraphBlock, VideoBlock, QuizBlock, QuizOption } from '@/types/lesson-blocks';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import type { LessonBlock, ParagraphBlock, VideoBlock, QuizBlock } from '@/types/lesson-blocks';
 import { getBlockTypeLabel } from '@/types/lesson-blocks';
 
 interface BlockEditorDialogProps {
@@ -30,25 +30,68 @@ export function BlockEditorDialog({
   onSave,
 }: BlockEditorDialogProps) {
   const [editedBlock, setEditedBlock] = useState<LessonBlock | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (block) {
       setEditedBlock({ ...block });
+      setErrors({});
     }
   }, [block]);
 
   if (!editedBlock) return null;
 
+  const validateBlock = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    switch (editedBlock.type) {
+      case 'paragraph':
+        if (!editedBlock.content.trim()) {
+          newErrors.content = 'Inhoud is verplicht';
+        }
+        break;
+      case 'video':
+        if (!editedBlock.url.trim()) {
+          newErrors.url = 'Video URL is verplicht';
+        } else {
+          try {
+            new URL(editedBlock.url);
+          } catch {
+            newErrors.url = 'Voer een geldige URL in';
+          }
+        }
+        break;
+      case 'quiz_mc':
+        if (!editedBlock.question.trim()) {
+          newErrors.question = 'Vraag is verplicht';
+        }
+        editedBlock.options.forEach((opt, idx) => {
+          if (!opt.trim()) {
+            newErrors[`option_${idx}`] = `Optie ${String.fromCharCode(65 + idx)} is verplicht`;
+          }
+        });
+        if (!editedBlock.explanation.trim()) {
+          newErrors.explanation = 'Uitleg is verplicht';
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = () => {
-    onSave(editedBlock);
-    onOpenChange(false);
+    if (validateBlock()) {
+      onSave(editedBlock);
+      onOpenChange(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{getBlockTypeLabel(editedBlock.type)} Bewerken</DialogTitle>
+          <DialogTitle>Edit {getBlockTypeLabel(editedBlock.type)} Block</DialogTitle>
           <DialogDescription>
             Pas de inhoud van dit blok aan.
           </DialogDescription>
@@ -58,6 +101,7 @@ export function BlockEditorDialog({
           {editedBlock.type === 'paragraph' && (
             <ParagraphEditor
               block={editedBlock as ParagraphBlock}
+              errors={errors}
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
           )}
@@ -65,13 +109,15 @@ export function BlockEditorDialog({
           {editedBlock.type === 'video' && (
             <VideoEditor
               block={editedBlock as VideoBlock}
+              errors={errors}
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
           )}
 
-          {editedBlock.type === 'quiz' && (
+          {editedBlock.type === 'quiz_mc' && (
             <QuizEditor
               block={editedBlock as QuizBlock}
+              errors={errors}
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
           )}
@@ -79,7 +125,7 @@ export function BlockEditorDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuleren
+            Cancel
           </Button>
           <Button onClick={handleSave}>Opslaan</Button>
         </DialogFooter>
@@ -91,35 +137,51 @@ export function BlockEditorDialog({
 // Paragraph Block Editor
 function ParagraphEditor({
   block,
+  errors,
   onChange,
 }: {
   block: ParagraphBlock;
+  errors: Record<string, string>;
   onChange: (updates: Partial<ParagraphBlock>) => void;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="content">Inhoud</Label>
+        <Label htmlFor="content">
+          Inhoud <span className="text-destructive">*</span>
+        </Label>
         <Textarea
           id="content"
-          placeholder="Schrijf hier je tekst... (Markdown wordt ondersteund)"
+          placeholder="Write your content here. Markdown is supported."
           value={block.content}
           onChange={(e) => onChange({ content: e.target.value })}
-          rows={8}
-          className="font-mono text-sm"
+          className="font-mono text-sm min-h-[300px]"
         />
+        {errors.content && (
+          <p className="text-sm text-destructive">{errors.content}</p>
+        )}
         <p className="text-xs text-muted-foreground">
           Je kunt Markdown gebruiken voor opmaak (bold, italic, lijsten, etc.)
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="imageUrl">Afbeelding URL (optioneel)</Label>
+        <Label htmlFor="imageUrl">Image URL (optional)</Label>
         <Input
           id="imageUrl"
-          placeholder="https://example.com/image.jpg"
-          value={block.imageUrl || ''}
-          onChange={(e) => onChange({ imageUrl: e.target.value || undefined })}
+          placeholder="https://... (optional)"
+          value={block.image_url || ''}
+          onChange={(e) => onChange({ image_url: e.target.value || undefined })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="imageCaption">Image Caption (optional)</Label>
+        <Input
+          id="imageCaption"
+          placeholder="Caption for the image..."
+          value={block.image_caption || ''}
+          onChange={(e) => onChange({ image_caption: e.target.value || undefined })}
         />
       </div>
     </div>
@@ -129,34 +191,64 @@ function ParagraphEditor({
 // Video Block Editor
 function VideoEditor({
   block,
+  errors,
   onChange,
 }: {
   block: VideoBlock;
+  errors: Record<string, string>;
   onChange: (updates: Partial<VideoBlock>) => void;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">Titel (optioneel)</Label>
+        <Label htmlFor="videoUrl">
+          Video URL <span className="text-destructive">*</span>
+        </Label>
         <Input
-          id="title"
-          placeholder="Bijv. Introductie tot AI"
-          value={block.title || ''}
-          onChange={(e) => onChange({ title: e.target.value || undefined })}
+          id="videoUrl"
+          placeholder="YouTube or Vimeo URL"
+          value={block.url}
+          onChange={(e) => onChange({ url: e.target.value })}
+        />
+        {errors.url && (
+          <p className="text-sm text-destructive">{errors.url}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Ondersteund: YouTube, Vimeo, of directe video URL
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="duration">Duration (seconds, optional)</Label>
+        <Input
+          id="duration"
+          type="number"
+          min="0"
+          placeholder="e.g. 180"
+          value={block.duration || ''}
+          onChange={(e) => onChange({ duration: e.target.value ? parseInt(e.target.value) : undefined })}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="videoUrl">Video URL</Label>
+        <Label htmlFor="caption">Caption (optional)</Label>
         <Input
-          id="videoUrl"
-          placeholder="https://youtube.com/watch?v=... of https://vimeo.com/..."
-          value={block.videoUrl}
-          onChange={(e) => onChange({ videoUrl: e.target.value })}
+          id="caption"
+          placeholder="Video caption or title..."
+          value={block.caption || ''}
+          onChange={(e) => onChange({ caption: e.target.value || undefined })}
         />
-        <p className="text-xs text-muted-foreground">
-          Ondersteund: YouTube, Vimeo, of directe video URL
-        </p>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="mustWatchFull"
+          checked={block.must_watch_full}
+          onCheckedChange={(checked) => onChange({ must_watch_full: checked === true })}
+        />
+        <Label htmlFor="mustWatchFull" className="text-sm font-normal cursor-pointer">
+          Require user to watch entire video before continuing
+        </Label>
       </div>
     </div>
   );
@@ -165,102 +257,114 @@ function VideoEditor({
 // Quiz Block Editor
 function QuizEditor({
   block,
+  errors,
   onChange,
 }: {
   block: QuizBlock;
+  errors: Record<string, string>;
   onChange: (updates: Partial<QuizBlock>) => void;
 }) {
-  const addOption = () => {
-    const newOption: QuizOption = {
-      id: `opt_${Date.now()}`,
-      text: '',
-      isCorrect: false,
-      explanation: '',
-    };
-    onChange({ options: [...block.options, newOption] });
-  };
+  const optionLabels = ['Option A', 'Option B', 'Option C', 'Option D'];
 
-  const updateOption = (optionId: string, updates: Partial<QuizOption>) => {
-    const updatedOptions = block.options.map((opt) =>
-      opt.id === optionId ? { ...opt, ...updates } : opt
-    );
-    onChange({ options: updatedOptions });
-  };
-
-  const removeOption = (optionId: string) => {
-    onChange({ options: block.options.filter((opt) => opt.id !== optionId) });
-  };
-
-  const setCorrectAnswer = (optionId: string) => {
-    const updatedOptions = block.options.map((opt) => ({
-      ...opt,
-      isCorrect: opt.id === optionId,
-    }));
-    onChange({ options: updatedOptions });
+  const updateOption = (index: number, value: string) => {
+    const newOptions = [...block.options] as [string, string, string, string];
+    newOptions[index] = value;
+    onChange({ options: newOptions });
   };
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="question">Vraag</Label>
+        <Label htmlFor="question">
+          Question <span className="text-destructive">*</span>
+        </Label>
         <Textarea
           id="question"
-          placeholder="Stel hier je vraag..."
+          placeholder="What is...?"
           value={block.question}
           onChange={(e) => onChange({ question: e.target.value })}
           rows={3}
         />
+        {errors.question && (
+          <p className="text-sm text-destructive">{errors.question}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Markdown wordt ondersteund voor opmaak.
+        </p>
       </div>
 
       <div className="space-y-3">
-        <Label>Antwoordopties</Label>
-        {block.options.map((option, index) => (
-          <div key={option.id} className="rounded-lg border p-3 space-y-2">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center gap-2 pt-2">
-                <Checkbox
-                  checked={option.isCorrect}
-                  onCheckedChange={() => setCorrectAnswer(option.id)}
-                />
-                <span className="text-xs text-muted-foreground">Correct</span>
+        <Label>
+          Answer Options <span className="text-destructive">*</span>
+        </Label>
+        <RadioGroup
+          value={block.correct_answer.toString()}
+          onValueChange={(value) => onChange({ correct_answer: parseInt(value) })}
+        >
+          {block.options.map((option, index) => (
+            <div key={index} className="rounded-lg border p-3 space-y-2">
+              <div className="flex items-center gap-3">
+                <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                <Label htmlFor={`option-${index}`} className="text-xs text-muted-foreground cursor-pointer">
+                  Correct
+                </Label>
+                <div className="flex-1">
+                  <Input
+                    placeholder={optionLabels[index]}
+                    value={option}
+                    onChange={(e) => updateOption(index, e.target.value)}
+                  />
+                  {errors[`option_${index}`] && (
+                    <p className="text-sm text-destructive mt-1">{errors[`option_${index}`]}</p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1 space-y-2">
-                <Input
-                  placeholder={`Optie ${index + 1}`}
-                  value={option.text}
-                  onChange={(e) => updateOption(option.id, { text: e.target.value })}
-                />
-                <Input
-                  placeholder="Uitleg (optioneel)"
-                  value={option.explanation || ''}
-                  onChange={(e) => updateOption(option.id, { explanation: e.target.value })}
-                  className="text-sm"
-                />
-              </div>
-              {block.options.length > 2 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeOption(option.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </RadioGroup>
+      </div>
 
-        {block.options.length < 6 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addOption}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Optie Toevoegen
-          </Button>
+      <div className="space-y-2">
+        <Label htmlFor="explanation">
+          Explanation <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="explanation"
+          placeholder="Explain why this is the correct answer..."
+          value={block.explanation}
+          onChange={(e) => onChange({ explanation: e.target.value })}
+          rows={3}
+        />
+        {errors.explanation && (
+          <p className="text-sm text-destructive">{errors.explanation}</p>
         )}
+        <p className="text-xs text-muted-foreground">
+          Wordt getoond nadat de gebruiker heeft geantwoord.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="points">Points</Label>
+          <Input
+            id="points"
+            type="number"
+            min="1"
+            value={block.points}
+            onChange={(e) => onChange({ points: parseInt(e.target.value) || 10 })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="maxAttempts">Max Attempts</Label>
+          <Input
+            id="maxAttempts"
+            type="number"
+            min="1"
+            value={block.max_attempts}
+            onChange={(e) => onChange({ max_attempts: parseInt(e.target.value) || 3 })}
+          />
+        </div>
       </div>
     </div>
   );
