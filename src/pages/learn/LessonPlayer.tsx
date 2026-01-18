@@ -49,6 +49,7 @@ export default function LessonPlayer() {
     currentBlockIndex,
     progressPercentage,
     quizAttempts,
+    quizResults,
     isLoading: progressLoading,
     goNext,
     goPrevious,
@@ -56,6 +57,8 @@ export default function LessonPlayer() {
     isLastBlock,
     markBlockCompleted,
     incrementQuizAttempt,
+    recordQuizResult,
+    calculateFinalScore,
   } = useLessonProgress({ 
     lessonId: lessonId || '', 
     blocks,
@@ -88,19 +91,34 @@ export default function LessonPlayer() {
         markBlockCompleted(currentBlock.id);
       }
 
-      // Create completion record
+      // Calculate final score from quizzes
+      const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
+      
+      // Determine time spent (approximate based on when started)
+      const timeSpent = 0; // We can calculate this from started_at if needed
+
+      // Create completion record with quiz score
       const { error } = await supabase
         .from('user_lesson_completions')
         .upsert({
           user_id: currentUser.id,
           lesson_id: lessonId,
-          score: progressPercentage,
+          score: percentage,
+          time_spent: timeSpent,
           completed_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,lesson_id',
         });
 
       if (error) throw error;
 
-      toast.success('Les afgerond! 🎉');
+      // Show success with score if there were quizzes
+      if (maxPoints > 0) {
+        toast.success(`Les afgerond! 🎉 Score: ${earnedPoints}/${maxPoints} punten (${percentage}%)`);
+      } else {
+        toast.success('Les afgerond! 🎉');
+      }
+      
       navigate('/training');
     } catch (error) {
       console.error('Error completing lesson:', error);
@@ -182,6 +200,7 @@ export default function LessonPlayer() {
             attempts={quizAttempts[currentBlock.id] ?? 0}
             onAttempt={() => incrementQuizAttempt(currentBlock.id)}
             onCanProceed={handleCanProceed}
+            onQuizResult={recordQuizResult}
           />
         );
       default:

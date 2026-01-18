@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { QuizBlock } from '@/types/lesson-blocks';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,6 +11,7 @@ interface QuizBlockPlayerProps {
   attempts: number;
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
+  onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
 }
 
 type QuizState = 'answering' | 'correct' | 'incorrect' | 'failed';
@@ -18,7 +20,8 @@ export function QuizBlockPlayer({
   block, 
   attempts, 
   onAttempt, 
-  onCanProceed 
+  onCanProceed,
+  onQuizResult,
 }: QuizBlockPlayerProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [quizState, setQuizState] = useState<QuizState>('answering');
@@ -43,11 +46,14 @@ export function QuizBlockPlayer({
       setQuizState('correct');
       setHasAnsweredCorrectly(true);
       onCanProceed(true);
+      // Report quiz result with points earned
+      onQuizResult?.(block.id, true, block.points);
     } else {
       if (remainingAttempts <= 1) {
         setQuizState('failed');
-        // Allow proceeding even on fail, but record the failure
+        // Allow proceeding even on fail, but record the failure with 0 points
         onCanProceed(true);
+        onQuizResult?.(block.id, false, 0);
       } else {
         setQuizState('incorrect');
       }
@@ -61,9 +67,9 @@ export function QuizBlockPlayer({
 
   return (
     <div className="space-y-6">
-      {/* Question */}
-      <div className="text-lg font-medium text-foreground">
-        {block.question}
+      {/* Question with markdown support */}
+      <div className="text-lg font-medium text-foreground prose prose-slate max-w-none">
+        <ReactMarkdown>{block.question}</ReactMarkdown>
       </div>
 
       {/* Points indicator */}
