@@ -57,7 +57,7 @@ export default function NewAssessment() {
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge variant="outline">Nieuwe Beoordeling</Badge>
+            <Badge variant="outline">Start AI Check</Badge>
           </div>
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -144,7 +144,7 @@ export default function NewAssessment() {
               className="gap-2 px-8"
               onClick={handleStartSurvey}
             >
-              Start Beoordeling
+              Start AI Check
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -155,7 +155,7 @@ export default function NewAssessment() {
               <strong>ℹ️ Hoe werkt het?</strong>
             </p>
             <p className="text-blue-700 text-sm mt-1">
-              Na de beoordeling krijg je een dynamisch advies (Route + Archetype) 
+              Na de AI Check krijg je een dynamisch advies (Route + Archetype) 
               gebaseerd op jouw specifieke situatie — niet op vooraf vastgestelde use-cases.
             </p>
           </div>

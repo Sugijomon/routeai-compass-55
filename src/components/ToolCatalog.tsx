@@ -167,7 +167,7 @@ export default function ToolCatalog() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">AI Tools Catalogus</h1>
-        <p className="text-gray-600 mt-1">Goedgekeurde AI tools met RouteAI beoordelingen</p>
+        <p className="text-gray-600 mt-1">Goedgekeurde AI tools met RouteAI AI Checks</p>
       </div>
 
       {/* Debug info (development only) */}

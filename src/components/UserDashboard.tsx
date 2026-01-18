@@ -96,7 +96,7 @@ export default function UserDashboard() {
         <div>
           <h2 className="text-3xl font-bold">Welkom, {currentUser.name.split(" ")[0]}!</h2>
           <p className="text-muted-foreground mt-1">
-            Je AI-rijbewijs is actief. Start een nieuwe beoordeling of bekijk je leerpad.
+            Je AI-rijbewijs is actief. Start een AI Check of bekijk je leerpad.
           </p>
         </div>
 
@@ -112,7 +112,7 @@ export default function UserDashboard() {
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-2xl font-bold mb-2">Wat wil je doen?</h3>
                 <p className="text-muted-foreground">
-                  Start een nieuwe beoordeling om AI verantwoord in te zetten voor je werk.
+                  Start een AI Check om AI verantwoord in te zetten voor je werk.
                 </p>
               </div>
               <Button 
@@ -120,7 +120,7 @@ export default function UserDashboard() {
                 className="gap-2"
                 onClick={() => navigate("/assessments/new")}
               >
-                Start Beoordeling
+                Start AI Check
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -194,7 +194,7 @@ export default function UserDashboard() {
             <CardTitle className="text-2xl">Jouw AI-vaardigheden</CardTitle>
             <p className="text-sm text-muted-foreground">
               Deze vaardigheden bepalen welke training je hebt voltooid, niet welke toepassingen je mag gebruiken.
-              Elke nieuwe toepassing vereist een beoordeling.
+              Elke nieuwe toepassing vereist een AI Check.
             </p>
           </CardHeader>
           <CardContent>
@@ -248,7 +248,7 @@ export default function UserDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              {/* Mijn beoordelingen */}
+              {/* Mijn AI Checks */}
               <Button 
                 variant="outline" 
                 className="h-20 justify-start" 
@@ -259,8 +259,8 @@ export default function UserDashboard() {
                     <History className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold">Mijn beoordelingen</div>
-                    <div className="text-sm text-muted-foreground">Bekijk eerdere beoordelingen</div>
+                    <div className="font-semibold">Mijn AI Checks</div>
+                    <div className="text-sm text-muted-foreground">Bekijk eerdere AI Checks</div>
                   </div>
                 </div>
               </Button>
