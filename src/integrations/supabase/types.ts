@@ -14,16 +14,347 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      course_lessons: {
+        Row: {
+          course_id: string | null
+          id: string
+          is_required: boolean | null
+          lesson_id: string | null
+          sequence_order: number
+        }
+        Insert: {
+          course_id?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          sequence_order: number
+        }
+        Update: {
+          course_id?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          sequence_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_lessons_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_published: boolean | null
+          passing_threshold: number | null
+          required_for_onboarding: boolean | null
+          title: string
+          unlocks_capability: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          passing_threshold?: number | null
+          required_for_onboarding?: boolean | null
+          title: string
+          unlocks_capability?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          passing_threshold?: number | null
+          required_for_onboarding?: boolean | null
+          title?: string
+          unlocks_capability?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lessons: {
+        Row: {
+          blocks: Json
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          is_published: boolean | null
+          lesson_type: string
+          passing_score: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_published?: boolean | null
+          lesson_type?: string
+          passing_score?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_published?: boolean | null
+          lesson_type?: string
+          passing_score?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          ai_rijbewijs_obtained_at: string | null
+          created_at: string | null
+          department: string | null
+          email: string | null
+          full_name: string | null
+          has_ai_rijbewijs: boolean | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_rijbewijs_obtained_at?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_ai_rijbewijs?: boolean | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_rijbewijs_obtained_at?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_ai_rijbewijs?: boolean | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_course_completions: {
+        Row: {
+          capability_unlocked: string | null
+          completed_at: string | null
+          course_id: string
+          final_score: number | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          capability_unlocked?: string | null
+          completed_at?: string | null
+          course_id: string
+          final_score?: number | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          capability_unlocked?: string | null
+          completed_at?: string | null
+          course_id?: string
+          final_score?: number | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_course_completions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_course_progress: {
+        Row: {
+          course_id: string
+          id: string
+          lessons_completed: number | null
+          lessons_required: number
+          progress_percentage: number | null
+          started_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          lessons_completed?: number | null
+          lessons_required: number
+          progress_percentage?: number | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          lessons_completed?: number | null
+          lessons_required?: number
+          progress_percentage?: number | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_course_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lesson_completions: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          score: number | null
+          time_spent: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          score?: number | null
+          time_spent?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          score?: number | null
+          time_spent?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lesson_completions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lesson_progress: {
+        Row: {
+          blocks_completed: Json | null
+          current_block_index: number | null
+          id: string
+          lesson_id: string
+          progress_percentage: number | null
+          quiz_attempts: Json | null
+          started_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          blocks_completed?: Json | null
+          current_block_index?: number | null
+          id?: string
+          lesson_id: string
+          progress_percentage?: number | null
+          quiz_attempts?: Json | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          blocks_completed?: Json | null
+          current_block_index?: number | null
+          id?: string
+          lesson_id?: string
+          progress_percentage?: number | null
+          quiz_attempts?: Json | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +481,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
