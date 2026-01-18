@@ -131,7 +131,7 @@ const Tools = () => {
                           Categorie: {tool.category}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Deze tool is beschikbaar voor gebruik na een goedgekeurde beoordeling.
+                          Deze tool is beschikbaar voor gebruik na een goedgekeurde AI Check.
                         </p>
                       </div>
                     </div>

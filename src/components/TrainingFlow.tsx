@@ -33,7 +33,7 @@ export default function TrainingFlow() {
           <div>
             <h1 className="text-2xl font-bold">AI Training Modules</h1>
             <p className="text-muted-foreground">
-              Voltooi alle modules om je AI-rijbewijs assessment te kunnen starten.
+              Voltooi alle modules om je AI-rijbewijs te behalen en AI Checks te kunnen starten.
             </p>
           </div>
 
