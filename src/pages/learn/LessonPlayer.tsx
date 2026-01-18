@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock } from '@/types/lesson-blocks';
@@ -10,6 +10,7 @@ import { ParagraphBlockPlayer } from '@/components/lesson-player/ParagraphBlockP
 import { VideoBlockPlayer } from '@/components/lesson-player/VideoBlockPlayer';
 import { QuizBlockPlayer } from '@/components/lesson-player/QuizBlockPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
+import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,17 +18,27 @@ import { useAppStore } from '@/stores/useAppStore';
 
 export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
+  const [searchParams] = useSearchParams();
+  const courseId = searchParams.get('courseId');
   const navigate = useNavigate();
   const getCurrentUser = useAppStore(state => state.getCurrentUser);
   const currentUser = getCurrentUser();
   const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
     score: number;
     earnedPoints: number;
     maxPoints: number;
     timeSpent: number;
     hasQuizzes: boolean;
+  } | null>(null);
+  const [courseCompletionData, setCourseCompletionData] = useState<{
+    courseTitle: string;
+    finalScore: number;
+    lessonsCompleted: number;
+    totalLessons: number;
+    unlockedCapability: string | null;
   } | null>(null);
 
   // Fetch lesson data
@@ -103,7 +114,7 @@ export default function LessonPlayer() {
       if (startedAt) {
         const startTime = new Date(startedAt).getTime();
         const now = Date.now();
-        timeSpent = Math.round((now - startTime) / 1000); // in seconds
+        timeSpent = Math.round((now - startTime) / 1000);
       }
 
       // Create completion record with quiz score
@@ -121,18 +132,24 @@ export default function LessonPlayer() {
 
       if (error) throw error;
 
-      // Update course progress if lesson is part of a course
-      await updateCourseProgress();
+      // Update course progress and check if course is complete
+      const courseResult = await updateCourseProgress();
 
-      // Show completion modal
-      setCompletionData({
-        score: percentage,
-        earnedPoints,
-        maxPoints,
-        timeSpent,
-        hasQuizzes: maxPoints > 0,
-      });
-      setShowCompletionModal(true);
+      if (courseResult?.courseComplete) {
+        // Show course completion modal
+        setCourseCompletionData(courseResult);
+        setShowCourseCompletionModal(true);
+      } else {
+        // Show lesson completion modal
+        setCompletionData({
+          score: percentage,
+          earnedPoints,
+          maxPoints,
+          timeSpent,
+          hasQuizzes: maxPoints > 0,
+        });
+        setShowCompletionModal(true);
+      }
     } catch (error) {
       console.error('Error completing lesson:', error);
       toast.error('Kon les niet afronden');
@@ -140,26 +157,40 @@ export default function LessonPlayer() {
   };
 
   // Update course progress when lesson is completed
-  const updateCourseProgress = async () => {
-    if (!lessonId || !currentUser?.id) return;
+  const updateCourseProgress = async (): Promise<{
+    courseComplete: boolean;
+    courseTitle: string;
+    finalScore: number;
+    lessonsCompleted: number;
+    totalLessons: number;
+    unlockedCapability: string | null;
+  } | null> => {
+    if (!lessonId || !currentUser?.id) return null;
 
     try {
-      // Find if this lesson is part of any course
-      const { data: courseLesson } = await supabase
-        .from('course_lessons')
-        .select('course_id, courses!inner(id)')
-        .eq('lesson_id', lessonId)
-        .maybeSingle();
+      // Find if this lesson is part of the specified course (or any course)
+      const courseQuery = courseId 
+        ? supabase
+            .from('course_lessons')
+            .select('course_id, courses!inner(id, title, unlocks_capability)')
+            .eq('lesson_id', lessonId)
+            .eq('course_id', courseId)
+            .maybeSingle()
+        : supabase
+            .from('course_lessons')
+            .select('course_id, courses!inner(id, title, unlocks_capability)')
+            .eq('lesson_id', lessonId)
+            .maybeSingle();
 
-      if (!courseLesson?.course_id) return;
+      const { data: courseLesson } = await courseQuery;
 
-      // Get current course progress
-      const { data: existingProgress } = await supabase
-        .from('user_course_progress')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('course_id', courseLesson.course_id)
-        .maybeSingle();
+      if (!courseLesson?.course_id) return null;
+
+      const courseData = courseLesson.courses as unknown as { 
+        id: string; 
+        title: string; 
+        unlocks_capability: string | null;
+      };
 
       // Get total lessons in course
       const { count: totalLessons } = await supabase
@@ -167,22 +198,37 @@ export default function LessonPlayer() {
         .select('id', { count: 'exact', head: true })
         .eq('course_id', courseLesson.course_id);
 
-      // Get completed lessons for this course
+      // Get all lesson IDs in this course
+      const { data: courseLessonIds } = await supabase
+        .from('course_lessons')
+        .select('lesson_id')
+        .eq('course_id', courseLesson.course_id);
+
+      const lessonIds = courseLessonIds?.map(cl => cl.lesson_id).filter(Boolean) ?? [];
+
+      // Get completed lessons for this course (including the one we just completed)
       const { data: completedLessons } = await supabase
         .from('user_lesson_completions')
-        .select('lesson_id')
+        .select('lesson_id, score')
         .eq('user_id', currentUser.id)
-        .in('lesson_id', 
-          (await supabase
-            .from('course_lessons')
-            .select('lesson_id')
-            .eq('course_id', courseLesson.course_id)
-          ).data?.map(cl => cl.lesson_id).filter(Boolean) ?? []
-        );
+        .in('lesson_id', lessonIds);
 
       const lessonsCompleted = completedLessons?.length ?? 0;
       const lessonsRequired = totalLessons ?? 1;
       const progressPercentage = Math.round((lessonsCompleted / lessonsRequired) * 100);
+
+      // Calculate average score
+      const averageScore = completedLessons && completedLessons.length > 0
+        ? Math.round(completedLessons.reduce((sum, l) => sum + (l.score ?? 0), 0) / completedLessons.length)
+        : 0;
+
+      // Get existing progress
+      const { data: existingProgress } = await supabase
+        .from('user_course_progress')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('course_id', courseLesson.course_id)
+        .maybeSingle();
 
       if (existingProgress) {
         await supabase
@@ -213,19 +259,50 @@ export default function LessonPlayer() {
           .upsert({
             user_id: currentUser.id,
             course_id: courseLesson.course_id,
+            final_score: averageScore,
+            capability_unlocked: courseData.unlocks_capability,
             completed_at: new Date().toISOString(),
           }, {
             onConflict: 'user_id,course_id',
           });
+
+        // If course unlocks ai_rijbewijs, update profile
+        if (courseData.unlocks_capability === 'ai_rijbewijs') {
+          await supabase
+            .from('profiles')
+            .update({
+              has_ai_rijbewijs: true,
+              ai_rijbewijs_obtained_at: new Date().toISOString(),
+            })
+            .eq('id', currentUser.id);
+        }
+
+        return {
+          courseComplete: true,
+          courseTitle: courseData.title,
+          finalScore: averageScore,
+          lessonsCompleted,
+          totalLessons: lessonsRequired,
+          unlockedCapability: courseData.unlocks_capability,
+        };
       }
+
+      return null;
     } catch (error) {
       console.error('Error updating course progress:', error);
+      return null;
     }
   };
 
   const handleContinue = () => {
     setShowCompletionModal(false);
-    navigate('/training');
+    // Navigate back to course if in course context, otherwise to training
+    navigate(courseId ? `/learn/course/${courseId}` : '/training');
+  };
+
+  const handleCourseComplete = () => {
+    setShowCourseCompletionModal(false);
+    navigate('/user-dashboard');
   };
 
   // Loading states
@@ -361,6 +438,19 @@ export default function LessonPlayer() {
           timeSpent={completionData.timeSpent}
           hasQuizzes={completionData.hasQuizzes}
           onContinue={handleContinue}
+        />
+      )}
+
+      {/* Course Completion Modal */}
+      {courseCompletionData && (
+        <CourseCompletionModal
+          open={showCourseCompletionModal}
+          courseTitle={courseCompletionData.courseTitle}
+          finalScore={courseCompletionData.finalScore}
+          lessonsCompleted={courseCompletionData.lessonsCompleted}
+          totalLessons={courseCompletionData.totalLessons}
+          unlockedCapability={courseCompletionData.unlockedCapability}
+          onContinue={handleCourseComplete}
         />
       )}
     </div>

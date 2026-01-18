@@ -9,7 +9,10 @@ import AdminRoute from "./components/AdminRoute";
 import NewAssessment from "./pages/NewAssessment";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import LessonPlayer from "./pages/learn/LessonPlayer";
+import CoursePlayer from "./pages/learn/CoursePlayer";
 
 export default function App() {
   return (
@@ -86,12 +89,41 @@ export default function App() {
           } 
         />
         
+        {/* Admin Courses Management */}
+        <Route 
+          path="/admin/courses" 
+          element={
+            <AdminRoute>
+              <AdminCourses />
+            </AdminRoute>
+          } 
+        />
+        
+        <Route 
+          path="/admin/courses/:courseId/edit" 
+          element={
+            <AdminRoute>
+              <AdminCourseEdit />
+            </AdminRoute>
+          } 
+        />
+        
         {/* Lesson Player - Protected */}
         <Route 
           path="/learn/:lessonId" 
           element={
             <ProtectedRoute>
               <LessonPlayer />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Course Player - Protected */}
+        <Route 
+          path="/learn/course/:courseId" 
+          element={
+            <ProtectedRoute>
+              <CoursePlayer />
             </ProtectedRoute>
           } 
         />
