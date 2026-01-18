@@ -7,6 +7,7 @@ import {
   Users,
   BarChart3,
   FileText,
+  BookOpen,
   ChevronRight
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
 ];
 
 const adminItems: NavItem[] = [
+  { label: 'Lessen', href: '/admin/lessons', icon: BookOpen, adminOnly: true },
   { label: 'Team Overzicht', href: '/admin/team', icon: Users, adminOnly: true },
   { label: 'Licenties', href: '/admin/licenses', icon: FileText, adminOnly: true },
   { label: 'Rapportages', href: '/admin/reports', icon: BarChart3, adminOnly: true },
