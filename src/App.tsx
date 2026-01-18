@@ -7,6 +7,8 @@ import ToolCatalog from "./components/ToolCatalog";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import NewAssessment from "./pages/NewAssessment";
+import AdminLessons from "./pages/admin/AdminLessons";
+import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
 
 export default function App() {
   return (
@@ -60,6 +62,25 @@ export default function App() {
           element={
             <AdminRoute>
               <ToolCatalog />
+            </AdminRoute>
+          } 
+        />
+        
+        {/* Admin Lessons Management */}
+        <Route 
+          path="/admin/lessons" 
+          element={
+            <AdminRoute>
+              <AdminLessons />
+            </AdminRoute>
+          } 
+        />
+        
+        <Route 
+          path="/admin/lessons/:lessonId/edit" 
+          element={
+            <AdminRoute>
+              <AdminLessonEdit />
             </AdminRoute>
           } 
         />
