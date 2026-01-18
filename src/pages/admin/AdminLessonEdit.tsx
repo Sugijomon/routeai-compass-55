@@ -1,17 +1,24 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
+import { BlockList } from '@/components/admin/lesson-editor/BlockList';
+import { AddBlockDropdown } from '@/components/admin/lesson-editor/AddBlockDropdown';
+import { BlockEditorDialog } from '@/components/admin/lesson-editor/BlockEditorDialog';
+import { LessonMetadataPanel } from '@/components/admin/lesson-editor/LessonMetadataPanel';
+import { SaveIndicator } from '@/components/admin/lesson-editor/SaveIndicator';
+import { useLessonEditor } from '@/hooks/useLessonEditor';
 import type { Tables } from '@/integrations/supabase/types';
+import type { LessonBlock, BlockType } from '@/types/lesson-blocks';
 
 type Lesson = Tables<'lessons'>;
 
 export default function AdminLessonEdit() {
   const { lessonId } = useParams<{ lessonId: string }>();
-  const navigate = useNavigate();
+  const [editingBlock, setEditingBlock] = useState<LessonBlock | null>(null);
 
   const { data: lesson, isLoading, error } = useQuery({
     queryKey: ['lesson', lessonId],
@@ -22,13 +29,29 @@ export default function AdminLessonEdit() {
         .from('lessons')
         .select('*')
         .eq('id', lessonId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Lesson;
+      return data as Lesson | null;
     },
     enabled: !!lessonId,
   });
+
+  const editor = useLessonEditor({ lesson });
+
+  const handleAddBlock = (type: BlockType) => {
+    const newBlock = editor.addBlock(type);
+    setEditingBlock(newBlock);
+  };
+
+  const handleEditBlock = (block: LessonBlock) => {
+    setEditingBlock(block);
+  };
+
+  const handleSaveBlock = (updatedBlock: LessonBlock) => {
+    editor.updateBlock(updatedBlock.id, updatedBlock);
+    setEditingBlock(null);
+  };
 
   if (isLoading) {
     return (
@@ -59,13 +82,11 @@ export default function AdminLessonEdit() {
       >
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8 text-center">
           <p className="text-destructive">Les niet gevonden of er is een fout opgetreden.</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => navigate('/admin/lessons')}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar lessen
+          <Button variant="outline" className="mt-4" asChild>
+            <Link to="/admin/lessons">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Terug naar lessen
+            </Link>
           </Button>
         </div>
       </AdminPageLayout>
@@ -74,17 +95,15 @@ export default function AdminLessonEdit() {
 
   return (
     <AdminPageLayout
-      title={lesson.title}
+      title="Les Bewerken"
       breadcrumbs={[
         { label: 'Admin', href: '/admin-dashboard' },
         { label: 'Lessen', href: '/admin/lessons' },
-        { label: lesson.title },
+        { label: editor.title || 'Bewerken' },
       ]}
       actions={
-        <div className="flex items-center gap-2">
-          <Badge variant={lesson.is_published ? 'default' : 'secondary'}>
-            {lesson.is_published ? 'Gepubliceerd' : 'Concept'}
-          </Badge>
+        <div className="flex items-center gap-4">
+          <SaveIndicator isSaving={editor.isSaving} lastSaved={editor.lastSaved} />
           <Button variant="outline" asChild>
             <Link to="/admin/lessons">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -94,32 +113,52 @@ export default function AdminLessonEdit() {
         </div>
       }
     >
-      {/* Placeholder for block editor - will be built in Part 2 */}
-      <div className="rounded-lg border border-dashed p-12 text-center">
-        <h3 className="text-lg font-medium text-muted-foreground">
-          Block Editor komt in Part 2
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Hier kun je straks blokken toevoegen: paragrafen, vragen, video's en checkpoints.
-        </p>
-        
-        {/* Show current lesson info */}
-        <div className="mt-8 rounded-lg bg-muted/50 p-4 text-left">
-          <h4 className="font-medium mb-2">Les Details:</h4>
-          <dl className="grid grid-cols-2 gap-2 text-sm">
-            <dt className="text-muted-foreground">ID:</dt>
-            <dd className="font-mono text-xs">{lesson.id}</dd>
-            <dt className="text-muted-foreground">Type:</dt>
-            <dd>{lesson.lesson_type}</dd>
-            <dt className="text-muted-foreground">Duur:</dt>
-            <dd>{lesson.estimated_duration ? `${lesson.estimated_duration} min` : '-'}</dd>
-            <dt className="text-muted-foreground">Slaagpercentage:</dt>
-            <dd>{lesson.passing_score ?? 80}%</dd>
-            <dt className="text-muted-foreground">Aantal blokken:</dt>
-            <dd>{Array.isArray(lesson.blocks) ? lesson.blocks.length : 0}</dd>
-          </dl>
+      <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
+        {/* Main Content - Block Editor */}
+        <div className="space-y-4">
+          <div className="rounded-lg border bg-card p-4">
+            <h3 className="font-semibold mb-4">Lesinhoud</h3>
+            
+            <BlockList
+              blocks={editor.blocks}
+              onEdit={handleEditBlock}
+              onDelete={editor.deleteBlock}
+              onMoveUp={editor.moveBlockUp}
+              onMoveDown={editor.moveBlockDown}
+            />
+
+            <div className="mt-4">
+              <AddBlockDropdown onAddBlock={handleAddBlock} />
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar - Metadata Panel */}
+        <div className="space-y-4">
+          <LessonMetadataPanel
+            title={editor.title}
+            description={editor.description}
+            lessonType={editor.lessonType}
+            estimatedDuration={editor.estimatedDuration}
+            passingScore={editor.passingScore}
+            isPublished={editor.isPublished}
+            onTitleChange={editor.setTitle}
+            onDescriptionChange={editor.setDescription}
+            onLessonTypeChange={editor.setLessonType}
+            onDurationChange={editor.setEstimatedDuration}
+            onPassingScoreChange={editor.setPassingScore}
+            onPublishedChange={editor.setIsPublished}
+          />
         </div>
       </div>
+
+      {/* Block Editor Dialog */}
+      <BlockEditorDialog
+        block={editingBlock}
+        open={!!editingBlock}
+        onOpenChange={(open) => !open && setEditingBlock(null)}
+        onSave={handleSaveBlock}
+      />
     </AdminPageLayout>
   );
 }
