@@ -28,6 +28,7 @@ interface UseLessonProgressReturn {
   progressPercentage: number;
   quizAttempts: Record<string, number>;
   quizResults: Record<string, { correct: boolean; points: number }>;
+  startedAt: string | null;
   isLoading: boolean;
   goToBlock: (index: number) => void;
   markBlockCompleted: (blockId: string) => void;
@@ -52,6 +53,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   const blocksCompleted = progressData?.blocks_completed ?? [];
   const quizAttempts = progressData?.quiz_attempts ?? {};
   const quizResults = progressData?.quiz_results ?? {};
+  const startedAt = progressData?.started_at ?? null;
   const progressPercentage = totalBlocks > 0 
     ? Math.round((blocksCompleted.length / totalBlocks) * 100) 
     : 0;
@@ -76,13 +78,28 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         if (fetchError) throw fetchError;
 
         if (existing) {
+          // Parse quiz_attempts which contains both attempts and results
+          const rawQuizData = (existing.quiz_attempts as Record<string, unknown>) ?? {};
+          const attempts: Record<string, number> = {};
+          const results: Record<string, { correct: boolean; points: number }> = {};
+          
+          // Separate attempts (numbers) from results (prefixed with result_)
+          Object.entries(rawQuizData).forEach(([key, value]) => {
+            if (key.startsWith('result_') && typeof value === 'object' && value !== null) {
+              const blockId = key.replace('result_', '');
+              results[blockId] = value as { correct: boolean; points: number };
+            } else if (typeof value === 'number') {
+              attempts[key] = value;
+            }
+          });
+          
           setProgressData({
             ...existing,
             blocks_completed: Array.isArray(existing.blocks_completed) 
               ? existing.blocks_completed as string[]
               : [],
-            quiz_attempts: (existing.quiz_attempts as Record<string, number>) ?? {},
-            quiz_results: (existing.quiz_attempts as Record<string, { correct: boolean; points: number }>) ?? {},
+            quiz_attempts: attempts,
+            quiz_results: results,
           });
         } else {
           // Create new progress record
@@ -120,6 +137,18 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
 
     loadProgress();
   }, [currentUser?.id, lessonId]);
+
+  // Build combined quiz data for storage
+  const buildCombinedQuizData = useCallback((
+    attempts: Record<string, number>,
+    results: Record<string, { correct: boolean; points: number }>
+  ) => {
+    const combined: Record<string, unknown> = { ...attempts };
+    Object.entries(results).forEach(([blockId, result]) => {
+      combined[`result_${blockId}`] = result;
+    });
+    return combined;
+  }, []);
 
   // Save progress to database
   const saveProgress = useCallback(async (updates: Partial<LessonProgressData>) => {
@@ -187,10 +216,11 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
       };
       
       const updated = { ...prev, quiz_attempts: newQuizAttempts };
-      saveProgress({ quiz_attempts: newQuizAttempts });
+      const combinedData = buildCombinedQuizData(newQuizAttempts, prev.quiz_results);
+      saveProgress({ quiz_attempts: combinedData as unknown as Record<string, number> });
       return updated;
     });
-  }, [saveProgress]);
+  }, [saveProgress, buildCombinedQuizData]);
 
   const recordQuizResult = useCallback((blockId: string, correct: boolean, points: number) => {
     setProgressData(prev => {
@@ -205,10 +235,11 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
       };
       
       const updated = { ...prev, quiz_results: newQuizResults };
-      // Store quiz results in quiz_attempts field (we're reusing the JSONB field)
+      const combinedData = buildCombinedQuizData(prev.quiz_attempts, newQuizResults);
+      saveProgress({ quiz_attempts: combinedData as unknown as Record<string, number> });
       return updated;
     });
-  }, []);
+  }, [saveProgress, buildCombinedQuizData]);
 
   const calculateFinalScore = useCallback(() => {
     // Find all quiz blocks
@@ -256,6 +287,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     progressPercentage,
     quizAttempts,
     quizResults,
+    startedAt,
     isLoading,
     goToBlock,
     markBlockCompleted,

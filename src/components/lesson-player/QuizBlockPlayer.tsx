@@ -12,6 +12,8 @@ interface QuizBlockPlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  alreadyCompleted?: boolean;
+  previousResult?: { correct: boolean; points: number };
 }
 
 type QuizState = 'answering' | 'correct' | 'incorrect' | 'failed';
@@ -22,6 +24,8 @@ export function QuizBlockPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  alreadyCompleted,
+  previousResult,
 }: QuizBlockPlayerProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [quizState, setQuizState] = useState<QuizState>('answering');
@@ -29,6 +33,16 @@ export function QuizBlockPlayer({
 
   const remainingAttempts = block.max_attempts - attempts;
   const optionLabels = ['A', 'B', 'C', 'D'];
+
+  // Restore state if already completed
+  useEffect(() => {
+    if (alreadyCompleted && previousResult) {
+      setSelectedOption(previousResult.correct ? block.correct_answer : null);
+      setQuizState(previousResult.correct ? 'correct' : 'failed');
+      setHasAnsweredCorrectly(previousResult.correct);
+      onCanProceed(true);
+    }
+  }, [alreadyCompleted, previousResult, block.correct_answer, onCanProceed]);
 
   // Check if already passed (from previous session)
   useEffect(() => {
@@ -88,9 +102,11 @@ export function QuizBlockPlayer({
           
           if (showResult) {
             if (isCorrect) {
-              optionStyle = 'border-green-500 bg-green-50';
+              optionStyle = 'border-green-500 bg-green-50 dark:bg-green-950/30';
             } else if (isSelected && !isCorrect) {
-              optionStyle = 'border-red-500 bg-red-50';
+              optionStyle = 'border-red-500 bg-red-50 dark:bg-red-950/30';
+            } else {
+              optionStyle = 'border-border opacity-60';
             }
           } else if (isSelected) {
             optionStyle = 'border-primary bg-primary/5';
@@ -102,7 +118,7 @@ export function QuizBlockPlayer({
               className={cn(
                 'p-4 cursor-pointer transition-all',
                 optionStyle,
-                quizState !== 'answering' && 'cursor-default'
+                quizState !== 'answering' && 'cursor-default pointer-events-none'
               )}
               onClick={() => {
                 if (quizState === 'answering') {
@@ -112,8 +128,12 @@ export function QuizBlockPlayer({
             >
               <div className="flex items-center gap-3">
                 <span className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border',
-                  isSelected && quizState === 'answering' 
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border shrink-0',
+                  showResult && isCorrect 
+                    ? 'border-green-500 bg-green-500 text-white'
+                    : showResult && isSelected && !isCorrect
+                    ? 'border-red-500 bg-red-500 text-white'
+                    : isSelected && quizState === 'answering' 
                     ? 'border-primary bg-primary text-primary-foreground' 
                     : 'border-border bg-background'
                 )}>
@@ -121,10 +141,10 @@ export function QuizBlockPlayer({
                 </span>
                 <span className="flex-1">{option}</span>
                 {showResult && isCorrect && (
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                 )}
                 {showResult && isSelected && !isCorrect && (
-                  <XCircle className="h-5 w-5 text-red-600" />
+                  <XCircle className="h-5 w-5 text-red-600 shrink-0" />
                 )}
               </div>
             </Card>
@@ -145,22 +165,25 @@ export function QuizBlockPlayer({
 
       {/* Result messages */}
       {quizState === 'correct' && (
-        <div className="rounded-lg bg-green-50 border border-green-200 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-green-700">
+        <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
             <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Correct! +{block.points} punten</span>
+            <span className="font-medium text-lg">✅ CORRECT!</span>
           </div>
-          <p className="text-sm text-green-600">{block.explanation}</p>
+          <p className="text-sm text-green-600 dark:text-green-300">{block.explanation}</p>
+          <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+            +{block.points} punten
+          </p>
         </div>
       )}
 
       {quizState === 'incorrect' && (
-        <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-amber-700">
+        <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
             <AlertCircle className="h-5 w-5" />
-            <span className="font-medium">Helaas, dat is niet correct</span>
+            <span className="font-medium text-lg">❌ INCORRECT</span>
           </div>
-          <p className="text-sm text-amber-600">
+          <p className="text-sm text-amber-600 dark:text-amber-300">
             Je hebt nog {remainingAttempts - 1} {remainingAttempts - 1 === 1 ? 'poging' : 'pogingen'} over.
           </p>
           <Button onClick={handleRetry} variant="outline" className="w-full">
@@ -170,12 +193,15 @@ export function QuizBlockPlayer({
       )}
 
       {quizState === 'failed' && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
             <XCircle className="h-5 w-5" />
-            <span className="font-medium">Geen pogingen meer</span>
+            <span className="font-medium text-lg">❌ INCORRECT</span>
           </div>
-          <p className="text-sm text-muted-foreground">{block.explanation}</p>
+          <p className="text-sm text-red-600 dark:text-red-300">
+            Geen pogingen meer. Het juiste antwoord was: <strong>{block.options[block.correct_answer]}</strong>
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">{block.explanation}</p>
         </div>
       )}
     </div>
