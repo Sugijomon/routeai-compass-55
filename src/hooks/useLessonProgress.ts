@@ -12,6 +12,7 @@ interface LessonProgressData {
   blocks_completed: string[];
   progress_percentage: number;
   quiz_attempts: Record<string, number>;
+  quiz_results: Record<string, { correct: boolean; points: number }>;
   started_at: string;
   updated_at: string;
 }
@@ -26,6 +27,7 @@ interface UseLessonProgressReturn {
   blocksCompleted: string[];
   progressPercentage: number;
   quizAttempts: Record<string, number>;
+  quizResults: Record<string, { correct: boolean; points: number }>;
   isLoading: boolean;
   goToBlock: (index: number) => void;
   markBlockCompleted: (blockId: string) => void;
@@ -35,6 +37,8 @@ interface UseLessonProgressReturn {
   canGoPrevious: boolean;
   isLastBlock: boolean;
   incrementQuizAttempt: (blockId: string) => void;
+  recordQuizResult: (blockId: string, correct: boolean, points: number) => void;
+  calculateFinalScore: () => { earnedPoints: number; maxPoints: number; percentage: number };
 }
 
 export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps): UseLessonProgressReturn {
@@ -47,6 +51,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   const currentBlockIndex = progressData?.current_block_index ?? 0;
   const blocksCompleted = progressData?.blocks_completed ?? [];
   const quizAttempts = progressData?.quiz_attempts ?? {};
+  const quizResults = progressData?.quiz_results ?? {};
   const progressPercentage = totalBlocks > 0 
     ? Math.round((blocksCompleted.length / totalBlocks) * 100) 
     : 0;
@@ -77,6 +82,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
               ? existing.blocks_completed as string[]
               : [],
             quiz_attempts: (existing.quiz_attempts as Record<string, number>) ?? {},
+            quiz_results: (existing.quiz_attempts as Record<string, { correct: boolean; points: number }>) ?? {},
           });
         } else {
           // Create new progress record
@@ -101,6 +107,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
             ...created,
             blocks_completed: [],
             quiz_attempts: {},
+            quiz_results: {},
           });
         }
       } catch (error) {
@@ -185,6 +192,48 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     });
   }, [saveProgress]);
 
+  const recordQuizResult = useCallback((blockId: string, correct: boolean, points: number) => {
+    setProgressData(prev => {
+      if (!prev) return prev;
+      
+      // Don't overwrite existing results
+      if (prev.quiz_results[blockId]) return prev;
+      
+      const newQuizResults = {
+        ...prev.quiz_results,
+        [blockId]: { correct, points },
+      };
+      
+      const updated = { ...prev, quiz_results: newQuizResults };
+      // Store quiz results in quiz_attempts field (we're reusing the JSONB field)
+      return updated;
+    });
+  }, []);
+
+  const calculateFinalScore = useCallback(() => {
+    // Find all quiz blocks
+    const quizBlocks = blocks.filter(b => b.type === 'quiz_mc');
+    
+    if (quizBlocks.length === 0) {
+      return { earnedPoints: 0, maxPoints: 0, percentage: 100 };
+    }
+    
+    const maxPoints = quizBlocks.reduce((sum, block) => {
+      if (block.type === 'quiz_mc') {
+        return sum + block.points;
+      }
+      return sum;
+    }, 0);
+    
+    const earnedPoints = Object.values(quizResults).reduce((sum, result) => {
+      return sum + result.points;
+    }, 0);
+    
+    const percentage = maxPoints > 0 ? Math.round((earnedPoints / maxPoints) * 100) : 100;
+    
+    return { earnedPoints, maxPoints, percentage };
+  }, [blocks, quizResults]);
+
   const goNext = useCallback(() => {
     const currentBlock = blocks[currentBlockIndex];
     if (currentBlock) {
@@ -206,6 +255,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     blocksCompleted,
     progressPercentage,
     quizAttempts,
+    quizResults,
     isLoading,
     goToBlock,
     markBlockCompleted,
@@ -215,5 +265,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     canGoPrevious,
     isLastBlock,
     incrementQuizAttempt,
+    recordQuizResult,
+    calculateFinalScore,
   };
 }
