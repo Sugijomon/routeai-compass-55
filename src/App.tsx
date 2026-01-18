@@ -9,6 +9,7 @@ import AdminRoute from "./components/AdminRoute";
 import NewAssessment from "./pages/NewAssessment";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
+import LessonPlayer from "./pages/learn/LessonPlayer";
 
 export default function App() {
   return (
@@ -82,6 +83,16 @@ export default function App() {
             <AdminRoute>
               <AdminLessonEdit />
             </AdminRoute>
+          } 
+        />
+        
+        {/* Lesson Player - Protected */}
+        <Route 
+          path="/learn/:lessonId" 
+          element={
+            <ProtectedRoute>
+              <LessonPlayer />
+            </ProtectedRoute>
           } 
         />
         
