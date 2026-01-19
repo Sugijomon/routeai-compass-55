@@ -13,6 +13,7 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
+import TrainingOverview from "./pages/learn/TrainingOverview";
 
 export default function App() {
   return (
@@ -108,6 +109,25 @@ export default function App() {
           } 
         />
         
+        {/* Learning Routes */}
+        <Route 
+          path="/training" 
+          element={
+            <ProtectedRoute>
+              <TrainingOverview />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/learn" 
+          element={
+            <ProtectedRoute>
+              <TrainingOverview />
+            </ProtectedRoute>
+          } 
+        />
+        
         {/* Lesson Player - Protected */}
         <Route 
           path="/learn/:lessonId" 
@@ -124,21 +144,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CoursePlayer />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Training - Protected */}
-        <Route 
-          path="/training" 
-          element={
-            <ProtectedRoute>
-              <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-4">🎓 Leren</h1>
-                  <p className="text-slate-600">Deze pagina wordt binnenkort beschikbaar.</p>
-                </div>
-              </div>
             </ProtectedRoute>
           } 
         />
