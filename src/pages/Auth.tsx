@@ -7,7 +7,27 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Shield, Mail, Lock, User } from 'lucide-react';
+import { Shield, Mail, Lock, User, Loader2 } from 'lucide-react';
+
+async function checkAdminRole(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
+
+    return !!data;
+  } catch {
+    return false;
+  }
+}
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -24,12 +44,20 @@ export default function Auth() {
 
   // Check if already logged in
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        navigate('/dashboard');
+        const isAdmin = await checkAdminRole(session.user.id);
+        navigate(isAdmin ? '/admin/lessons' : '/dashboard');
       }
     });
   }, [navigate]);
+
+  const redirectAfterAuth = async (userId: string) => {
+    // Small delay to allow trigger to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const isAdmin = await checkAdminRole(userId);
+    navigate(isAdmin ? '/admin/lessons' : '/dashboard');
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +72,9 @@ export default function Auth() {
       if (error) throw error;
 
       toast.success('Succesvol ingelogd!');
-      navigate('/dashboard');
+      if (data.user) {
+        await redirectAfterAuth(data.user.id);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Inloggen mislukt');
     } finally {
@@ -57,7 +87,7 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      // Sign up the user
+      // Sign up the user - profile is created by database trigger
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
@@ -65,29 +95,16 @@ export default function Auth() {
           data: {
             full_name: signupName,
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            email: signupEmail,
-            full_name: signupName,
-          });
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Don't throw - profile might already exist or be created by trigger
-        }
+        toast.success('Account aangemaakt! Je bent nu ingelogd.');
+        await redirectAfterAuth(authData.user.id);
       }
-
-      toast.success('Account aangemaakt! Je bent nu ingelogd.');
-      navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Registratie mislukt');
     } finally {
@@ -118,8 +135,8 @@ export default function Auth() {
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Inloggen</TabsTrigger>
-                <TabsTrigger value="signup">Registreren</TabsTrigger>
+                <TabsTrigger value="login" disabled={isLoading}>Inloggen</TabsTrigger>
+                <TabsTrigger value="signup" disabled={isLoading}>Registreren</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login" className="space-y-4 mt-4">
@@ -135,6 +152,7 @@ export default function Auth() {
                         className="pl-10"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
+                        disabled={isLoading}
                         required
                       />
                     </div>
@@ -150,12 +168,20 @@ export default function Auth() {
                         className="pl-10"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
+                        disabled={isLoading}
                         required
                       />
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Bezig...' : 'Inloggen'}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Bezig met inloggen...
+                      </>
+                    ) : (
+                      'Inloggen'
+                    )}
                   </Button>
                 </form>
               </TabsContent>
@@ -173,6 +199,7 @@ export default function Auth() {
                         className="pl-10"
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
+                        disabled={isLoading}
                         required
                       />
                     </div>
@@ -188,6 +215,7 @@ export default function Auth() {
                         className="pl-10"
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
+                        disabled={isLoading}
                         required
                       />
                     </div>
@@ -203,13 +231,21 @@ export default function Auth() {
                         className="pl-10"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
+                        disabled={isLoading}
                         minLength={6}
                         required
                       />
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Bezig...' : 'Account aanmaken'}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Account aanmaken...
+                      </>
+                    ) : (
+                      'Account aanmaken'
+                    )}
                   </Button>
                 </form>
               </TabsContent>
