@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface UserProfile {
   id: string;
@@ -14,24 +14,24 @@ export interface UserProfile {
 }
 
 export function useUserProfile() {
-  const getCurrentUser = useAppStore((state) => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const { data: profile, isLoading, error, refetch } = useQuery({
-    queryKey: ['user-profile', currentUser?.id],
+    queryKey: ['user-profile', userId],
     queryFn: async () => {
-      if (!currentUser?.id) return null;
+      if (!userId) return null;
 
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', currentUser.id)
+        .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
       return data as UserProfile | null;
     },
-    enabled: !!currentUser?.id,
+    enabled: !!userId,
   });
 
   return {
@@ -43,3 +43,4 @@ export function useUserProfile() {
     aiRijbewijsObtainedAt: profile?.ai_rijbewijs_obtained_at,
   };
 }
+
