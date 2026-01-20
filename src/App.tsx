@@ -6,6 +6,8 @@ import UserDashboard from "./components/UserDashboard";
 import ToolCatalog from "./components/ToolCatalog";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import { AuthRoute } from "./components/AuthRoute";
+import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
@@ -19,25 +21,27 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<RoleSelector />} />
+        <Route path="/auth" element={<Auth />} />
         
-        {/* SmartDashboard - Protected */}
+        {/* SmartDashboard - Protected with real auth */}
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <SmartDashboard />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
-        {/* Admin Dashboard */}
+        {/* Admin Dashboard - requires admin role */}
         <Route 
           path="/admin-dashboard" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <AdminDashboard />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
@@ -45,9 +49,9 @@ export default function App() {
         <Route 
           path="/user-dashboard" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <UserDashboard />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
@@ -55,19 +59,19 @@ export default function App() {
         <Route 
           path="/assessments/new" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <NewAssessment />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
-        {/* Tool Catalog - ADMIN ONLY (governance, not permissions) */}
+        {/* Tool Catalog - ADMIN ONLY */}
         <Route 
           path="/tools" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <ToolCatalog />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
@@ -75,18 +79,18 @@ export default function App() {
         <Route 
           path="/admin/lessons" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <AdminLessons />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
         <Route 
           path="/admin/lessons/:lessonId/edit" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <AdminLessonEdit />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
@@ -94,18 +98,18 @@ export default function App() {
         <Route 
           path="/admin/courses" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <AdminCourses />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
         <Route 
           path="/admin/courses/:courseId/edit" 
           element={
-            <AdminRoute>
+            <AuthRoute requireAdmin>
               <AdminCourseEdit />
-            </AdminRoute>
+            </AuthRoute>
           } 
         />
         
@@ -113,18 +117,18 @@ export default function App() {
         <Route 
           path="/training" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <TrainingOverview />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
         <Route 
           path="/learn" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <TrainingOverview />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
@@ -132,9 +136,9 @@ export default function App() {
         <Route 
           path="/learn/:lessonId" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <LessonPlayer />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
@@ -142,9 +146,9 @@ export default function App() {
         <Route 
           path="/learn/course/:courseId" 
           element={
-            <ProtectedRoute>
+            <AuthRoute>
               <CoursePlayer />
-            </ProtectedRoute>
+            </AuthRoute>
           } 
         />
         
