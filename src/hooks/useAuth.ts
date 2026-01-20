@@ -18,7 +18,35 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    // Get initial session
+    // Set up auth state listener FIRST (synchronous only!)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // Only synchronous state updates here
+        setAuthState(prev => ({
+          ...prev,
+          user: session?.user ?? null,
+          session,
+          isLoading: session?.user ? true : false, // Keep loading if we need to check admin
+          isAdmin: session?.user ? prev.isAdmin : false,
+        }));
+        
+        // Defer Supabase calls with setTimeout to prevent deadlock
+        if (session?.user) {
+          setTimeout(() => {
+            checkAdminRole(session.user.id).then((isAdmin) => {
+              setAuthState({
+                user: session.user,
+                session,
+                isLoading: false,
+                isAdmin,
+              });
+            });
+          }, 0);
+        }
+      }
+    );
+
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         checkAdminRole(session.user.id).then((isAdmin) => {
@@ -38,28 +66,6 @@ export function useAuth() {
         });
       }
     });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          const isAdmin = await checkAdminRole(session.user.id);
-          setAuthState({
-            user: session.user,
-            session,
-            isLoading: false,
-            isAdmin,
-          });
-        } else {
-          setAuthState({
-            user: null,
-            session: null,
-            isLoading: false,
-            isAdmin: false,
-          });
-        }
-      }
-    );
 
     return () => subscription.unsubscribe();
   }, []);
