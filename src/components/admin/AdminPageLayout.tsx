@@ -1,6 +1,9 @@
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface Breadcrumb {
   label: string;
@@ -22,8 +25,27 @@ export function AdminPageLayout({
   children,
   className,
 }: AdminPageLayoutProps) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({ title: 'Uitgelogd', description: 'Je bent succesvol uitgelogd.' });
+    navigate('/auth');
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Top bar with logout */}
+      <div className="border-b bg-card">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
+          <span className="text-sm font-medium text-muted-foreground">Admin</span>
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Uitloggen
+          </Button>
+        </div>
+      </div>
+      
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         {breadcrumbs && breadcrumbs.length > 0 && (
