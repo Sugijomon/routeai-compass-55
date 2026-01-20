@@ -16,10 +16,8 @@ import {
   ClipboardCheck,
   ArrowRight,
   History,
-  BookOpen,
   Lock,
 } from "lucide-react";
-import { useAppStore } from "@/stores/useAppStore";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useOnboardingCourse } from "@/hooks/useOnboardingCourse";
 import { OnboardingBanner } from "@/components/dashboard/OnboardingBanner";
@@ -31,41 +29,50 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const getCurrentUser = useAppStore((state) => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const { user } = useAuth();
+
   const { profile, hasAiRijbewijs, aiRijbewijsObtainedAt, isLoading: profileLoading } = useUserProfile();
   const { onboardingCourse, progressPercentage, isCompleted, isLoading: courseLoading } = useOnboardingCourse();
-  
+
+  const displayName = (profile?.full_name || user?.email || "Gebruiker").trim();
+  const firstName = displayName.split(" ")[0] || "Gebruiker";
+
   // Show welcome modal for new users who haven't started training
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  
+
   useEffect(() => {
+    if (!user?.id) return;
+
     // Show welcome modal if:
     // 1. Not loading
     // 2. User doesn't have AI Rijbewijs
     // 3. There's an onboarding course
     // 4. User hasn't started the course yet
     if (!profileLoading && !courseLoading && !hasAiRijbewijs && onboardingCourse && progressPercentage === 0) {
-      // Check localStorage to see if we've shown the modal before
-      const hasSeenWelcome = localStorage.getItem(`welcome-shown-${currentUser?.id}`);
+      const hasSeenWelcome = localStorage.getItem(`welcome-shown-${user.id}`);
       if (!hasSeenWelcome) {
         setShowWelcomeModal(true);
-        localStorage.setItem(`welcome-shown-${currentUser?.id}`, 'true');
+        localStorage.setItem(`welcome-shown-${user.id}`, 'true');
       }
     }
-  }, [profileLoading, courseLoading, hasAiRijbewijs, onboardingCourse, progressPercentage, currentUser?.id]);
+  }, [profileLoading, courseLoading, hasAiRijbewijs, onboardingCourse, progressPercentage, user?.id]);
 
-  if (!currentUser) {
+  if (!user) {
     return null;
   }
 
-  const handleLogout = () => {
-    // Navigate to home - user selection will handle the rest
-    navigate("/");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Uitgelogd');
+    navigate('/auth', { replace: true });
   };
+
 
   // Capability icon mapping met emoji fallback
   const getCapabilityDisplay = (capabilityId: string) => {
@@ -103,8 +110,9 @@ export default function UserDashboard() {
     );
   };
 
-  const userCapabilities = currentUser.license?.grantedCapabilities || [];
-  const trainingLevel = currentUser.license?.trainingLevel || "basis";
+  // Capabilities/licensing are not yet persisted for real users; keep UI stable with safe defaults.
+  const userCapabilities: string[] = [];
+  const trainingLevel = "basis";
 
   return (
     <TooltipProvider>
@@ -119,7 +127,7 @@ export default function UserDashboard() {
               {hasAiRijbewijs && <AiRijbewijsBadge obtainedAt={aiRijbewijsObtainedAt} compact />}
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{currentUser.name}</span>
+              <span className="text-sm text-muted-foreground">{displayName}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Uitloggen
@@ -132,7 +140,7 @@ export default function UserDashboard() {
         <main className="container mx-auto px-4 py-8 space-y-8">
           {/* Welcome Section */}
           <div>
-            <h2 className="text-3xl font-bold">Welkom, {currentUser.name.split(" ")[0]}!</h2>
+            <h2 className="text-3xl font-bold">Welkom, {firstName}!</h2>
             <p className="text-muted-foreground mt-1">
               {hasAiRijbewijs 
                 ? "Je AI-rijbewijs is actief. Start een AI Check of bekijk je leerpad."

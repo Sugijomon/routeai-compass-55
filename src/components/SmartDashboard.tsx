@@ -1,24 +1,23 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/store/useAppStore';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SmartDashboard() {
-  const currentUser = useAppStore(state => state.currentUser);
   const navigate = useNavigate();
+  const { user, isAdmin, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!currentUser) {
+    if (isLoading) return;
+
+    // Should generally be guarded by <AuthRoute>, but keep this safe.
+    if (!user) {
       navigate('/', { replace: true });
       return;
     }
 
-    if (currentUser.role === 'org_admin') {
-      navigate('/admin-dashboard', { replace: true });
-    } else {
-      navigate('/user-dashboard', { replace: true });
-    }
-  }, [currentUser, navigate]);
+    navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard', { replace: true });
+  }, [user, isAdmin, isLoading, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500">
@@ -29,3 +28,4 @@ export default function SmartDashboard() {
     </div>
   );
 }
+
