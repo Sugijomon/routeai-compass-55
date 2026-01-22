@@ -46,6 +46,7 @@ export default function LessonPlayer() {
     maxPoints: number;
     timeSpent: number;
     hasQuizzes: boolean;
+    passingScore: number;
   } | null>(null);
   const [courseCompletionData, setCourseCompletionData] = useState<{
     courseTitle: string;
@@ -165,13 +166,15 @@ export default function LessonPlayer() {
         setCourseCompletionData(courseResult);
         setShowCourseCompletionModal(true);
       } else {
-        // Show lesson completion modal
+        // Show lesson completion modal with passing score from lesson
+        const lessonPassingScore = lesson?.passing_score ?? 0;
         setCompletionData({
           score: percentage,
           earnedPoints,
           maxPoints,
           timeSpent,
           hasQuizzes: maxPoints > 0,
+          passingScore: lessonPassingScore,
         });
         setShowCompletionModal(true);
       }
@@ -462,6 +465,7 @@ export default function LessonPlayer() {
           maxPoints={completionData.maxPoints}
           timeSpent={completionData.timeSpent}
           hasQuizzes={completionData.hasQuizzes}
+          passingScore={completionData.passingScore}
           onContinue={handleContinue}
         />
       )}
