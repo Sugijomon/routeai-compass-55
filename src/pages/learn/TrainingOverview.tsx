@@ -1,7 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAppStore } from '@/stores/useAppStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +13,14 @@ import {
   ArrowRight,
   ArrowLeft,
   Clock,
-  Lock,
+  FileText,
   Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
+type Lesson = Tables<'lessons'>;
 
 interface CourseWithProgress extends Course {
   lessonsCount: number;
@@ -28,10 +29,22 @@ interface CourseWithProgress extends Course {
   isCompleted: boolean;
 }
 
+interface LessonWithProgress extends Lesson {
+  isCompleted: boolean;
+}
+
 export default function TrainingOverview() {
   const navigate = useNavigate();
-  const getCurrentUser = useAppStore((state) => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get authenticated user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+    };
+    getUser();
+  }, []);
 
   // Fetch published courses
   const { data: courses, isLoading } = useQuery({
@@ -72,14 +85,14 @@ export default function TrainingOverview() {
 
   // Fetch user's course progress
   const { data: userProgress } = useQuery({
-    queryKey: ['user-all-course-progress', currentUser?.id],
+    queryKey: ['user-all-course-progress', userId],
     queryFn: async () => {
-      if (!currentUser?.id) return {};
+      if (!userId) return {};
 
       const { data, error } = await supabase
         .from('user_course_progress')
         .select('*')
-        .eq('user_id', currentUser.id);
+        .eq('user_id', userId);
 
       if (error) throw error;
 
@@ -92,25 +105,74 @@ export default function TrainingOverview() {
       });
       return progressMap;
     },
-    enabled: !!currentUser?.id,
+    enabled: !!userId,
   });
 
   // Fetch user's completed courses
   const { data: completedCourses } = useQuery({
-    queryKey: ['user-completed-courses', currentUser?.id],
+    queryKey: ['user-completed-courses', userId],
     queryFn: async () => {
-      if (!currentUser?.id) return new Set<string>();
+      if (!userId) return new Set<string>();
 
       const { data, error } = await supabase
         .from('user_course_completions')
         .select('course_id')
-        .eq('user_id', currentUser.id);
+        .eq('user_id', userId);
 
       if (error) throw error;
       return new Set(data?.map((c) => c.course_id) ?? []);
     },
-    enabled: !!currentUser?.id,
+    enabled: !!userId,
   });
+
+  // Fetch standalone lessons (lessons not assigned to any course)
+  const { data: standaloneLessons } = useQuery({
+    queryKey: ['standalone-lessons'],
+    queryFn: async () => {
+      // Get all lesson IDs that are part of courses
+      const { data: courseLessonData } = await supabase
+        .from('course_lessons')
+        .select('lesson_id');
+      
+      const lessonIdsInCourses = new Set(courseLessonData?.map(cl => cl.lesson_id) ?? []);
+      
+      // Get all published standalone lessons
+      const { data: allLessons, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('is_published', true)
+        .eq('lesson_type', 'standalone')
+        .order('title');
+
+      if (error) throw error;
+      
+      // Filter out lessons that are in courses
+      return (allLessons ?? []).filter(lesson => !lessonIdsInCourses.has(lesson.id)) as Lesson[];
+    },
+  });
+
+  // Fetch user's completed lessons
+  const { data: completedLessons } = useQuery({
+    queryKey: ['user-completed-lessons', userId],
+    queryFn: async () => {
+      if (!userId) return new Set<string>();
+
+      const { data, error } = await supabase
+        .from('user_lesson_completions')
+        .select('lesson_id')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return new Set(data?.map((l) => l.lesson_id) ?? []);
+    },
+    enabled: !!userId,
+  });
+
+  // Combine standalone lessons with completion status
+  const standaloneLessonsWithProgress: LessonWithProgress[] = (standaloneLessons ?? []).map((lesson) => ({
+    ...lesson,
+    isCompleted: completedLessons?.has(lesson.id) ?? false,
+  }));
 
   // Combine course data with progress
   const coursesWithProgress: CourseWithProgress[] = (courses ?? []).map((course) => ({
@@ -190,14 +252,29 @@ export default function TrainingOverview() {
           </section>
         )}
 
+        {/* Standalone Lessons */}
+        {standaloneLessonsWithProgress.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-xl font-semibold">Losse Lessen</h2>
+            </div>
+            <div className="grid gap-4">
+              {standaloneLessonsWithProgress.map((lesson) => (
+                <LessonCard key={lesson.id} lesson={lesson} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Empty State */}
-        {coursesWithProgress.length === 0 && (
+        {coursesWithProgress.length === 0 && standaloneLessonsWithProgress.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Geen cursussen beschikbaar</h3>
+              <h3 className="text-lg font-semibold mb-2">Geen leermateriaal beschikbaar</h3>
               <p className="text-muted-foreground">
-                Er zijn momenteel geen gepubliceerde cursussen.
+                Er zijn momenteel geen gepubliceerde cursussen of lessen.
               </p>
             </CardContent>
           </Card>
@@ -304,6 +381,86 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
             ) : (
               <>
                 Start cursus
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
+  const navigate = useNavigate();
+
+  return (
+    <Card
+      className={cn(
+        'transition-all hover:shadow-md',
+        lesson.isCompleted && 'bg-green-50/50 dark:bg-green-950/10 border-green-200 dark:border-green-800'
+      )}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                'h-10 w-10 rounded-lg flex items-center justify-center',
+                lesson.isCompleted
+                  ? 'bg-green-500 text-white'
+                  : 'bg-primary/10 text-primary'
+              )}
+            >
+              {lesson.isCompleted ? (
+                <CheckCircle className="h-5 w-5" />
+              ) : (
+                <FileText className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <CardTitle className="text-lg">{lesson.title}</CardTitle>
+              {lesson.description && (
+                <CardDescription className="mt-1 line-clamp-1">
+                  {lesson.description}
+                </CardDescription>
+              )}
+            </div>
+          </div>
+          {lesson.estimated_duration && (
+            <Badge variant="secondary" className="gap-1 shrink-0">
+              <Clock className="h-3 w-3" />
+              {lesson.estimated_duration} min
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            {lesson.isCompleted ? (
+              <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                Afgerond
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <FileText className="h-4 w-4" />
+                Losse les
+              </span>
+            )}
+          </div>
+
+          <Button
+            onClick={() => navigate(`/learn/lesson/${lesson.id}`)}
+            variant={lesson.isCompleted ? 'outline' : 'default'}
+            className="gap-2 shrink-0"
+          >
+            {lesson.isCompleted ? (
+              <>Bekijk opnieuw</>
+            ) : (
+              <>
+                Start les
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
