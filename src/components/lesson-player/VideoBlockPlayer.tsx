@@ -72,8 +72,27 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
   
   const { type, id } = parseVideoUrl(block.url);
 
+  const debugPrefix = `[VideoBlockPlayer:${block.id}]`;
+
+  // Debug: component mount/unmount + block config
+  useEffect(() => {
+    console.log(`${debugPrefix} mount`, {
+      url: block.url,
+      parsed: { type, id },
+      must_watch_full: (block as any).must_watch_full,
+      requireFullWatch: (block as any).requireFullWatch,
+      caption: block.caption,
+    });
+    return () => {
+      console.log(`${debugPrefix} unmount`);
+    };
+    // NOTE: intentionally only on initial mount/unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Handle completion
   const handleVideoEnded = useCallback(() => {
+    console.log(`${debugPrefix} handleVideoEnded -> setIsCompleted(true)`);
     setIsCompleted(true);
     setIsPlaying(false);
     setProgress(100);
@@ -84,6 +103,11 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
   // Update proceed permission based on must_watch_full setting
   useEffect(() => {
+    console.log(`${debugPrefix} proceedCheck`, {
+      must_watch_full: (block as any).must_watch_full,
+      isCompleted,
+      willAllowProceed: !(block as any).must_watch_full ? true : isCompleted,
+    });
     if (!block.must_watch_full) {
       onCanProceed(true);
     } else {
@@ -95,20 +119,25 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
   useEffect(() => {
     if (type !== 'youtube' || !id) return;
 
+    console.log(`${debugPrefix} init YouTube flow`, { type, id });
+
     const loadYouTubeAPI = () => {
       if (window.YT && window.YT.Player) {
+        console.log(`${debugPrefix} YouTube API already available`);
         initYouTubePlayer();
         return;
       }
 
       // Check if script is already loading
       if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        console.log(`${debugPrefix} YouTube API script tag already exists; waiting for onYouTubeIframeAPIReady`);
         window.onYouTubeIframeAPIReady = initYouTubePlayer;
         return;
       }
 
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
+      console.log(`${debugPrefix} injecting YouTube iframe_api script`);
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
@@ -117,6 +146,8 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
     const initYouTubePlayer = () => {
       if (!containerRef.current || youtubePlayerRef.current) return;
+
+      console.log(`${debugPrefix} creating YouTube player`, { playerDivId: `youtube-player-${block.id}` });
       
       // Create a div for the player
       const playerDiv = document.createElement('div');
@@ -133,9 +164,11 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
         },
         events: {
           onReady: () => {
+            console.log(`${debugPrefix} YouTube onReady`);
             setIsLoading(false);
           },
           onStateChange: (event) => {
+            console.log(`${debugPrefix} YouTube onStateChange`, { state: event.data });
             if (event.data === window.YT.PlayerState.ENDED) {
               handleVideoEnded();
             } else if (event.data === window.YT.PlayerState.PLAYING) {
@@ -164,6 +197,7 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
     loadYouTubeAPI();
 
     return () => {
+      console.log(`${debugPrefix} cleanup YouTube`);
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
@@ -177,6 +211,8 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
   // Initialize Vimeo player
   useEffect(() => {
     if (type !== 'vimeo' || !id || !containerRef.current) return;
+
+    console.log(`${debugPrefix} init Vimeo flow`, { type, id });
 
     // Create iframe for Vimeo
     const iframe = document.createElement('iframe');
@@ -192,28 +228,35 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
     vimeoPlayerRef.current = player;
 
     player.ready().then(() => {
+      console.log(`${debugPrefix} Vimeo ready()`);
       setIsLoading(false);
     });
 
     player.on('ended', () => {
+      console.log(`${debugPrefix} Vimeo ended`);
       handleVideoEnded();
     });
 
     player.on('play', () => {
+      console.log(`${debugPrefix} Vimeo play`);
       setIsPlaying(true);
     });
 
     player.on('pause', () => {
+      console.log(`${debugPrefix} Vimeo pause`);
       setIsPlaying(false);
     });
 
     player.on('timeupdate', (data) => {
+      // noisy, but useful while debugging
+      console.log(`${debugPrefix} Vimeo timeupdate`, { seconds: data.seconds, duration: data.duration });
       if (data.duration > 0) {
         setProgress((data.seconds / data.duration) * 100);
       }
     });
 
     return () => {
+      console.log(`${debugPrefix} cleanup Vimeo`);
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
