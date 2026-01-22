@@ -14,7 +14,6 @@ import { CourseCompletionModal } from '@/components/lesson-player/CourseCompleti
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAppStore } from '@/stores/useAppStore';
 
 export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -22,9 +21,23 @@ export default function LessonPlayer() {
   const courseId = searchParams.get('courseId');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const getCurrentUser = useAppStore(state => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const [userId, setUserId] = useState<string | null>(null);
   const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
+
+  // Get authenticated user from Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+    };
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
@@ -110,7 +123,7 @@ export default function LessonPlayer() {
 
   // Handle lesson completion
   const handleComplete = async () => {
-    if (!lessonId || !currentUser?.id) return;
+    if (!lessonId || !userId) return;
 
     try {
       // Mark last block as completed
@@ -133,7 +146,7 @@ export default function LessonPlayer() {
       const { error } = await supabase
         .from('user_lesson_completions')
         .upsert({
-          user_id: currentUser.id,
+          user_id: userId,
           lesson_id: lessonId,
           score: percentage,
           time_spent: timeSpent,
@@ -177,7 +190,7 @@ export default function LessonPlayer() {
     totalLessons: number;
     unlockedCapability: string | null;
   } | null> => {
-    if (!lessonId || !currentUser?.id) return null;
+    if (!lessonId || !userId) return null;
 
     try {
       // Find if this lesson is part of the specified course (or any course)
@@ -222,7 +235,7 @@ export default function LessonPlayer() {
       const { data: completedLessons } = await supabase
         .from('user_lesson_completions')
         .select('lesson_id, score')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .in('lesson_id', lessonIds);
 
       const lessonsCompleted = completedLessons?.length ?? 0;
@@ -238,7 +251,7 @@ export default function LessonPlayer() {
       const { data: existingProgress } = await supabase
         .from('user_course_progress')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .eq('course_id', courseLesson.course_id)
         .maybeSingle();
 
@@ -255,7 +268,7 @@ export default function LessonPlayer() {
         await supabase
           .from('user_course_progress')
           .insert({
-            user_id: currentUser.id,
+            user_id: userId,
             course_id: courseLesson.course_id,
             lessons_completed: lessonsCompleted,
             lessons_required: lessonsRequired,
@@ -269,7 +282,7 @@ export default function LessonPlayer() {
         await supabase
           .from('user_course_completions')
           .upsert({
-            user_id: currentUser.id,
+            user_id: userId,
             course_id: courseLesson.course_id,
             final_score: averageScore,
             capability_unlocked: courseData.unlocks_capability,
@@ -286,7 +299,7 @@ export default function LessonPlayer() {
               has_ai_rijbewijs: true,
               ai_rijbewijs_obtained_at: new Date().toISOString(),
             })
-            .eq('id', currentUser.id);
+            .eq('id', userId);
         }
 
         return {
