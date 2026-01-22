@@ -1,5 +1,11 @@
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface LessonPlayerFooterProps {
   currentBlock: number;
@@ -23,6 +29,28 @@ export function LessonPlayerFooter({
   onComplete,
   nextEnabled,
 }: LessonPlayerFooterProps) {
+  const NextButton = () => (
+    <Button
+      onClick={onNext}
+      disabled={!nextEnabled}
+      className="gap-2"
+    >
+      Volgende
+      <ChevronRight className="h-4 w-4" />
+    </Button>
+  );
+
+  const CompleteButton = () => (
+    <Button
+      onClick={onComplete}
+      disabled={!nextEnabled}
+      className="gap-2"
+    >
+      <CheckCircle className="h-4 w-4" />
+      Afronden
+    </Button>
+  );
+
   return (
     <footer className="sticky bottom-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
       <div className="container max-w-4xl mx-auto px-4 py-4">
@@ -41,25 +69,20 @@ export function LessonPlayerFooter({
             Blok {currentBlock + 1} van {totalBlocks}
           </span>
 
-          {isLastBlock ? (
-            <Button
-              onClick={onComplete}
-              disabled={!nextEnabled}
-              className="gap-2"
-            >
-              <CheckCircle className="h-4 w-4" />
-              Afronden
-            </Button>
-          ) : (
-            <Button
-              onClick={onNext}
-              disabled={!nextEnabled}
-              className="gap-2"
-            >
-              Volgende
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={!nextEnabled ? 'cursor-not-allowed' : ''}>
+                  {isLastBlock ? <CompleteButton /> : <NextButton />}
+                </span>
+              </TooltipTrigger>
+              {!nextEnabled && (
+                <TooltipContent>
+                  <p>Voltooi eerst dit onderdeel</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </footer>
