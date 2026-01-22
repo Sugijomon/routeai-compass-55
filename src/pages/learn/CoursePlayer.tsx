@@ -1,7 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAppStore } from '@/stores/useAppStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -29,8 +29,22 @@ interface CourseLessonWithDetails extends CourseLesson {
 export default function CoursePlayer() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
-  const getCurrentUser = useAppStore((state) => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get authenticated user from Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+    };
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Fetch course data
   const { data: course, isLoading: courseLoading } = useQuery({
@@ -73,9 +87,9 @@ export default function CoursePlayer() {
 
   // Fetch user's completed lessons for this course
   const { data: completedLessonIds } = useQuery({
-    queryKey: ['user-lesson-completions', courseId, currentUser?.id],
+    queryKey: ['user-lesson-completions', courseId, userId],
     queryFn: async () => {
-      if (!courseId || !currentUser?.id) return [];
+      if (!courseId || !userId) return [];
       
       // Get lesson IDs in this course
       const lessonIds = courseLessons?.map((cl) => cl.lesson_id).filter(Boolean) ?? [];
@@ -84,45 +98,45 @@ export default function CoursePlayer() {
       const { data, error } = await supabase
         .from('user_lesson_completions')
         .select('lesson_id')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .in('lesson_id', lessonIds);
 
       if (error) throw error;
       return data?.map((c) => c.lesson_id) ?? [];
     },
-    enabled: !!courseId && !!currentUser?.id && !!courseLessons,
+    enabled: !!courseId && !!userId && !!courseLessons,
   });
 
   // Fetch course progress
-  const { data: courseProgress } = useQuery({
-    queryKey: ['user-course-progress', courseId, currentUser?.id],
+  const { data: _courseProgress } = useQuery({
+    queryKey: ['user-course-progress', courseId, userId],
     queryFn: async () => {
-      if (!courseId || !currentUser?.id) return null;
+      if (!courseId || !userId) return null;
       const { data } = await supabase
         .from('user_course_progress')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .eq('course_id', courseId)
         .maybeSingle();
       return data;
     },
-    enabled: !!courseId && !!currentUser?.id,
+    enabled: !!courseId && !!userId,
   });
 
   // Check if course is already completed
   const { data: courseCompletion } = useQuery({
-    queryKey: ['user-course-completion', courseId, currentUser?.id],
+    queryKey: ['user-course-completion', courseId, userId],
     queryFn: async () => {
-      if (!courseId || !currentUser?.id) return null;
+      if (!courseId || !userId) return null;
       const { data } = await supabase
         .from('user_course_completions')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .eq('course_id', courseId)
         .maybeSingle();
       return data;
     },
-    enabled: !!courseId && !!currentUser?.id,
+    enabled: !!courseId && !!userId,
   });
 
   // Determine which lessons are unlocked
