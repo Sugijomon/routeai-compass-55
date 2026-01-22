@@ -16,6 +16,7 @@ import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
+import DebugQuiz from "./pages/DebugQuiz";
 
 export default function App() {
   return (
@@ -151,6 +152,8 @@ export default function App() {
             </AuthRoute>
           } 
         />
+        {/* Debug page */}
+        <Route path="/debug-quiz" element={<DebugQuiz />} />
         
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
