@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
@@ -21,6 +21,7 @@ export default function LessonPlayer() {
   const [searchParams] = useSearchParams();
   const courseId = searchParams.get('courseId');
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const getCurrentUser = useAppStore(state => state.getCurrentUser);
   const currentUser = getCurrentUser();
   const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
@@ -41,6 +42,15 @@ export default function LessonPlayer() {
     unlockedCapability: string | null;
   } | null>(null);
 
+  // Force clear cache and refetch on mount
+  useEffect(() => {
+    if (lessonId) {
+      // Invalidate and refetch lesson data
+      queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] });
+      queryClient.invalidateQueries({ queryKey: ['lesson-progress', lessonId] });
+    }
+  }, [lessonId, queryClient]);
+
   // Fetch lesson data
   const { data: lesson, isLoading: lessonLoading, error } = useQuery({
     queryKey: ['lesson', lessonId],
@@ -58,6 +68,8 @@ export default function LessonPlayer() {
       return data;
     },
     enabled: !!lessonId,
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: 'always', // Always refetch when component mounts
   });
 
   const blocks: LessonBlock[] = Array.isArray(lesson?.blocks) 
