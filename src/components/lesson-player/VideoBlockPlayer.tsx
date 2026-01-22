@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { VideoBlock } from '@/types/lesson-blocks';
-import { Clock } from 'lucide-react';
+import { Clock, Play, CheckCircle2, Loader2 } from 'lucide-react';
+import Player from '@vimeo/player';
 
 interface VideoBlockPlayerProps {
   block: VideoBlock;
   onCanProceed: (canProceed: boolean) => void;
 }
 
+type VideoType = 'youtube' | 'vimeo' | 'unknown';
+
 // Extract video ID and type from URL
-function parseVideoUrl(url: string): { type: 'youtube' | 'vimeo' | 'unknown'; id: string | null } {
+function parseVideoUrl(url: string): { type: VideoType; id: string | null } {
   // YouTube patterns
   const youtubeMatch = url.match(
     /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
@@ -26,58 +29,202 @@ function parseVideoUrl(url: string): { type: 'youtube' | 'vimeo' | 'unknown'; id
   return { type: 'unknown', id: null };
 }
 
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+// Declare YouTube types
+declare global {
+  interface Window {
+    YT: {
+      Player: new (elementId: string, config: {
+        videoId: string;
+        playerVars?: Record<string, number | string>;
+        events?: {
+          onReady?: (event: { target: YTPlayer }) => void;
+          onStateChange?: (event: { data: number; target: YTPlayer }) => void;
+        };
+      }) => YTPlayer;
+      PlayerState: {
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
+    };
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+interface YTPlayer {
+  destroy: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
 }
 
 export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps) {
-  const [timeRemaining, setTimeRemaining] = useState(block.duration || 0);
-  const [hasStartedWatching, setHasStartedWatching] = useState(false);
-
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const youtubePlayerRef = useRef<YTPlayer | null>(null);
+  const vimeoPlayerRef = useRef<Player | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+  
   const { type, id } = parseVideoUrl(block.url);
 
-  // Handle watch requirement
+  // Handle completion
+  const handleVideoEnded = useCallback(() => {
+    setIsCompleted(true);
+    setIsPlaying(false);
+    setProgress(100);
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+  }, []);
+
+  // Update proceed permission based on must_watch_full setting
   useEffect(() => {
     if (!block.must_watch_full) {
       onCanProceed(true);
-      return;
+    } else {
+      onCanProceed(isCompleted);
     }
+  }, [block.must_watch_full, isCompleted, onCanProceed]);
 
-    // If must watch full and has duration, start countdown when user starts watching
-    if (block.duration && block.duration > 0 && hasStartedWatching && timeRemaining > 0) {
-      const interval = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          if (newTime <= 0) {
-            onCanProceed(true);
-            clearInterval(interval);
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
+  // Load YouTube API
+  useEffect(() => {
+    if (type !== 'youtube' || !id) return;
 
-      return () => clearInterval(interval);
-    } else if (!block.duration || block.duration <= 0) {
-      // No duration specified, allow proceed after 30 seconds
-      onCanProceed(true);
-    }
-  }, [block.must_watch_full, block.duration, hasStartedWatching, timeRemaining, onCanProceed]);
+    const loadYouTubeAPI = () => {
+      if (window.YT && window.YT.Player) {
+        initYouTubePlayer();
+        return;
+      }
 
-  // Generate embed URL
-  const getEmbedUrl = () => {
-    if (type === 'youtube' && id) {
-      return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
-    }
-    if (type === 'vimeo' && id) {
-      return `https://player.vimeo.com/video/${id}`;
-    }
-    return null;
-  };
+      // Check if script is already loading
+      if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        window.onYouTubeIframeAPIReady = initYouTubePlayer;
+        return;
+      }
 
-  const embedUrl = getEmbedUrl();
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = initYouTubePlayer;
+    };
+
+    const initYouTubePlayer = () => {
+      if (!containerRef.current || youtubePlayerRef.current) return;
+      
+      // Create a div for the player
+      const playerDiv = document.createElement('div');
+      playerDiv.id = `youtube-player-${block.id}`;
+      containerRef.current.innerHTML = '';
+      containerRef.current.appendChild(playerDiv);
+
+      youtubePlayerRef.current = new window.YT.Player(playerDiv.id, {
+        videoId: id,
+        playerVars: {
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+        },
+        events: {
+          onReady: () => {
+            setIsLoading(false);
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.ENDED) {
+              handleVideoEnded();
+            } else if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+              // Start progress tracking
+              if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current);
+              }
+              progressIntervalRef.current = window.setInterval(() => {
+                if (youtubePlayerRef.current) {
+                  const currentTime = youtubePlayerRef.current.getCurrentTime();
+                  const duration = youtubePlayerRef.current.getDuration();
+                  if (duration > 0) {
+                    setProgress((currentTime / duration) * 100);
+                  }
+                }
+              }, 500);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
+          },
+        },
+      });
+    };
+
+    loadYouTubeAPI();
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      if (youtubePlayerRef.current) {
+        youtubePlayerRef.current.destroy();
+        youtubePlayerRef.current = null;
+      }
+    };
+  }, [type, id, block.id, handleVideoEnded]);
+
+  // Initialize Vimeo player
+  useEffect(() => {
+    if (type !== 'vimeo' || !id || !containerRef.current) return;
+
+    // Create iframe for Vimeo
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://player.vimeo.com/video/${id}`;
+    iframe.className = 'absolute inset-0 w-full h-full';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.allowFullscreen = true;
+    
+    containerRef.current.innerHTML = '';
+    containerRef.current.appendChild(iframe);
+
+    const player = new Player(iframe);
+    vimeoPlayerRef.current = player;
+
+    player.ready().then(() => {
+      setIsLoading(false);
+    });
+
+    player.on('ended', () => {
+      handleVideoEnded();
+    });
+
+    player.on('play', () => {
+      setIsPlaying(true);
+    });
+
+    player.on('pause', () => {
+      setIsPlaying(false);
+    });
+
+    player.on('timeupdate', (data) => {
+      if (data.duration > 0) {
+        setProgress((data.seconds / data.duration) * 100);
+      }
+    });
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      if (vimeoPlayerRef.current) {
+        vimeoPlayerRef.current.destroy();
+        vimeoPlayerRef.current = null;
+      }
+    };
+  }, [type, id, handleVideoEnded]);
+
+  const showProgressIndicator = block.must_watch_full && !isCompleted;
 
   return (
     <div className="space-y-4">
@@ -86,40 +233,58 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
         <p className="text-lg text-muted-foreground text-center">{block.caption}</p>
       )}
 
-      {/* Video embed */}
-      <div 
-        className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden"
-        onClick={() => !hasStartedWatching && setHasStartedWatching(true)}
-      >
-        {embedUrl ? (
-          <iframe
-            src={embedUrl}
-            title={block.caption || 'Video'}
-            className="absolute inset-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={() => setHasStartedWatching(true)}
-          />
-        ) : (
+      {/* Video container */}
+      <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        
+        {type === 'unknown' ? (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <p>Video URL niet herkend: {block.url}</p>
           </div>
+        ) : (
+          <div 
+            ref={containerRef} 
+            className="absolute inset-0 w-full h-full"
+          />
         )}
       </div>
 
-      {/* Watch timer indicator */}
-      {block.must_watch_full && timeRemaining > 0 && (
-        <div className="flex items-center justify-center gap-2 text-muted-foreground bg-muted/50 rounded-lg p-3">
-          <Clock className="h-4 w-4" />
-          <span className="text-sm">
-            Bekijk de video om door te gaan ({formatTime(timeRemaining)} resterend)
-          </span>
+      {/* Progress indicator */}
+      {showProgressIndicator && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              {isPlaying ? (
+                <Play className="h-4 w-4 text-primary animate-pulse" />
+              ) : (
+                <Clock className="h-4 w-4" />
+              )}
+              <span>
+                {isPlaying 
+                  ? 'Video wordt afgespeeld...' 
+                  : 'Bekijk de volledige video om door te gaan'}
+              </span>
+            </div>
+            <span className="font-medium">{Math.round(progress)}%</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       )}
 
-      {block.must_watch_full && timeRemaining <= 0 && (
-        <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 rounded-lg p-3">
-          <span className="text-sm">✓ Video bekeken - je kunt doorgaan</span>
+      {/* Completion indicator */}
+      {isCompleted && block.must_watch_full && (
+        <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
+          <CheckCircle2 className="h-5 w-5" />
+          <span className="text-sm font-medium">Video bekeken - je kunt doorgaan</span>
         </div>
       )}
     </div>
