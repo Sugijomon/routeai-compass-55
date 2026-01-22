@@ -452,7 +452,7 @@ function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
           </div>
 
           <Button
-            onClick={() => navigate(`/learn/lesson/${lesson.id}`)}
+            onClick={() => navigate(`/learn/${lesson.id}`)}
             variant={lesson.isCompleted ? 'outline' : 'default'}
             className="gap-2 shrink-0"
           >
