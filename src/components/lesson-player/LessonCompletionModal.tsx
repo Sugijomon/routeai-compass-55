@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, Award } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Award } from 'lucide-react';
 
 interface LessonCompletionModalProps {
   open: boolean;
@@ -9,6 +9,7 @@ interface LessonCompletionModalProps {
   maxPoints: number;
   timeSpent: number; // in seconds
   hasQuizzes: boolean;
+  passingScore: number; // percentage required to pass (0-100)
   onContinue: () => void;
 }
 
@@ -31,32 +32,57 @@ export function LessonCompletionModal({
   maxPoints,
   timeSpent,
   hasQuizzes,
+  passingScore,
   onContinue,
 }: LessonCompletionModalProps) {
+  // Determine if user passed based on score vs passing threshold
+  // If no quizzes, user automatically passes
+  const passed = !hasQuizzes || score >= passingScore;
+
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
+            passed ? 'bg-green-100' : 'bg-red-100'
+          }`}>
+            {passed ? (
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            ) : (
+              <XCircle className="h-10 w-10 text-red-600" />
+            )}
           </div>
-          <DialogTitle className="text-2xl">🎉 Les Afgerond!</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {passed ? '🎉 Les Afgerond!' : '❌ Niet Geslaagd'}
+          </DialogTitle>
           <DialogDescription className="text-base">
-            Gefeliciteerd! Je hebt deze les succesvol afgerond.
+            {passed 
+              ? 'Gefeliciteerd! Je hebt deze les succesvol afgerond.'
+              : `Je hebt ${score}% behaald, maar ${passingScore}% is nodig om te slagen.`
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Score display - only show if quizzes exist */}
           {hasQuizzes && (
-            <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-4">
-              <Award className="h-6 w-6 text-primary" />
+            <div className={`flex items-center gap-3 rounded-lg p-4 ${
+              passed ? 'bg-green-50 dark:bg-green-950/30' : 'bg-red-50 dark:bg-red-950/30'
+            }`}>
+              <Award className={`h-6 w-6 ${passed ? 'text-green-600' : 'text-red-600'}`} />
               <div>
                 <p className="text-sm text-muted-foreground">Je score</p>
-                <p className="text-2xl font-bold text-foreground">{score}%</p>
+                <p className={`text-2xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>
+                  {score}%
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {earnedPoints} van {maxPoints} punten behaald
                 </p>
+                {!passed && (
+                  <p className="text-sm text-red-600 mt-1">
+                    Minimaal {passingScore}% nodig
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -72,7 +98,7 @@ export function LessonCompletionModal({
         </div>
 
         <Button onClick={onContinue} className="w-full" size="lg">
-          Doorgaan
+          {passed ? 'Doorgaan' : 'Opnieuw proberen'}
         </Button>
       </DialogContent>
     </Dialog>
