@@ -98,13 +98,23 @@ export function QuizBlockPlayer({
           const isCorrect = index === block.correct_answer;
           const showResult = quizState !== 'answering';
           
+          // Only reveal correct answer when:
+          // 1. User answered correctly (quizState === 'correct'), or
+          // 2. User has exhausted all attempts (quizState === 'failed')
+          const shouldRevealCorrect = quizState === 'correct' || quizState === 'failed';
+          
           let optionStyle = 'border-border hover:border-primary/50 hover:bg-accent/50';
           
           if (showResult) {
-            if (isCorrect) {
+            if (shouldRevealCorrect && isCorrect) {
+              // Show correct answer in green (only when allowed to reveal)
               optionStyle = 'border-green-500 bg-green-50 dark:bg-green-950/30';
             } else if (isSelected && !isCorrect) {
+              // Show wrong selection in red
               optionStyle = 'border-red-500 bg-red-50 dark:bg-red-950/30';
+            } else if (quizState === 'incorrect') {
+              // During 'incorrect' state (still has attempts), don't dim other options
+              optionStyle = 'border-border';
             } else {
               optionStyle = 'border-border opacity-60';
             }
@@ -129,9 +139,9 @@ export function QuizBlockPlayer({
               <div className="flex items-center gap-3">
                 <span className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border shrink-0',
-                  showResult && isCorrect 
+                  shouldRevealCorrect && isCorrect 
                     ? 'border-green-500 bg-green-500 text-white'
-                    : showResult && isSelected && !isCorrect
+                    : isSelected && !isCorrect && showResult
                     ? 'border-red-500 bg-red-500 text-white'
                     : isSelected && quizState === 'answering' 
                     ? 'border-primary bg-primary text-primary-foreground' 
@@ -140,7 +150,7 @@ export function QuizBlockPlayer({
                   {optionLabels[index]}
                 </span>
                 <span className="flex-1">{option}</span>
-                {showResult && isCorrect && (
+                {shouldRevealCorrect && isCorrect && (
                   <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                 )}
                 {showResult && isSelected && !isCorrect && (
