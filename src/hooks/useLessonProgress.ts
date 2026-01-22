@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAppStore } from '@/stores/useAppStore';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { toast } from 'sonner';
 
@@ -43,10 +42,25 @@ interface UseLessonProgressReturn {
 }
 
 export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps): UseLessonProgressReturn {
-  const getCurrentUser = useAppStore(state => state.getCurrentUser);
-  const currentUser = getCurrentUser();
+  const [userId, setUserId] = useState<string | null>(null);
   const [progressData, setProgressData] = useState<LessonProgressData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get the actual authenticated user from Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+    };
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   
   const totalBlocks = blocks.length;
   const currentBlockIndex = progressData?.current_block_index ?? 0;
@@ -61,7 +75,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   // Load or create progress record
   useEffect(() => {
     async function loadProgress() {
-      if (!currentUser?.id || !lessonId) {
+      if (!userId || !lessonId) {
         setIsLoading(false);
         return;
       }
@@ -71,7 +85,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         const { data: existing, error: fetchError } = await supabase
           .from('user_lesson_progress')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', userId)
           .eq('lesson_id', lessonId)
           .maybeSingle();
 
@@ -104,7 +118,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         } else {
           // Create new progress record
           const newProgress = {
-            user_id: currentUser.id,
+            user_id: userId,
             lesson_id: lessonId,
             current_block_index: 0,
             blocks_completed: [],
@@ -136,7 +150,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     }
 
     loadProgress();
-  }, [currentUser?.id, lessonId]);
+  }, [userId, lessonId]);
 
   // Build combined quiz data for storage
   const buildCombinedQuizData = useCallback((
