@@ -15,7 +15,11 @@ import {
   Clock,
   FileText,
   Star,
+  XCircle,
+  RotateCcw,
+  Eye,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -31,6 +35,9 @@ interface CourseWithProgress extends Course {
 
 interface LessonWithProgress extends Lesson {
   isCompleted: boolean;
+  hasProgress: boolean;
+  score: number | null;
+  passed: boolean;
 }
 
 export default function TrainingOverview() {
@@ -151,28 +158,65 @@ export default function TrainingOverview() {
     },
   });
 
-  // Fetch user's completed lessons
-  const { data: completedLessons } = useQuery({
-    queryKey: ['user-completed-lessons', userId],
+  // Fetch user's completed lessons with score data
+  const { data: lessonCompletions } = useQuery({
+    queryKey: ['user-lesson-completions-detail', userId],
     queryFn: async () => {
-      if (!userId) return new Set<string>();
+      if (!userId) return new Map<string, { score: number | null }>();
 
       const { data, error } = await supabase
         .from('user_lesson_completions')
-        .select('lesson_id')
+        .select('lesson_id, score')
         .eq('user_id', userId);
 
       if (error) throw error;
-      return new Set(data?.map((l) => l.lesson_id) ?? []);
+      
+      const map = new Map<string, { score: number | null }>();
+      data?.forEach((l) => {
+        map.set(l.lesson_id, { score: l.score });
+      });
+      return map;
     },
     enabled: !!userId,
   });
 
-  // Combine standalone lessons with completion status
-  const standaloneLessonsWithProgress: LessonWithProgress[] = (standaloneLessons ?? []).map((lesson) => ({
-    ...lesson,
-    isCompleted: completedLessons?.has(lesson.id) ?? false,
-  }));
+  // Fetch user's lesson progress (in-progress lessons)
+  const { data: lessonProgress } = useQuery({
+    queryKey: ['user-lesson-progress-all', userId],
+    queryFn: async () => {
+      if (!userId) return new Set<string>();
+
+      const { data, error } = await supabase
+        .from('user_lesson_progress')
+        .select('lesson_id')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return new Set(data?.map((p) => p.lesson_id) ?? []);
+    },
+    enabled: !!userId,
+  });
+
+  // Derive completed lessons set from completions
+  const completedLessons = new Set(lessonCompletions?.keys() ?? []);
+
+  // Combine standalone lessons with completion status and progress
+  const standaloneLessonsWithProgress: LessonWithProgress[] = (standaloneLessons ?? []).map((lesson) => {
+    const completion = lessonCompletions?.get(lesson.id);
+    const isCompleted = completedLessons.has(lesson.id);
+    const hasProgress = lessonProgress?.has(lesson.id) ?? false;
+    const score = completion?.score ?? null;
+    const passingScore = lesson.passing_score ?? 0;
+    const passed = isCompleted && (passingScore === 0 || (score !== null && score >= passingScore));
+    
+    return {
+      ...lesson,
+      isCompleted,
+      hasProgress: hasProgress && !isCompleted,
+      score,
+      passed,
+    };
+  });
 
   // Combine course data with progress
   const coursesWithProgress: CourseWithProgress[] = (courses ?? []).map((course) => ({
@@ -261,7 +305,15 @@ export default function TrainingOverview() {
             </div>
             <div className="grid gap-4">
               {standaloneLessonsWithProgress.map((lesson) => (
-                <LessonCard key={lesson.id} lesson={lesson} />
+                <LessonCard 
+                  key={lesson.id} 
+                  lesson={lesson} 
+                  userId={userId}
+                  onRetry={() => {
+                    // Invalidate queries to refetch data
+                    // The query keys will auto-refetch
+                  }}
+                />
               ))}
             </div>
           </section>
@@ -391,14 +443,50 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
   );
 }
 
-function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
+function LessonCard({ lesson, userId, onRetry }: { 
+  lesson: LessonWithProgress; 
+  userId: string | null;
+  onRetry: () => void;
+}) {
   const navigate = useNavigate();
+  const [isRetrying, setIsRetrying] = useState(false);
+  
+  // Determine lesson status
+  const isCompletedAndPassed = lesson.isCompleted && lesson.passed;
+  const isCompletedButFailed = lesson.isCompleted && !lesson.passed;
+  const isInProgress = lesson.hasProgress && !lesson.isCompleted;
+  
+  const handleRetry = async () => {
+    if (!userId || !lesson.id) return;
+    
+    setIsRetrying(true);
+    try {
+      // Delete lesson progress to reset quiz answers
+      await supabase
+        .from('user_lesson_progress')
+        .delete()
+        .eq('user_id', userId)
+        .eq('lesson_id', lesson.id);
+      
+      console.log('Deleted lesson progress for retry');
+      onRetry();
+      
+      // Navigate to lesson fresh
+      navigate(`/learn/${lesson.id}?retry=true`);
+    } catch (error) {
+      console.error('Error resetting lesson:', error);
+      toast.error('Kon les niet resetten');
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   return (
     <Card
       className={cn(
         'transition-all hover:shadow-md',
-        lesson.isCompleted && 'bg-green-50/50 dark:bg-green-950/10 border-green-200 dark:border-green-800'
+        isCompletedAndPassed && 'bg-green-50/50 dark:bg-green-950/10 border-green-200 dark:border-green-800',
+        isCompletedButFailed && 'bg-red-50/50 dark:bg-red-950/10 border-red-200 dark:border-red-800'
       )}
     >
       <CardHeader className="pb-2">
@@ -407,13 +495,17 @@ function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
             <div
               className={cn(
                 'h-10 w-10 rounded-lg flex items-center justify-center',
-                lesson.isCompleted
+                isCompletedAndPassed
                   ? 'bg-green-500 text-white'
+                  : isCompletedButFailed
+                  ? 'bg-red-500 text-white'
                   : 'bg-primary/10 text-primary'
               )}
             >
-              {lesson.isCompleted ? (
+              {isCompletedAndPassed ? (
                 <CheckCircle className="h-5 w-5" />
+              ) : isCompletedButFailed ? (
+                <XCircle className="h-5 w-5" />
               ) : (
                 <FileText className="h-5 w-5" />
               )}
@@ -427,21 +519,41 @@ function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
               )}
             </div>
           </div>
-          {lesson.estimated_duration && (
-            <Badge variant="secondary" className="gap-1 shrink-0">
-              <Clock className="h-3 w-3" />
-              {lesson.estimated_duration} min
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {lesson.score !== null && (
+              <Badge 
+                variant={lesson.passed ? 'default' : 'destructive'}
+                className={lesson.passed ? 'bg-green-600' : ''}
+              >
+                {lesson.score}%
+              </Badge>
+            )}
+            {lesson.estimated_duration && (
+              <Badge variant="secondary" className="gap-1">
+                <Clock className="h-3 w-3" />
+                {lesson.estimated_duration} min
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            {lesson.isCompleted ? (
+            {isCompletedAndPassed ? (
               <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
                 <CheckCircle className="h-4 w-4" />
-                Afgerond
+                Geslaagd
+              </span>
+            ) : isCompletedButFailed ? (
+              <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                <XCircle className="h-4 w-4" />
+                Niet geslaagd
+              </span>
+            ) : isInProgress ? (
+              <span className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4" />
+                Bezig
               </span>
             ) : (
               <span className="flex items-center gap-1.5">
@@ -451,20 +563,58 @@ function LessonCard({ lesson }: { lesson: LessonWithProgress }) {
             )}
           </div>
 
-          <Button
-            onClick={() => navigate(`/learn/${lesson.id}`)}
-            variant={lesson.isCompleted ? 'outline' : 'default'}
-            className="gap-2 shrink-0"
-          >
-            {lesson.isCompleted ? (
-              <>Bekijk opnieuw</>
+          <div className="flex items-center gap-2">
+            {/* View results button for completed lessons */}
+            {lesson.isCompleted && (
+              <Button
+                onClick={() => navigate(`/learn/${lesson.id}?review=true`)}
+                variant="outline"
+                size="sm"
+                className="gap-1"
+              >
+                <Eye className="h-4 w-4" />
+                Bekijk
+              </Button>
+            )}
+            
+            {/* Main action button */}
+            {isCompletedButFailed ? (
+              <Button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                className="gap-2"
+              >
+                <RotateCcw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+                Opnieuw proberen
+              </Button>
+            ) : isInProgress ? (
+              <Button
+                onClick={() => navigate(`/learn/${lesson.id}`)}
+                className="gap-2"
+              >
+                Doorgaan
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : isCompletedAndPassed ? (
+              <Button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                variant="outline"
+                className="gap-2"
+              >
+                <RotateCcw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+                Opnieuw
+              </Button>
             ) : (
-              <>
+              <Button
+                onClick={() => navigate(`/learn/${lesson.id}`)}
+                className="gap-2"
+              >
                 Start les
                 <ArrowRight className="h-4 w-4" />
-              </>
+              </Button>
             )}
-          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

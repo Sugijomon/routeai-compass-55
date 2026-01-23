@@ -356,17 +356,32 @@ export default function LessonPlayer() {
     navigate(courseId ? `/learn/course/${courseId}` : '/training');
   };
 
-  // Handle retry - start a new attempt and reset progress
+  // Handle retry - delete progress and start fresh
   const handleRetry = async () => {
+    if (!lessonId || !userId) return;
+    
     setShowCompletionModal(false);
     setCompletionData(null);
     
-    // Start a new attempt
-    await startNewAttempt();
-    
-    // Reset lesson progress for new attempt
-    // Navigate to the lesson again to reset state
-    window.location.reload();
+    try {
+      // Delete the user_lesson_progress record to reset all quiz answers
+      await supabase
+        .from('user_lesson_progress')
+        .delete()
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId);
+      
+      console.log('Deleted lesson progress for retry');
+      
+      // Start a new attempt
+      await startNewAttempt();
+      
+      // Reload the page to start fresh at block 0
+      window.location.reload();
+    } catch (error) {
+      console.error('Error resetting lesson progress:', error);
+      toast.error('Kon les niet resetten');
+    }
   };
 
   const handleCourseComplete = () => {
