@@ -214,20 +214,18 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
     console.log(`${debugPrefix} init Vimeo flow`, { type, id });
 
-    // Create container div for Vimeo player
-    const playerDiv = document.createElement('div');
-    playerDiv.className = 'absolute inset-0 w-full h-full';
+    // Create iframe for Vimeo with URL parameters to hide end screen suggestions
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://player.vimeo.com/video/${id}?outro=0&title=0&byline=0&portrait=0`;
+    iframe.className = 'absolute inset-0 w-full h-full';
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+    iframe.setAttribute('allowfullscreen', '');
     
     containerRef.current.innerHTML = '';
-    containerRef.current.appendChild(playerDiv);
+    containerRef.current.appendChild(iframe);
 
-    // Initialize Vimeo player with options to hide end screen suggestions
-    const player = new Player(playerDiv, {
-      id: parseInt(id, 10),
-      title: false,
-      byline: false,
-      portrait: false,
-    });
+    const player = new Player(iframe);
     vimeoPlayerRef.current = player;
 
     player.ready().then(() => {
