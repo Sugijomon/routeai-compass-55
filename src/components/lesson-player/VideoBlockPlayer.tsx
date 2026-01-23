@@ -216,7 +216,7 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
     // Create iframe for Vimeo with URL parameters to hide end screen suggestions
     const iframe = document.createElement('iframe');
-    iframe.src = `https://player.vimeo.com/video/${id}?outro=0&title=0&byline=0&portrait=0`;
+    iframe.src = `https://player.vimeo.com/video/${id}?outro=nothing&title=0&byline=0&portrait=0&controls=1`;
     iframe.className = 'absolute inset-0 w-full h-full';
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
