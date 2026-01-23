@@ -216,7 +216,7 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
     // Create iframe for Vimeo
     const iframe = document.createElement('iframe');
-    iframe.src = `https://player.vimeo.com/video/${id}`;
+    iframe.src = `https://player.vimeo.com/video/${id}?outro=0`;
     iframe.className = 'absolute inset-0 w-full h-full';
     iframe.allow = 'autoplay; fullscreen; picture-in-picture';
     iframe.allowFullscreen = true;
