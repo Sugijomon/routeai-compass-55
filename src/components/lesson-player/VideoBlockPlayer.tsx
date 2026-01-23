@@ -214,17 +214,20 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
     console.log(`${debugPrefix} init Vimeo flow`, { type, id });
 
-    // Create iframe for Vimeo
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://player.vimeo.com/video/${id}?outro=0`;
-    iframe.className = 'absolute inset-0 w-full h-full';
-    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-    iframe.allowFullscreen = true;
+    // Create container div for Vimeo player
+    const playerDiv = document.createElement('div');
+    playerDiv.className = 'absolute inset-0 w-full h-full';
     
     containerRef.current.innerHTML = '';
-    containerRef.current.appendChild(iframe);
+    containerRef.current.appendChild(playerDiv);
 
-    const player = new Player(iframe);
+    // Initialize Vimeo player with options to hide end screen suggestions
+    const player = new Player(playerDiv, {
+      id: parseInt(id, 10),
+      title: false,
+      byline: false,
+      portrait: false,
+    });
     vimeoPlayerRef.current = player;
 
     player.ready().then(() => {
