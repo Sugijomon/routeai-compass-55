@@ -88,7 +88,7 @@ export function QuizBlockPlayer({
 
       {/* Points indicator */}
       <div className="text-sm text-muted-foreground">
-        {block.points} punten • {remainingAttempts > 0 ? `${remainingAttempts} pogingen over` : 'Geen pogingen meer'}
+        {block.points} punten • {remainingAttempts} {remainingAttempts === 1 ? 'poging' : 'pogingen'} over
       </div>
 
       {/* Options */}
@@ -194,7 +194,7 @@ export function QuizBlockPlayer({
             <span className="font-medium text-lg">❌ INCORRECT</span>
           </div>
           <p className="text-sm text-amber-600 dark:text-amber-300">
-            Je hebt nog {remainingAttempts - 1} {remainingAttempts - 1 === 1 ? 'poging' : 'pogingen'} over.
+            Je hebt nog {remainingAttempts} {remainingAttempts === 1 ? 'poging' : 'pogingen'} over.
           </p>
           <Button onClick={handleRetry} variant="outline" className="w-full">
             Opnieuw proberen
