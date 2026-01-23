@@ -89,6 +89,59 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_attempts: {
+        Row: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          max_score: number | null
+          passed: boolean | null
+          percentage: number | null
+          score: number | null
+          started_at: string
+          time_spent: number | null
+          user_id: string
+        }
+        Insert: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          max_score?: number | null
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string
+          time_spent?: number | null
+          user_id: string
+        }
+        Update: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          max_score?: number | null
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string
+          time_spent?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           blocks: Json

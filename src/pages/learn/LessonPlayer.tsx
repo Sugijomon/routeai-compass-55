@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
+import { useLessonAttempts } from '@/hooks/useLessonAttempts';
 import { LessonPlayerHeader } from '@/components/lesson-player/LessonPlayerHeader';
 import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFooter';
 import { ParagraphBlockPlayer } from '@/components/lesson-player/ParagraphBlockPlayer';
@@ -11,6 +12,7 @@ import { VideoBlockPlayer } from '@/components/lesson-player/VideoBlockPlayer';
 import { QuizBlockPlayer } from '@/components/lesson-player/QuizBlockPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -47,6 +49,7 @@ export default function LessonPlayer() {
     timeSpent: number;
     hasQuizzes: boolean;
     passingScore: number;
+    attemptNumber: number;
   } | null>(null);
   const [courseCompletionData, setCourseCompletionData] = useState<{
     courseTitle: string;
@@ -112,6 +115,18 @@ export default function LessonPlayer() {
     blocks,
   });
 
+  // Attempt tracking
+  const {
+    attempts,
+    currentAttemptNumber,
+    completeCurrentAttempt,
+    startNewAttempt,
+    isLoading: attemptsLoading,
+  } = useLessonAttempts({
+    lessonId: lessonId || '',
+    userId,
+  });
+
   const currentBlock = blocks[currentBlockIndex];
 
   // Handle block proceed state
@@ -143,7 +158,20 @@ export default function LessonPlayer() {
         timeSpent = Math.round((now - startTime) / 1000);
       }
 
-      // Create completion record with quiz score
+      // Determine if passed
+      const lessonPassingScore = lesson?.passing_score ?? 0;
+      const passed = maxPoints === 0 || percentage >= lessonPassingScore;
+
+      // Complete the current attempt
+      await completeCurrentAttempt({
+        score: earnedPoints,
+        maxScore: maxPoints,
+        percentage,
+        passed,
+        timeSpent,
+      });
+
+      // Create/update completion record with quiz score (best attempt logic)
       const { error } = await supabase
         .from('user_lesson_completions')
         .upsert({
@@ -167,7 +195,6 @@ export default function LessonPlayer() {
         setShowCourseCompletionModal(true);
       } else {
         // Show lesson completion modal with passing score from lesson
-        const lessonPassingScore = lesson?.passing_score ?? 0;
         setCompletionData({
           score: percentage,
           earnedPoints,
@@ -175,6 +202,7 @@ export default function LessonPlayer() {
           timeSpent,
           hasQuizzes: maxPoints > 0,
           passingScore: lessonPassingScore,
+          attemptNumber: currentAttemptNumber,
         });
         setShowCompletionModal(true);
       }
@@ -328,13 +356,26 @@ export default function LessonPlayer() {
     navigate(courseId ? `/learn/course/${courseId}` : '/training');
   };
 
+  // Handle retry - start a new attempt and reset progress
+  const handleRetry = async () => {
+    setShowCompletionModal(false);
+    setCompletionData(null);
+    
+    // Start a new attempt
+    await startNewAttempt();
+    
+    // Reset lesson progress for new attempt
+    // Navigate to the lesson again to reset state
+    window.location.reload();
+  };
+
   const handleCourseComplete = () => {
     setShowCourseCompletionModal(false);
     navigate('/user-dashboard');
   };
 
   // Loading states
-  if (lessonLoading || progressLoading) {
+  if (lessonLoading || progressLoading || attemptsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -466,7 +507,9 @@ export default function LessonPlayer() {
           timeSpent={completionData.timeSpent}
           hasQuizzes={completionData.hasQuizzes}
           passingScore={completionData.passingScore}
+          attemptNumber={completionData.attemptNumber}
           onContinue={handleContinue}
+          onRetry={handleRetry}
         />
       )}
 
