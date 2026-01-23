@@ -77,8 +77,11 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     ? Math.round((blocksCompleted.length / totalBlocks) * 100) 
     : 0;
 
-  // Check if this is a retry - force fresh start
-  const isRetry = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('retry') === 'true';
+  // Check if this is a retry - force fresh start (only on first load)
+  const [isRetryHandled, setIsRetryHandled] = useState(false);
+  const isRetry = typeof window !== 'undefined' && 
+    new URLSearchParams(window.location.search).get('retry') === 'true' &&
+    !isRetryHandled;
 
   // Load or create progress record - only on initial mount
   useEffect(() => {
@@ -131,6 +134,14 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
               updated_at: new Date().toISOString(),
             })
             .eq('id', existing.id);
+          
+          // Mark retry as handled so it doesn't reset again on tab switch
+          setIsRetryHandled(true);
+          
+          // Remove retry param from URL without reload
+          const url = new URL(window.location.href);
+          url.searchParams.delete('retry');
+          window.history.replaceState({}, '', url.toString());
           
           initialLoadComplete.current = true;
           setIsLoading(false);
