@@ -10,7 +10,9 @@ interface LessonCompletionModalProps {
   timeSpent: number; // in seconds
   hasQuizzes: boolean;
   passingScore: number; // percentage required to pass (0-100)
+  attemptNumber?: number; // current attempt number
   onContinue: () => void;
+  onRetry?: () => void; // callback for retry button
 }
 
 function formatTime(seconds: number): string {
@@ -33,11 +35,21 @@ export function LessonCompletionModal({
   timeSpent,
   hasQuizzes,
   passingScore,
+  attemptNumber,
   onContinue,
+  onRetry,
 }: LessonCompletionModalProps) {
   // Determine if user passed based on score vs passing threshold
   // If no quizzes, user automatically passes
   const passed = !hasQuizzes || score >= passingScore;
+
+  const handleButtonClick = () => {
+    if (!passed && onRetry) {
+      onRetry();
+    } else {
+      onContinue();
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -55,6 +67,11 @@ export function LessonCompletionModal({
           <DialogTitle className="text-2xl">
             {passed ? '🎉 Les Afgerond!' : '❌ Niet Geslaagd'}
           </DialogTitle>
+          {attemptNumber && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Dit was poging #{attemptNumber}
+            </p>
+          )}
           <DialogDescription className="text-base">
             {passed 
               ? 'Gefeliciteerd! Je hebt deze les succesvol afgerond.'
@@ -97,7 +114,7 @@ export function LessonCompletionModal({
           </div>
         </div>
 
-        <Button onClick={onContinue} className="w-full" size="lg">
+        <Button onClick={handleButtonClick} className="w-full" size="lg">
           {passed ? 'Doorgaan' : 'Opnieuw proberen'}
         </Button>
       </DialogContent>
