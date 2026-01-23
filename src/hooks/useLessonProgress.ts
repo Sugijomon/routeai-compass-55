@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { toast } from 'sonner';
@@ -45,6 +45,11 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   const [userId, setUserId] = useState<string | null>(null);
   const [progressData, setProgressData] = useState<LessonProgressData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Track if initial load is complete to prevent re-fetching on tab visibility change
+  const initialLoadComplete = useRef(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingSaveRef = useRef<Partial<LessonProgressData> | null>(null);
 
   // Get the actual authenticated user from Supabase
   useEffect(() => {
@@ -72,13 +77,21 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     ? Math.round((blocksCompleted.length / totalBlocks) * 100) 
     : 0;
 
-  // Load or create progress record
+  // Load or create progress record - only on initial mount
   useEffect(() => {
     async function loadProgress() {
+      // Prevent re-loading if already loaded
+      if (initialLoadComplete.current) {
+        console.log('Progress load skipped - already loaded');
+        return;
+      }
+      
       if (!userId || !lessonId) {
         setIsLoading(false);
         return;
       }
+
+      console.log('Progress loading from database for lesson:', lessonId);
 
       try {
         // Try to fetch existing progress
@@ -92,6 +105,11 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         if (fetchError) throw fetchError;
 
         if (existing) {
+          console.log('Progress loaded:', {
+            currentBlockIndex: existing.current_block_index,
+            blocksCompleted: existing.blocks_completed,
+          });
+          
           // Parse quiz_attempts which contains both attempts and results
           const rawQuizData = (existing.quiz_attempts as Record<string, unknown>) ?? {};
           const attempts: Record<string, number> = {};
@@ -116,6 +134,8 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
             quiz_results: results,
           });
         } else {
+          console.log('Creating new progress record for lesson:', lessonId);
+          
           // Create new progress record
           const newProgress = {
             user_id: userId,
@@ -141,6 +161,8 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
             quiz_results: {},
           });
         }
+        
+        initialLoadComplete.current = true;
       } catch (error) {
         console.error('Error loading lesson progress:', error);
         toast.error('Kon voortgang niet laden');
@@ -151,6 +173,38 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
 
     loadProgress();
   }, [userId, lessonId]);
+
+  // Handle tab visibility changes - save progress when leaving, don't reload on return
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('Tab hidden - saving pending progress');
+        // Force immediate save of any pending changes
+        if (pendingSaveRef.current && progressData?.id) {
+          flushSave();
+        }
+      } else {
+        console.log('Tab visible - NOT reloading (using cached state)');
+        // Do NOT reload from database - use the cached local state
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [progressData?.id]);
+
+  // Cleanup on unmount - save any pending changes
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      // Flush pending save on unmount
+      if (pendingSaveRef.current && progressData?.id) {
+        flushSave();
+      }
+    };
+  }, [progressData?.id]);
 
   // Build combined quiz data for storage
   const buildCombinedQuizData = useCallback((
@@ -164,9 +218,19 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     return combined;
   }, []);
 
-  // Save progress to database
-  const saveProgress = useCallback(async (updates: Partial<LessonProgressData>) => {
-    if (!progressData?.id) return;
+  // Flush pending save immediately
+  const flushSave = useCallback(async () => {
+    if (!progressData?.id || !pendingSaveRef.current) return;
+    
+    const updates = pendingSaveRef.current;
+    pendingSaveRef.current = null;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    console.log('Progress saved (flush):', updates);
 
     try {
       const { error } = await supabase
@@ -183,8 +247,62 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     }
   }, [progressData?.id]);
 
+  // Debounced save progress to database
+  const saveProgress = useCallback(async (updates: Partial<LessonProgressData>) => {
+    if (!progressData?.id) return;
+
+    // Merge with pending updates
+    pendingSaveRef.current = {
+      ...pendingSaveRef.current,
+      ...updates,
+    };
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Set new debounced save (800ms)
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (!pendingSaveRef.current) return;
+      
+      const toSave = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      
+      console.log('Progress saved (debounced):', toSave);
+
+      try {
+        const { error } = await supabase
+          .from('user_lesson_progress')
+          .update({
+            ...toSave,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', progressData.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving progress:', error);
+      }
+    }, 800);
+  }, [progressData?.id]);
+
+  // Auto-save every 10 seconds if there are pending changes
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      if (pendingSaveRef.current && progressData?.id) {
+        console.log('Auto-save triggered (10s interval)');
+        flushSave();
+      }
+    }, 10000);
+
+    return () => clearInterval(autoSaveInterval);
+  }, [progressData?.id, flushSave]);
+
   const goToBlock = useCallback((index: number) => {
     if (index < 0 || index >= totalBlocks) return;
+    
+    console.log('Going to block:', index);
     
     setProgressData(prev => {
       if (!prev) return prev;
@@ -203,6 +321,8 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
       
       const newBlocksCompleted = [...prev.blocks_completed, blockId];
       const newPercentage = Math.round((newBlocksCompleted.length / totalBlocks) * 100);
+      
+      console.log('Block completed:', blockId, 'Total completed:', newBlocksCompleted.length);
       
       const updated = {
         ...prev,
@@ -247,6 +367,8 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         ...prev.quiz_results,
         [blockId]: { correct, points },
       };
+      
+      console.log('Quiz result recorded:', blockId, { correct, points });
       
       const updated = { ...prev, quiz_results: newQuizResults };
       const combinedData = buildCombinedQuizData(prev.quiz_attempts, newQuizResults);
