@@ -364,20 +364,46 @@ export default function LessonPlayer() {
     setCompletionData(null);
     
     try {
-      // Delete the user_lesson_progress record to reset all quiz answers
-      await supabase
+      console.log('Deleting progress for lesson:', lessonId);
+      
+      // Delete progress record first - await to ensure it completes
+      const { error: progressError } = await supabase
         .from('user_lesson_progress')
         .delete()
         .eq('user_id', userId)
         .eq('lesson_id', lessonId);
       
-      console.log('Deleted lesson progress for retry');
+      if (progressError) {
+        console.error('Error deleting progress:', progressError);
+      }
+      
+      // Delete completion record as well for fresh start
+      const { error: completionError } = await supabase
+        .from('user_lesson_completions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId);
+        
+      if (completionError) {
+        console.error('Error deleting completion:', completionError);
+      }
+      
+      console.log('Progress deleted, starting new attempt...');
       
       // Start a new attempt
       await startNewAttempt();
       
-      // Reload the page to start fresh at block 0
-      window.location.reload();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['lesson-progress', lessonId] });
+      
+      // Wait for delete to propagate, then navigate with retry flag
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Navigate with retry=true flag and force reload
+      navigate(`/learn/${lessonId}?retry=true`, { replace: true });
+      
+      // Force full page reload after navigation
+      setTimeout(() => window.location.reload(), 100);
     } catch (error) {
       console.error('Error resetting lesson progress:', error);
       toast.error('Kon les niet resetten');

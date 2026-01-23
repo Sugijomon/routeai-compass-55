@@ -77,11 +77,14 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     ? Math.round((blocksCompleted.length / totalBlocks) * 100) 
     : 0;
 
+  // Check if this is a retry - force fresh start
+  const isRetry = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('retry') === 'true';
+
   // Load or create progress record - only on initial mount
   useEffect(() => {
     async function loadProgress() {
-      // Prevent re-loading if already loaded
-      if (initialLoadComplete.current) {
+      // Prevent re-loading if already loaded (unless it's a retry)
+      if (initialLoadComplete.current && !isRetry) {
         console.log('Progress load skipped - already loaded');
         return;
       }
@@ -91,7 +94,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         return;
       }
 
-      console.log('Progress loading from database for lesson:', lessonId);
+      console.log('Progress loading from database for lesson:', lessonId, isRetry ? '(retry mode)' : '');
 
       try {
         // Try to fetch existing progress
@@ -103,6 +106,36 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
           .maybeSingle();
 
         if (fetchError) throw fetchError;
+
+        // If retry mode and existing record found, it means delete didn't complete yet
+        // Force block 0 in this case
+        if (isRetry && existing) {
+          console.log('Retry mode: forcing block 0 even though progress exists');
+          setProgressData({
+            ...existing,
+            current_block_index: 0,
+            blocks_completed: [],
+            progress_percentage: 0,
+            quiz_attempts: {},
+            quiz_results: {},
+          });
+          
+          // Also update the database to reset to block 0
+          await supabase
+            .from('user_lesson_progress')
+            .update({
+              current_block_index: 0,
+              blocks_completed: [],
+              progress_percentage: 0,
+              quiz_attempts: {},
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existing.id);
+          
+          initialLoadComplete.current = true;
+          setIsLoading(false);
+          return;
+        }
 
         if (existing) {
           console.log('Progress loaded:', {
@@ -172,7 +205,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     }
 
     loadProgress();
-  }, [userId, lessonId]);
+  }, [userId, lessonId, isRetry]);
 
   // Handle tab visibility changes - save progress when leaving, don't reload on return
   useEffect(() => {
