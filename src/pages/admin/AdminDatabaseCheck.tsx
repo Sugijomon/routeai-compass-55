@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, Shield, Database, Users, Building2 } from "lucide-react";
+import { useDashboardRedirect } from "@/hooks/useDashboardRedirect";
 
 interface Organization {
   id: string;
@@ -33,6 +34,7 @@ interface NullCounts {
 }
 
 export default function AdminDatabaseCheck() {
+  const dashboardUrl = useDashboardRedirect();
   const [rlsTestResult, setRlsTestResult] = useState<{
     tested: boolean;
     canSeeOtherOrgs: boolean;
@@ -178,7 +180,7 @@ export default function AdminDatabaseCheck() {
     <AdminPageLayout
       title="Database Check"
       breadcrumbs={[
-        { label: "Admin", href: "/admin/lessons" },
+        { label: "Admin", href: dashboardUrl },
         { label: "Database Check" },
       ]}
     >

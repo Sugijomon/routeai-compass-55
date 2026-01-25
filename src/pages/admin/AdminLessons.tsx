@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner';
 import { CreateLessonDialog } from '@/components/admin/CreateLessonDialog';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Lesson = Tables<'lessons'>;
@@ -33,6 +34,7 @@ type Lesson = Tables<'lessons'>;
 export default function AdminLessons() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const dashboardUrl = useDashboardRedirect();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deleteLesson, setDeleteLesson] = useState<Lesson | null>(null);
 
@@ -87,7 +89,7 @@ export default function AdminLessons() {
       <AdminPageLayout
         title="Lessen"
         breadcrumbs={[
-          { label: 'Admin', href: '/admin-dashboard' },
+          { label: 'Admin', href: dashboardUrl },
           { label: 'Lessen' },
         ]}
       >
@@ -102,7 +104,7 @@ export default function AdminLessons() {
     <AdminPageLayout
       title="Lessen"
       breadcrumbs={[
-        { label: 'Admin', href: '/admin-dashboard' },
+        { label: 'Admin', href: dashboardUrl },
         { label: 'Lessen' },
       ]}
       actions={

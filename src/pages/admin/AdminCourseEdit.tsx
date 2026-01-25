@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
@@ -41,6 +42,7 @@ interface CourseLessonWithDetails extends CourseLesson {
 export default function AdminCourseEdit() {
   const { courseId } = useParams<{ courseId: string }>();
   const queryClient = useQueryClient();
+  const dashboardUrl = useDashboardRedirect();
   
   const [isSaving, setIsSaving] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string>('');
@@ -263,7 +265,7 @@ export default function AdminCourseEdit() {
       <AdminPageLayout
         title="Cursus bewerken"
         breadcrumbs={[
-          { label: 'Admin', href: '/admin-dashboard' },
+          { label: 'Admin', href: dashboardUrl },
           { label: 'Cursussen', href: '/admin/courses' },
           { label: 'Laden...' },
         ]}
@@ -280,7 +282,7 @@ export default function AdminCourseEdit() {
       <AdminPageLayout
         title="Cursus niet gevonden"
         breadcrumbs={[
-          { label: 'Admin', href: '/admin-dashboard' },
+          { label: 'Admin', href: dashboardUrl },
           { label: 'Cursussen', href: '/admin/courses' },
           { label: 'Fout' },
         ]}
@@ -302,7 +304,7 @@ export default function AdminCourseEdit() {
     <AdminPageLayout
       title="Cursus Bewerken"
       breadcrumbs={[
-        { label: 'Admin', href: '/admin-dashboard' },
+        { label: 'Admin', href: dashboardUrl },
         { label: 'Cursussen', href: '/admin/courses' },
         { label: formData.title || 'Bewerken' },
       ]}

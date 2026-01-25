@@ -15,6 +15,7 @@ import {
   Lock,
   Globe
 } from "lucide-react";
+import { useDashboardRedirect } from "@/hooks/useDashboardRedirect";
 
 type RouteStatus = "working" | "redirecting" | "empty" | "error" | "unknown";
 type AuthType = "public" | "protected" | "admin";
@@ -264,6 +265,7 @@ const AUTH_GUARD_ANALYSIS = [
 ];
 
 export default function AdminRoutesAudit() {
+  const dashboardUrl = useDashboardRedirect();
   const [routes] = useState<RouteInfo[]>(ROUTE_INVENTORY);
   const [testing, setTesting] = useState<string | null>(null);
 
@@ -330,7 +332,7 @@ export default function AdminRoutesAudit() {
     <AdminPageLayout 
       title="Route Audit"
       breadcrumbs={[
-        { label: "Admin", href: "/admin/lessons" },
+        { label: "Admin", href: dashboardUrl },
         { label: "Route Audit" }
       ]}
     >

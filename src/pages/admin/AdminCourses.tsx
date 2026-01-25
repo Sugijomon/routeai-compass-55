@@ -28,6 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, BookOpen, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
@@ -37,6 +38,7 @@ interface CourseWithLessonCount extends Course {
 }
 
 export default function AdminCourses() {
+  const dashboardUrl = useDashboardRedirect();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({
@@ -118,7 +120,7 @@ export default function AdminCourses() {
     <AdminPageLayout
       title="Cursussen"
       breadcrumbs={[
-        { label: 'Admin', href: '/admin-dashboard' },
+        { label: 'Admin', href: dashboardUrl },
         { label: 'Cursussen' },
       ]}
       actions={

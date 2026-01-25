@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
@@ -42,6 +43,7 @@ interface LessonWithProgress extends Lesson {
 
 export default function TrainingOverview() {
   const navigate = useNavigate();
+  const dashboardUrl = useDashboardRedirect();
   const [userId, setUserId] = useState<string | null>(null);
 
   // Get authenticated user
@@ -248,7 +250,7 @@ export default function TrainingOverview() {
             variant="ghost"
             size="sm"
             className="mb-4"
-            onClick={() => navigate('/user-dashboard')}
+            onClick={() => navigate(dashboardUrl)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Terug naar dashboard
