@@ -4,9 +4,6 @@ import SmartDashboard from "./components/SmartDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import ToolCatalog from "./components/ToolCatalog";
-// Legacy guards - kept for reference but not used (AuthRoute handles all auth now)
-// import ProtectedRoute from "./components/ProtectedRoute";
-// import AdminRoute from "./components/AdminRoute";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
@@ -137,14 +134,10 @@ export default function App() {
           } 
         />
         
-        {/* Learning Routes */}
+        {/* Learning Routes - consolidated to /learn */}
         <Route
           path="/training" 
-          element={
-            <AuthRoute>
-              <TrainingOverview />
-            </AuthRoute>
-          } 
+          element={<Navigate to="/learn" replace />} 
         />
         
         <Route 
@@ -175,9 +168,14 @@ export default function App() {
             </AuthRoute>
           } 
         />
+        
+        {/* Admin redirect */}
+        <Route path="/admin" element={<Navigate to="/admin/lessons" replace />} />
+        
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
         
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
