@@ -1,11 +1,12 @@
-// ToolCatalog.tsx - FILTERING FIX (TypeScript Compatible)
+// ToolCatalog.tsx - Using real Supabase auth
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Shield, AlertTriangle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "@/store/useAppStore";
+import { useDashboardRedirect } from "@/hooks/useDashboardRedirect";
+import { useAuth } from "@/hooks/useAuth";
 
 // Type definitions
 interface Tool {
@@ -18,25 +19,13 @@ interface Tool {
   status: "approved" | "restricted";
 }
 
-interface User {
-  role: string;
-  license?: {
-    grantedCapabilities: string[];
-  };
-  name: string;
-}
 
 export default function ToolCatalog() {
   const navigate = useNavigate();
-  const currentUser = useAppStore((state) => state.currentUser);
+  const dashboardUrl = useDashboardRedirect();
+  const { user, isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
-
-  // Determine correct dashboard route based on user role
-  const getDashboardRoute = () => {
-    if (currentUser?.role === "org_admin") return "/admin-dashboard";
-    return "/user-dashboard";
-  };
 
   useEffect(() => {
     // Mock tools data - replace with actual data from mockTools.ts
@@ -88,47 +77,18 @@ export default function ToolCatalog() {
       },
     ];
 
-    // KRITIEKE FILTERING LOGICA
-    const filteredTools = filterToolsByCapabilities(allTools, currentUser);
-    setTools(filteredTools);
-  }, [currentUser]);
-
-  // HELPER: Filter tools based on user capabilities
-  const filterToolsByCapabilities = (allTools: Tool[], user: User | null): Tool[] => {
-    if (!user) return [];
-
-    // Admins see ALL tools
-    if (user.role === "org_admin") {
+    // For now, admins see all tools, regular users see approved tools
+    // TODO: Implement capability-based filtering with real data
+    if (isAdmin) {
       console.log("🔓 Admin access: showing ALL tools");
-      return allTools;
+      setTools(allTools);
+    } else {
+      // Regular users see approved tools only
+      const approvedTools = allTools.filter(tool => tool.status === "approved");
+      setTools(approvedTools);
     }
+  }, [isAdmin]);
 
-    // Regular users: filter on capabilities
-    const userCapabilities = user.license?.grantedCapabilities || [];
-
-    console.log("🔍 Filtering tools for:", user.name);
-    console.log("User capabilities:", userCapabilities);
-
-    const filtered = allTools.filter((tool) => {
-      // Tool is visible if it has AT LEAST ONE matching capability
-      const hasMatchingCapability = tool.capabilities.some((toolCap) => userCapabilities.includes(toolCap));
-
-      if (hasMatchingCapability) {
-        console.log(
-          `✅ ${tool.name}: ALLOWED (matches ${tool.capabilities.filter((c) => userCapabilities.includes(c)).join(", ")})`,
-        );
-      } else {
-        console.log(
-          `❌ ${tool.name}: BLOCKED (needs ${tool.capabilities.join(" or ")}, user has ${userCapabilities.join(", ")})`,
-        );
-      }
-
-      return hasMatchingCapability;
-    });
-
-    console.log(`📊 Result: ${filtered.length} of ${allTools.length} tools visible`);
-    return filtered;
-  };
 
   // Risk level badge component
   const getRiskBadge = (riskLevel: Tool["riskLevel"]) => {
@@ -159,7 +119,7 @@ export default function ToolCatalog() {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="ghost" className="gap-2" onClick={() => navigate(getDashboardRoute())}>
+      <Button variant="ghost" className="gap-2" onClick={() => navigate(dashboardUrl)}>
         <ArrowLeft className="w-4 h-4" />
         Terug naar Dashboard
       </Button>
@@ -170,24 +130,6 @@ export default function ToolCatalog() {
         <p className="text-gray-600 mt-1">Goedgekeurde AI tools met RouteAI AI Checks</p>
       </div>
 
-      {/* Debug info (development only) */}
-      {process.env.NODE_ENV === "development" && currentUser && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="text-xs font-mono space-y-1">
-              <div>
-                <strong>User:</strong> {currentUser.name} ({currentUser.role})
-              </div>
-              <div>
-                <strong>Capabilities:</strong> {currentUser.license?.grantedCapabilities?.join(", ") || "None"}
-              </div>
-              <div>
-                <strong>Visible tools:</strong> {displayedTools.length} of {tools.length} filtered
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Search */}
       <div className="relative">

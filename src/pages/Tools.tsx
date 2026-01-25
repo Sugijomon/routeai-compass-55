@@ -1,21 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Wrench, Search, ExternalLink, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Wrench, Search, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { tools } from '@/data/tools';
-import { useAppStore } from '@/stores/useAppStore';
-import { getCapabilityById } from '@/data/capabilities';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 const Tools = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const { getCurrentUser } = useAppStore();
-  const user = getCurrentUser();
-  const license = user?.license;
+  const navigate = useNavigate();
+  const dashboardUrl = useDashboardRedirect();
+  const { profile, hasAiRijbewijs } = useUserProfile();
+  
 
   const filteredTools = tools.filter(tool =>
     tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,10 +24,6 @@ const Tools = () => {
     tool.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const hasCapability = (capabilityId: string | undefined) => {
-    if (!capabilityId) return true;
-    return license?.grantedCapabilities.includes(capabilityId);
-  };
 
   const getRiskBadgeClass = (risk: string) => {
     switch (risk) {
@@ -50,6 +47,16 @@ const Tools = () => {
 
   return (
     <AppLayout>
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        className="mb-6 gap-2" 
+        onClick={() => navigate(dashboardUrl)}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Terug naar Dashboard
+      </Button>
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
@@ -77,19 +84,19 @@ const Tools = () => {
       </div>
 
       {/* License Warning */}
-      {!license && (
+      {!hasAiRijbewijs && (
         <Card className="mb-6 border-warning/30 bg-warning/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-warning" />
               <div className="flex-1">
-                <p className="font-medium">Geen AI Licentie</p>
+                <p className="font-medium">Geen AI-Rijbewijs</p>
                 <p className="text-sm text-muted-foreground">
-                  Je hebt een licentie nodig om AI tools te gebruiken.
+                  Je hebt een AI-Rijbewijs nodig om AI tools te gebruiken.
                 </p>
               </div>
               <Button asChild size="sm">
-                <Link to="/training">Start Training</Link>
+                <Link to="/learn">Start Training</Link>
               </Button>
             </div>
           </CardContent>
