@@ -11,6 +11,7 @@ import { BlockEditorDialog } from '@/components/admin/lesson-editor/BlockEditorD
 import { LessonMetadataPanel } from '@/components/admin/lesson-editor/LessonMetadataPanel';
 import { SaveIndicator } from '@/components/admin/lesson-editor/SaveIndicator';
 import { useLessonEditor } from '@/hooks/useLessonEditor';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 import type { LessonBlock, BlockType } from '@/types/lesson-blocks';
 
@@ -18,6 +19,7 @@ type Lesson = Tables<'lessons'>;
 
 export default function AdminLessonEdit() {
   const { lessonId } = useParams<{ lessonId: string }>();
+  const dashboardUrl = useDashboardRedirect();
   const [editingBlock, setEditingBlock] = useState<LessonBlock | null>(null);
 
   const { data: lesson, isLoading, error } = useQuery({
@@ -58,7 +60,7 @@ export default function AdminLessonEdit() {
       <AdminPageLayout
         title="Les bewerken"
         breadcrumbs={[
-          { label: 'Admin', href: '/admin-dashboard' },
+          { label: 'Admin', href: dashboardUrl },
           { label: 'Lessen', href: '/admin/lessons' },
           { label: 'Laden...' },
         ]}
@@ -75,7 +77,7 @@ export default function AdminLessonEdit() {
       <AdminPageLayout
         title="Les niet gevonden"
         breadcrumbs={[
-          { label: 'Admin', href: '/admin-dashboard' },
+          { label: 'Admin', href: dashboardUrl },
           { label: 'Lessen', href: '/admin/lessons' },
           { label: 'Fout' },
         ]}
@@ -97,7 +99,7 @@ export default function AdminLessonEdit() {
     <AdminPageLayout
       title="Les Bewerken"
       breadcrumbs={[
-        { label: 'Admin', href: '/admin-dashboard' },
+        { label: 'Admin', href: dashboardUrl },
         { label: 'Lessen', href: '/admin/lessons' },
         { label: editor.title || 'Bewerken' },
       ]}

@@ -3,24 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAppStore } from '@/store/useAppStore';
 import { TRAINING_MODULES } from '@/data/trainingData';
+import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 
 export default function TrainingFlow() {
   const navigate = useNavigate();
-  const { currentUser } = useAppStore();
-
-  if (!currentUser) {
-    navigate('/');
-    return null;
-  }
+  const dashboardUrl = useDashboardRedirect();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" onClick={() => navigate(dashboardUrl)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Terug naar Dashboard
           </Button>
