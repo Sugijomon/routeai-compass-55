@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { PageHeader } from '@/components/layout/PageHeader';
 import {
   BookOpen,
   GraduationCap,
   CheckCircle,
   ArrowRight,
-  ArrowLeft,
   Clock,
   FileText,
   Star,
@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
@@ -43,7 +42,6 @@ interface LessonWithProgress extends Lesson {
 
 export default function TrainingOverview() {
   const navigate = useNavigate();
-  const dashboardUrl = useDashboardRedirect();
   const [userId, setUserId] = useState<string | null>(null);
 
   // Get authenticated user
@@ -244,27 +242,12 @@ export default function TrainingOverview() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container max-w-5xl mx-auto px-4 py-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mb-4"
-            onClick={() => navigate(dashboardUrl)}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar dashboard
-          </Button>
-
-          <div className="flex items-center gap-3 mb-2">
-            <GraduationCap className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Leren</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Voltooi cursussen om AI verantwoord te kunnen gebruiken.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Leren"
+        subtitle="Voltooi cursussen om AI verantwoord te kunnen gebruiken."
+        icon={<GraduationCap className="h-5 w-5" />}
+        backButton={{}}
+      />
 
       {/* Main Content */}
       <main className="container max-w-5xl mx-auto px-4 py-8 space-y-8">

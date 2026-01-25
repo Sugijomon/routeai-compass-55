@@ -1,29 +1,25 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Wrench, Search, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Wrench, Search, AlertTriangle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { tools } from '@/data/tools';
-import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const Tools = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const dashboardUrl = useDashboardRedirect();
-  const { profile, hasAiRijbewijs } = useUserProfile();
-  
+  const { hasAiRijbewijs } = useUserProfile();
 
   const filteredTools = tools.filter(tool =>
     tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   const getRiskBadgeClass = (risk: string) => {
     switch (risk) {
@@ -47,41 +43,23 @@ const Tools = () => {
 
   return (
     <AppLayout>
-      {/* Back Button */}
-      <Button 
-        variant="ghost" 
-        className="mb-6 gap-2" 
-        onClick={() => navigate(dashboardUrl)}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Terug naar Dashboard
-      </Button>
-
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Wrench className="h-6 w-6 text-primary" />
+      <PageHeader
+        title="AI Tool Catalogus"
+        subtitle="Technische eigenschappen van tools (niet bepalend voor routes)"
+        icon={<Wrench className="h-5 w-5" />}
+        backButton={{}}
+        actions={
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Zoek tools..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">AI Tool Catalogus</h1>
-            <p className="text-muted-foreground">
-              Technische eigenschappen van tools (niet bepalend voor routes)
-            </p>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Zoek tools..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+        }
+      />
 
       {/* License Warning */}
       {!hasAiRijbewijs && (
