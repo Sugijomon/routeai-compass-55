@@ -59,6 +59,7 @@ export type Database = {
           description: string | null
           id: string
           is_published: boolean | null
+          org_id: string
           passing_threshold: number | null
           required_for_onboarding: boolean | null
           title: string
@@ -70,6 +71,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean | null
+          org_id?: string
           passing_threshold?: number | null
           required_for_onboarding?: boolean | null
           title: string
@@ -81,13 +83,22 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean | null
+          org_id?: string
           passing_threshold?: number | null
           required_for_onboarding?: boolean | null
           title?: string
           unlocks_capability?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lesson_attempts: {
         Row: {
@@ -97,6 +108,7 @@ export type Database = {
           id: string
           lesson_id: string
           max_score: number | null
+          org_id: string | null
           passed: boolean | null
           percentage: number | null
           score: number | null
@@ -111,6 +123,7 @@ export type Database = {
           id?: string
           lesson_id: string
           max_score?: number | null
+          org_id?: string | null
           passed?: boolean | null
           percentage?: number | null
           score?: number | null
@@ -125,6 +138,7 @@ export type Database = {
           id?: string
           lesson_id?: string
           max_score?: number | null
+          org_id?: string | null
           passed?: boolean | null
           percentage?: number | null
           score?: number | null
@@ -140,6 +154,13 @@ export type Database = {
             referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lesson_attempts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lessons: {
@@ -152,6 +173,7 @@ export type Database = {
           id: string
           is_published: boolean | null
           lesson_type: string
+          org_id: string
           passing_score: number | null
           title: string
           updated_at: string | null
@@ -165,6 +187,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           lesson_type?: string
+          org_id?: string
           passing_score?: number | null
           title: string
           updated_at?: string | null
@@ -178,8 +201,50 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           lesson_type?: string
+          org_id?: string
           passing_score?: number | null
           title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          id: string
+          name: string
+          sector: string | null
+          settings: Json | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          sector?: string | null
+          settings?: Json | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          sector?: string | null
+          settings?: Json | null
+          slug?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -193,6 +258,7 @@ export type Database = {
           full_name: string | null
           has_ai_rijbewijs: boolean | null
           id: string
+          org_id: string
           updated_at: string | null
         }
         Insert: {
@@ -203,6 +269,7 @@ export type Database = {
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
           id: string
+          org_id?: string
           updated_at?: string | null
         }
         Update: {
@@ -213,9 +280,18 @@ export type Database = {
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
           id?: string
+          org_id?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_course_completions: {
         Row: {
@@ -224,6 +300,7 @@ export type Database = {
           course_id: string
           final_score: number | null
           id: string
+          org_id: string | null
           user_id: string
         }
         Insert: {
@@ -232,6 +309,7 @@ export type Database = {
           course_id: string
           final_score?: number | null
           id?: string
+          org_id?: string | null
           user_id: string
         }
         Update: {
@@ -240,6 +318,7 @@ export type Database = {
           course_id?: string
           final_score?: number | null
           id?: string
+          org_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -250,6 +329,13 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_course_completions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_course_progress: {
@@ -258,6 +344,7 @@ export type Database = {
           id: string
           lessons_completed: number | null
           lessons_required: number
+          org_id: string | null
           progress_percentage: number | null
           started_at: string | null
           updated_at: string | null
@@ -268,6 +355,7 @@ export type Database = {
           id?: string
           lessons_completed?: number | null
           lessons_required: number
+          org_id?: string | null
           progress_percentage?: number | null
           started_at?: string | null
           updated_at?: string | null
@@ -278,6 +366,7 @@ export type Database = {
           id?: string
           lessons_completed?: number | null
           lessons_required?: number
+          org_id?: string | null
           progress_percentage?: number | null
           started_at?: string | null
           updated_at?: string | null
@@ -291,6 +380,13 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_course_progress_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_lesson_completions: {
@@ -298,6 +394,7 @@ export type Database = {
           completed_at: string | null
           id: string
           lesson_id: string
+          org_id: string | null
           score: number | null
           time_spent: number | null
           user_id: string
@@ -306,6 +403,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           lesson_id: string
+          org_id?: string | null
           score?: number | null
           time_spent?: number | null
           user_id: string
@@ -314,6 +412,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           lesson_id?: string
+          org_id?: string | null
           score?: number | null
           time_spent?: number | null
           user_id?: string
@@ -326,6 +425,13 @@ export type Database = {
             referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_lesson_completions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_lesson_progress: {
@@ -334,6 +440,7 @@ export type Database = {
           current_block_index: number | null
           id: string
           lesson_id: string
+          org_id: string | null
           progress_percentage: number | null
           quiz_attempts: Json | null
           started_at: string | null
@@ -345,6 +452,7 @@ export type Database = {
           current_block_index?: number | null
           id?: string
           lesson_id: string
+          org_id?: string | null
           progress_percentage?: number | null
           quiz_attempts?: Json | null
           started_at?: string | null
@@ -356,6 +464,7 @@ export type Database = {
           current_block_index?: number | null
           id?: string
           lesson_id?: string
+          org_id?: string | null
           progress_percentage?: number | null
           quiz_attempts?: Json | null
           started_at?: string | null
@@ -370,34 +479,53 @@ export type Database = {
             referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_lesson_progress_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
         Row: {
           created_at: string | null
           id: string
+          org_id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          org_id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          org_id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_user_org_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -13,6 +13,7 @@ import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
+import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
@@ -114,6 +115,15 @@ export default function App() {
           } 
         />
         
+        {/* Admin Database Check */}
+        <Route 
+          path="/admin/database-check" 
+          element={
+            <AuthRoute requireAdmin>
+              <AdminDatabaseCheck />
+            </AuthRoute>
+          } 
+        />
         {/* Learning Routes */}
         <Route 
           path="/training" 
