@@ -415,11 +415,15 @@ export default function LessonPlayer() {
     navigate('/user-dashboard');
   };
 
-  // Loading states
+  // Loading states - MUST wait for progress to load before rendering blocks
+  // This prevents flashing block 0 before saved progress loads
   if (lessonLoading || progressLoading || attemptsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">Laden...</span>
+        </div>
       </div>
     );
   }
