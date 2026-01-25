@@ -113,7 +113,9 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
         // If retry mode and existing record found, it means delete didn't complete yet
         // Force block 0 in this case
         if (isRetry && existing) {
-          console.log('Retry mode: forcing block 0 even though progress exists');
+          console.log('Retry mode: forcing block 0 and resetting timer');
+          const newStartedAt = new Date().toISOString();
+          
           setProgressData({
             ...existing,
             current_block_index: 0,
@@ -121,9 +123,10 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
             progress_percentage: 0,
             quiz_attempts: {},
             quiz_results: {},
+            started_at: newStartedAt, // Reset timer for new attempt
           });
           
-          // Also update the database to reset to block 0
+          // Also update the database to reset to block 0 and reset timer
           await supabase
             .from('user_lesson_progress')
             .update({
@@ -131,6 +134,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
               blocks_completed: [],
               progress_percentage: 0,
               quiz_attempts: {},
+              started_at: newStartedAt, // Reset timer in DB too
               updated_at: new Date().toISOString(),
             })
             .eq('id', existing.id);
