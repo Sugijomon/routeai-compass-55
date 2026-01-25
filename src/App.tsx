@@ -4,8 +4,9 @@ import SmartDashboard from "./components/SmartDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import ToolCatalog from "./components/ToolCatalog";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminRoute from "./components/AdminRoute";
+// Legacy guards - kept for reference but not used (AuthRoute handles all auth now)
+// import ProtectedRoute from "./components/ProtectedRoute";
+// import AdminRoute from "./components/AdminRoute";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
@@ -14,6 +15,7 @@ import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
+import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
@@ -124,8 +126,19 @@ export default function App() {
             </AuthRoute>
           } 
         />
-        {/* Learning Routes */}
+        
+        {/* Admin Routes Audit */}
         <Route 
+          path="/admin/routes-audit" 
+          element={
+            <AuthRoute requireAdmin>
+              <AdminRoutesAudit />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Learning Routes */}
+        <Route
           path="/training" 
           element={
             <AuthRoute>
