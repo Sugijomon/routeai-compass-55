@@ -15,17 +15,28 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useOrganizations, useOrganizationStats, useTotalUsers, Organization } from "@/hooks/useOrganizations";
+import { OrganizationsTable } from "@/components/super-admin/OrganizationsTable";
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { profile } = useUserProfile();
+  const { data: organizations, isLoading: orgsLoading } = useOrganizations();
+  const { data: totalUsers, isLoading: usersLoading } = useTotalUsers();
+  const stats = useOrganizationStats(organizations);
 
   const handleLogout = async () => {
     await signOut();
     navigate("/auth", { replace: true });
+  };
+
+  const handleSelectOrganization = (org: Organization) => {
+    console.log("Selected organization:", org);
+    // TODO: Navigate to org detail or show detail panel
   };
 
   if (authLoading) {
@@ -81,8 +92,16 @@ export default function SuperAdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              {orgsLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                <>
+                  <span className="text-3xl font-bold">{stats.total}</span>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.active} actief, {stats.test} test
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -95,8 +114,14 @@ export default function SuperAdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">All organizations</p>
+              {usersLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                <>
+                  <span className="text-3xl font-bold">{totalUsers}</span>
+                  <p className="text-xs text-muted-foreground mt-1">All organizations</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -109,8 +134,16 @@ export default function SuperAdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              {orgsLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                <>
+                  <span className="text-3xl font-bold">{stats.active}</span>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.expired} verlopen
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -129,35 +162,26 @@ export default function SuperAdminDashboard() {
           </Card>
         </div>
 
-        {/* Platform Sections */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Organizations Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                Organisaties Overzicht
-              </CardTitle>
-              <CardDescription>Beheer alle organisaties op het platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Organizations Table */}
+        <OrganizationsTable 
+          organizations={organizations}
+          isLoading={orgsLoading}
+          onSelectOrganization={handleSelectOrganization}
+        />
 
+        {/* Platform Sections */}
+        <div className="grid md:grid-cols-3 gap-6">
           {/* Tools Library Management */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Wrench className="h-5 w-5 text-primary" />
                 Tools Library Beheer
               </CardTitle>
               <CardDescription>Platform-brede AI tools bibliotheek</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
                 <p className="text-muted-foreground text-sm">Coming next</p>
               </div>
             </CardContent>
@@ -166,14 +190,14 @@ export default function SuperAdminDashboard() {
           {/* Learning Library Management */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <GraduationCap className="h-5 w-5 text-primary" />
                 Learning Library Beheer
               </CardTitle>
               <CardDescription>Platform-brede trainingsinhoud</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
                 <p className="text-muted-foreground text-sm">Coming next</p>
               </div>
             </CardContent>
@@ -182,14 +206,14 @@ export default function SuperAdminDashboard() {
           {/* Platform Analytics */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <BarChart3 className="h-5 w-5 text-primary" />
                 Platform Analytics
               </CardTitle>
               <CardDescription>Inzichten en statistieken</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
                 <p className="text-muted-foreground text-sm">Coming next</p>
               </div>
             </CardContent>
