@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useOrganizations, useOrganizationStats, useTotalUsers, Organization } from "@/hooks/useOrganizations";
 import { OrganizationsTable } from "@/components/super-admin/OrganizationsTable";
+import { ToolsLibraryManager } from "@/components/super-admin/ToolsLibraryManager";
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -169,23 +170,22 @@ export default function SuperAdminDashboard() {
           onSelectOrganization={handleSelectOrganization}
         />
 
+        {/* Tools Library Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Wrench className="h-5 w-5 text-primary" />
+              Tools Library Beheer
+            </CardTitle>
+            <CardDescription>Platform-brede AI tools bibliotheek</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ToolsLibraryManager />
+          </CardContent>
+        </Card>
+
         {/* Platform Sections */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Tools Library Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Wrench className="h-5 w-5 text-primary" />
-                Tools Library Beheer
-              </CardTitle>
-              <CardDescription>Platform-brede AI tools bibliotheek</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid md:grid-cols-2 gap-6">
 
           {/* Learning Library Management */}
           <Card>
