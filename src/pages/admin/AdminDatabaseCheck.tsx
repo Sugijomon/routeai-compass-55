@@ -180,7 +180,7 @@ export default function AdminDatabaseCheck() {
     <AdminPageLayout
       title="Database Check"
       breadcrumbs={[
-        { label: "Admin", href: dashboardUrl },
+        { label: "Admin", href: dashboardUrl.path },
         { label: "Database Check" },
       ]}
     >

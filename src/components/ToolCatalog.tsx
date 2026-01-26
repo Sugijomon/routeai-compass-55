@@ -119,7 +119,7 @@ export default function ToolCatalog() {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="ghost" className="gap-2" onClick={() => navigate(dashboardUrl)}>
+      <Button variant="ghost" className="gap-2" onClick={() => navigate(dashboardUrl.path)}>
         <ArrowLeft className="w-4 h-4" />
         Terug naar Dashboard
       </Button>

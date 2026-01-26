@@ -28,31 +28,34 @@ export function useUserRole(): UserRoleData {
   const { user } = useAuth();
   const userId = user?.id;
 
-  const { data: roleData, isLoading, error } = useQuery({
-    queryKey: ['user-role', userId],
+  const { data: rolesData, isLoading, error } = useQuery({
+    queryKey: ['user-roles', userId],
     queryFn: async () => {
-      if (!userId) return null;
+      if (!userId) return [];
 
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
+        .eq('user_id', userId);
 
       if (error) throw error;
-      return data?.role as AppRole | null;
+      return (data || []).map(r => r.role as AppRole);
     },
     enabled: !!userId,
   });
 
-  const role = roleData ?? null;
+  const roles = rolesData ?? [];
+
+  // Determine highest privilege role (priority order)
+  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'moderator', 'user'];
+  const role = roleHierarchy.find(r => roles.includes(r)) ?? null;
   
-  // Individual role checks
-  const isSuperAdmin = role === 'super_admin';
-  const isContentEditor = role === 'content_editor';
-  const isOrgAdmin = role === 'org_admin';
-  const isManager = role === 'manager';
-  const isUser = role === 'user' || role === null;
+  // Individual role checks (based on ALL roles user has)
+  const isSuperAdmin = roles.includes('super_admin');
+  const isContentEditor = roles.includes('content_editor');
+  const isOrgAdmin = roles.includes('org_admin');
+  const isManager = roles.includes('manager');
+  const isUser = roles.length === 0 || (roles.length === 1 && roles.includes('user'));
   
   // Combined permission checks
   const canManageOrg = isSuperAdmin || isOrgAdmin;

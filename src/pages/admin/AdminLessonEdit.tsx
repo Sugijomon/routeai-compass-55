@@ -60,7 +60,7 @@ export default function AdminLessonEdit() {
       <AdminPageLayout
         title="Les bewerken"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl },
+          { label: 'Admin', href: dashboardUrl.path },
           { label: 'Lessen', href: '/admin/lessons' },
           { label: 'Laden...' },
         ]}
@@ -77,7 +77,7 @@ export default function AdminLessonEdit() {
       <AdminPageLayout
         title="Les niet gevonden"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl },
+          { label: 'Admin', href: dashboardUrl.path },
           { label: 'Lessen', href: '/admin/lessons' },
           { label: 'Fout' },
         ]}
@@ -99,7 +99,7 @@ export default function AdminLessonEdit() {
     <AdminPageLayout
       title="Les Bewerken"
       breadcrumbs={[
-        { label: 'Admin', href: dashboardUrl },
+        { label: 'Admin', href: dashboardUrl.path },
         { label: 'Lessen', href: '/admin/lessons' },
         { label: editor.title || 'Bewerken' },
       ]}
