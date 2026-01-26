@@ -103,7 +103,9 @@ export type Database = {
       learning_catalog: {
         Row: {
           assigned_to_roles: string[] | null
+          completion_reward_points: number | null
           created_at: string | null
+          custom_completion_message: string | null
           custom_deadline: string | null
           custom_intro: string | null
           custom_notes: string | null
@@ -118,7 +120,9 @@ export type Database = {
         }
         Insert: {
           assigned_to_roles?: string[] | null
+          completion_reward_points?: number | null
           created_at?: string | null
+          custom_completion_message?: string | null
           custom_deadline?: string | null
           custom_intro?: string | null
           custom_notes?: string | null
@@ -133,7 +137,9 @@ export type Database = {
         }
         Update: {
           assigned_to_roles?: string[] | null
+          completion_reward_points?: number | null
           created_at?: string | null
+          custom_completion_message?: string | null
           custom_deadline?: string | null
           custom_intro?: string | null
           custom_notes?: string | null
