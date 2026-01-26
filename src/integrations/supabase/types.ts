@@ -100,6 +100,126 @@ export type Database = {
           },
         ]
       }
+      learning_catalog: {
+        Row: {
+          assigned_to_roles: string[] | null
+          created_at: string | null
+          custom_deadline: string | null
+          custom_intro: string | null
+          custom_notes: string | null
+          custom_title: string | null
+          id: string
+          is_enabled: boolean | null
+          is_mandatory: boolean | null
+          library_item_id: string
+          org_id: string
+          priority: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to_roles?: string[] | null
+          created_at?: string | null
+          custom_deadline?: string | null
+          custom_intro?: string | null
+          custom_notes?: string | null
+          custom_title?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          is_mandatory?: boolean | null
+          library_item_id: string
+          org_id: string
+          priority?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to_roles?: string[] | null
+          created_at?: string | null
+          custom_deadline?: string | null
+          custom_intro?: string | null
+          custom_notes?: string | null
+          custom_title?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          is_mandatory?: boolean | null
+          library_item_id?: string
+          org_id?: string
+          priority?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_catalog_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "learning_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_catalog_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_library: {
+        Row: {
+          content: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          org_id: string | null
+          status: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          org_id?: string | null
+          status?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          org_id?: string | null
+          status?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_library_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_library_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_attempts: {
         Row: {
           attempt_number: number
