@@ -437,6 +437,93 @@ export type Database = {
           },
         ]
       }
+      tools_library: {
+        Row: {
+          api_available: boolean | null
+          capabilities: string[] | null
+          category: string | null
+          contract_required: boolean | null
+          created_at: string | null
+          created_by: string | null
+          data_residency: string | null
+          description: string | null
+          gpai_status: boolean | null
+          hosting_location: string | null
+          id: string
+          model_type: string | null
+          name: string
+          org_id: string | null
+          status: string | null
+          updated_at: string | null
+          vendor: string
+          vendor_privacy_policy_url: string | null
+          vendor_terms_url: string | null
+          vendor_website_url: string | null
+          version: string | null
+        }
+        Insert: {
+          api_available?: boolean | null
+          capabilities?: string[] | null
+          category?: string | null
+          contract_required?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          data_residency?: string | null
+          description?: string | null
+          gpai_status?: boolean | null
+          hosting_location?: string | null
+          id?: string
+          model_type?: string | null
+          name: string
+          org_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          vendor: string
+          vendor_privacy_policy_url?: string | null
+          vendor_terms_url?: string | null
+          vendor_website_url?: string | null
+          version?: string | null
+        }
+        Update: {
+          api_available?: boolean | null
+          capabilities?: string[] | null
+          category?: string | null
+          contract_required?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          data_residency?: string | null
+          description?: string | null
+          gpai_status?: boolean | null
+          hosting_location?: string | null
+          id?: string
+          model_type?: string | null
+          name?: string
+          org_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          vendor?: string
+          vendor_privacy_policy_url?: string | null
+          vendor_terms_url?: string | null
+          vendor_website_url?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tools_library_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tools_library_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_course_completions: {
         Row: {
           capability_unlocked: string | null
