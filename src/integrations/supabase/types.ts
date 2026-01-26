@@ -166,40 +166,58 @@ export type Database = {
       learning_library: {
         Row: {
           content: Json | null
+          content_type: Database["public"]["Enums"]["learning_content_type"]
           created_at: string | null
           created_by: string | null
           description: string | null
+          difficulty_level:
+            | Database["public"]["Enums"]["learning_difficulty_level"]
+            | null
+          estimated_duration_minutes: number | null
           id: string
+          learning_objectives: string[] | null
           org_id: string | null
-          status: string | null
+          required_for_license: string[] | null
+          status: Database["public"]["Enums"]["learning_status"]
           title: string
-          type: string
           updated_at: string | null
           version: string | null
         }
         Insert: {
           content?: Json | null
+          content_type: Database["public"]["Enums"]["learning_content_type"]
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["learning_difficulty_level"]
+            | null
+          estimated_duration_minutes?: number | null
           id?: string
+          learning_objectives?: string[] | null
           org_id?: string | null
-          status?: string | null
+          required_for_license?: string[] | null
+          status?: Database["public"]["Enums"]["learning_status"]
           title: string
-          type: string
           updated_at?: string | null
           version?: string | null
         }
         Update: {
           content?: Json | null
+          content_type?: Database["public"]["Enums"]["learning_content_type"]
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["learning_difficulty_level"]
+            | null
+          estimated_duration_minutes?: number | null
           id?: string
+          learning_objectives?: string[] | null
           org_id?: string | null
-          status?: string | null
+          required_for_license?: string[] | null
+          status?: Database["public"]["Enums"]["learning_status"]
           title?: string
-          type?: string
           updated_at?: string | null
           version?: string | null
         }
@@ -668,6 +686,9 @@ export type Database = {
         | "content_editor"
         | "org_admin"
         | "manager"
+      learning_content_type: "course" | "module" | "assessment" | "document"
+      learning_difficulty_level: "basic" | "intermediate" | "advanced"
+      learning_status: "draft" | "published" | "deprecated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -804,6 +825,9 @@ export const Constants = {
         "org_admin",
         "manager",
       ],
+      learning_content_type: ["course", "module", "assessment", "document"],
+      learning_difficulty_level: ["basic", "intermediate", "advanced"],
+      learning_status: ["draft", "published", "deprecated"],
     },
   },
 } as const
