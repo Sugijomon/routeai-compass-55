@@ -437,6 +437,93 @@ export type Database = {
           },
         ]
       }
+      tools_catalog: {
+        Row: {
+          allowed_roles: string[] | null
+          contract_expiry_date: string | null
+          contract_reference: string | null
+          cost_center: string | null
+          created_at: string | null
+          custom_display_name: string | null
+          custom_guidelines: string | null
+          custom_icon_url: string | null
+          custom_risk_notes: string | null
+          display_priority: number | null
+          id: string
+          is_enabled: boolean | null
+          monthly_cost: number | null
+          notes: string | null
+          org_id: string
+          procurement_contact: string | null
+          procurement_date: string | null
+          requires_approval: boolean | null
+          tool_id: string
+          updated_at: string | null
+          usage_limits: string | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          contract_expiry_date?: string | null
+          contract_reference?: string | null
+          cost_center?: string | null
+          created_at?: string | null
+          custom_display_name?: string | null
+          custom_guidelines?: string | null
+          custom_icon_url?: string | null
+          custom_risk_notes?: string | null
+          display_priority?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          org_id: string
+          procurement_contact?: string | null
+          procurement_date?: string | null
+          requires_approval?: boolean | null
+          tool_id: string
+          updated_at?: string | null
+          usage_limits?: string | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          contract_expiry_date?: string | null
+          contract_reference?: string | null
+          cost_center?: string | null
+          created_at?: string | null
+          custom_display_name?: string | null
+          custom_guidelines?: string | null
+          custom_icon_url?: string | null
+          custom_risk_notes?: string | null
+          display_priority?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          org_id?: string
+          procurement_contact?: string | null
+          procurement_date?: string | null
+          requires_approval?: boolean | null
+          tool_id?: string
+          updated_at?: string | null
+          usage_limits?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tools_catalog_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tools_catalog_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools_library: {
         Row: {
           api_available: boolean | null
