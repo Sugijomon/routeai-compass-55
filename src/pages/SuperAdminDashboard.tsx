@@ -21,6 +21,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useOrganizations, useOrganizationStats, useTotalUsers, Organization } from "@/hooks/useOrganizations";
 import { OrganizationsTable } from "@/components/super-admin/OrganizationsTable";
 import { ToolsLibraryManager } from "@/components/super-admin/ToolsLibraryManager";
+import { LearningLibraryManager } from "@/components/super-admin/LearningLibraryManager";
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -184,41 +185,35 @@ export default function SuperAdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Platform Sections */}
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Learning Library Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              Learning Library Beheer
+            </CardTitle>
+            <CardDescription>Platform-brede trainingsinhoud</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LearningLibraryManager />
+          </CardContent>
+        </Card>
 
-          {/* Learning Library Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                Learning Library Beheer
-              </CardTitle>
-              <CardDescription>Platform-brede trainingsinhoud</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Platform Analytics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Platform Analytics
-              </CardTitle>
-              <CardDescription>Inzichten en statistieken</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Platform Analytics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Platform Analytics
+            </CardTitle>
+            <CardDescription>Inzichten en statistieken</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-24 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+              <p className="text-muted-foreground text-sm">Coming next</p>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
