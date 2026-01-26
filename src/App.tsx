@@ -3,6 +3,8 @@ import RoleSelector from "./components/RoleSelector";
 import SmartDashboard from "./components/SmartDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import OrgAdminDashboard from "./pages/OrgAdminDashboard";
 import ToolCatalog from "./components/ToolCatalog";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
@@ -36,7 +38,27 @@ export default function App() {
           } 
         />
         
-        {/* Admin Dashboard - requires admin role */}
+        {/* Super Admin Dashboard - requires super_admin role */}
+        <Route 
+          path="/super-admin" 
+          element={
+            <AuthRoute requireAdmin>
+              <SuperAdminDashboard />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Org Admin Dashboard - requires org_admin, content_editor, or manager role */}
+        <Route 
+          path="/org-admin" 
+          element={
+            <AuthRoute requireAdmin>
+              <OrgAdminDashboard />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Legacy Admin Dashboard - redirect to appropriate new dashboard */}
         <Route 
           path="/admin-dashboard" 
           element={
