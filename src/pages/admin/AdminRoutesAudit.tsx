@@ -143,9 +143,9 @@ const ROUTE_INVENTORY: RouteInfo[] = [
     component: "AdminDashboard",
     authType: "admin",
     roleRequired: "admin",
-    status: "empty",
-    issue: "Uses mock useAppStore instead of real Supabase data",
-    fixNeeded: "Refactor to use Supabase queries for profiles/user_roles",
+    status: "working",
+    issue: null,
+    fixNeeded: null,
     deprecated: false,
   },
   {
@@ -154,8 +154,8 @@ const ROUTE_INVENTORY: RouteInfo[] = [
     authType: "admin",
     roleRequired: "admin",
     status: "working",
-    issue: "Uses mock data from mockTools.ts",
-    fixNeeded: "Consider creating tools table in Supabase",
+    issue: null,
+    fixNeeded: null,
     deprecated: false,
   },
   {
@@ -251,16 +251,16 @@ const AUTH_GUARD_ANALYSIS = [
     issues: ["Works correctly", "Role check uses user_roles table via useAuth hook"],
   },
   {
-    guard: "ProtectedRoute",
+    guard: "ProtectedRoute (REMOVED)",
     file: "src/components/ProtectedRoute.tsx",
-    behavior: "Uses mock useAppStore - NOT REAL AUTH",
-    issues: ["Uses mock store instead of Supabase", "Should be removed or migrated"],
+    behavior: "Previously used mock useAppStore",
+    issues: ["✅ DELETED - Legacy guard removed"],
   },
   {
-    guard: "AdminRoute",
+    guard: "AdminRoute (REMOVED)",
     file: "src/components/AdminRoute.tsx",
-    behavior: "Uses mock useAppStore - NOT REAL AUTH",
-    issues: ["Uses mock store instead of Supabase", "Should be removed or migrated"],
+    behavior: "Previously used mock useAppStore",
+    issues: ["✅ DELETED - Legacy guard removed"],
   },
 ];
 
