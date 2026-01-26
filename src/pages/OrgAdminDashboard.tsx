@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Users, 
@@ -15,15 +15,19 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
+import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
 
 export default function OrgAdminDashboard() {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { profile } = useUserProfile();
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Fetch organization info
   const { data: organization } = useQuery({
@@ -40,6 +44,9 @@ export default function OrgAdminDashboard() {
     },
     enabled: !!profile?.org_id,
   });
+
+  // Fetch org tools stats
+  const { data: toolsStats } = useOrgToolsStats();
 
   const handleLogout = async () => {
     await signOut();
@@ -134,8 +141,10 @@ export default function OrgAdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              <span className="text-3xl font-bold">{toolsStats?.enabledCount || 0}</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                €{toolsStats?.totalCost?.toFixed(2) || "0.00"}/maand
+              </p>
             </CardContent>
           </Card>
 
@@ -154,72 +163,141 @@ export default function OrgAdminDashboard() {
           </Card>
         </div>
 
-        {/* Organization Sections */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Tools Catalog */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wrench className="h-5 w-5 text-primary" />
-                Tools Catalogus
-              </CardTitle>
-              <CardDescription>Beheer goedgekeurde AI tools voor je organisatie</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Tabs for different sections */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overzicht</TabsTrigger>
+            <TabsTrigger value="tools">Tools Catalogus</TabsTrigger>
+            <TabsTrigger value="learning">Learning Catalogus</TabsTrigger>
+            <TabsTrigger value="users">Gebruikers</TabsTrigger>
+          </TabsList>
 
-          {/* Learning Catalog */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                Learning Catalogus
-              </CardTitle>
-              <CardDescription>Trainingsmateriaal voor je organisatie</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Organization Sections */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Tools Catalog Summary */}
+              <Card 
+                className="cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setActiveTab("tools")}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wrench className="h-5 w-5 text-primary" />
+                    Tools Catalogus
+                  </CardTitle>
+                  <CardDescription>Beheer goedgekeurde AI tools voor je organisatie</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-2xl font-bold">{toolsStats?.enabledCount || 0}</span>
+                      <span className="text-muted-foreground ml-2">tools actief</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Beheren →
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Users & Roles */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCog className="h-5 w-5 text-primary" />
-                Gebruikers & Rollen
-              </CardTitle>
-              <CardDescription>Beheer teamleden en hun toegangsrechten</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
+              {/* Learning Catalog */}
+              <Card 
+                className="cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setActiveTab("learning")}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-primary" />
+                    Learning Catalogus
+                  </CardTitle>
+                  <CardDescription>Trainingsmateriaal voor je organisatie</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+                    <p className="text-muted-foreground text-sm">Coming next</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Assessments Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Beoordelingen Overzicht
-              </CardTitle>
-              <CardDescription>AI Check beoordelingen en status</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                <p className="text-muted-foreground text-sm">Coming next</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              {/* Users & Roles */}
+              <Card 
+                className="cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setActiveTab("users")}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCog className="h-5 w-5 text-primary" />
+                    Gebruikers & Rollen
+                  </CardTitle>
+                  <CardDescription>Beheer teamleden en hun toegangsrechten</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+                    <p className="text-muted-foreground text-sm">Coming next</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Assessments Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Beoordelingen Overzicht
+                  </CardTitle>
+                  <CardDescription>AI Check beoordelingen en status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+                    <p className="text-muted-foreground text-sm">Coming next</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tools">
+            <ToolsCatalogManager />
+          </TabsContent>
+
+          <TabsContent value="learning">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  Learning Catalogus
+                </CardTitle>
+                <CardDescription>
+                  Beheer welke trainingen beschikbaar zijn voor je organisatie
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+                  <p className="text-muted-foreground">Coming in next step</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCog className="h-5 w-5 text-primary" />
+                  Gebruikers & Rollen
+                </CardTitle>
+                <CardDescription>
+                  Beheer teamleden en hun toegangsrechten
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+                  <p className="text-muted-foreground">Coming soon</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
