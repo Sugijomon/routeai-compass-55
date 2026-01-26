@@ -8,58 +8,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Shield, Mail, Lock, User, Loader2 } from 'lucide-react';
-import type { AppRole } from '@/hooks/useUserRole';
+import { getDashboardPathFromRoles } from '@/hooks/useDashboardRedirect';
 
 /**
- * Check if user has any admin-level role using the new app_role enum.
- * Checks for: super_admin, org_admin, content_editor
+ * Fetch user roles and determine the correct dashboard path.
+ * Goes DIRECTLY to the correct dashboard - no intermediate redirects.
  */
-async function checkAdminStatus(userId: string): Promise<{ isAdmin: boolean; highestRole: AppRole | null }> {
+async function fetchRolesAndGetPath(userId: string): Promise<string> {
   try {
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .in('role', ['super_admin', 'org_admin', 'content_editor']);
+      .eq('user_id', userId);
 
     if (error) {
-      console.error('Error checking admin status:', error);
-      return { isAdmin: false, highestRole: null };
-    }
-
-    if (!data || data.length === 0) {
-      return { isAdmin: false, highestRole: null };
-    }
-
-    // Determine highest privilege role
-    const roles = data.map(r => r.role as AppRole);
-    const roleHierarchy: AppRole[] = ['super_admin', 'content_editor', 'org_admin', 'manager', 'moderator', 'user'];
-    const highestRole = roleHierarchy.find(r => roles.includes(r)) || null;
-    
-    return { isAdmin: true, highestRole };
-  } catch {
-    return { isAdmin: false, highestRole: null };
-  }
-}
-
-/**
- * Determine redirect path based on user's highest role
- */
-function getRedirectPath(isAdmin: boolean, highestRole: AppRole | null): string {
-  if (!isAdmin || !highestRole) {
-    return '/user-dashboard';
-  }
-  
-  switch (highestRole) {
-    case 'super_admin':
-      return '/admin-dashboard'; // Will become /super-admin when ready
-    case 'org_admin':
-    case 'content_editor':
-      return '/admin-dashboard';
-    case 'manager':
-      return '/admin-dashboard'; // Will become /manager-dashboard when ready
-    default:
+      console.error('Error fetching user roles:', error);
       return '/user-dashboard';
+    }
+
+    const roles = (data || []).map(r => r.role as string);
+    return getDashboardPathFromRoles(roles);
+  } catch {
+    return '/user-dashboard';
   }
 }
 
@@ -76,21 +46,21 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
 
-  // Check if already logged in
+  // Check if already logged in - redirect DIRECTLY to correct dashboard
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const { isAdmin, highestRole } = await checkAdminStatus(session.user.id);
-        navigate(getRedirectPath(isAdmin, highestRole));
+        const path = await fetchRolesAndGetPath(session.user.id);
+        navigate(path, { replace: true });
       }
     });
   }, [navigate]);
 
   const redirectAfterAuth = async (userId: string) => {
-    // Small delay to allow trigger to complete
+    // Small delay to allow database trigger to complete
     await new Promise(resolve => setTimeout(resolve, 500));
-    const { isAdmin, highestRole } = await checkAdminStatus(userId);
-    navigate(getRedirectPath(isAdmin, highestRole));
+    const path = await fetchRolesAndGetPath(userId);
+    navigate(path, { replace: true });
   };
 
   const handleLogin = async (e: React.FormEvent) => {

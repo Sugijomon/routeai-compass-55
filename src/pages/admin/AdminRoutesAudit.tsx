@@ -332,7 +332,7 @@ export default function AdminRoutesAudit() {
     <AdminPageLayout 
       title="Route Audit"
       breadcrumbs={[
-        { label: "Admin", href: dashboardUrl },
+        { label: "Admin", href: dashboardUrl.path },
         { label: "Route Audit" }
       ]}
     >

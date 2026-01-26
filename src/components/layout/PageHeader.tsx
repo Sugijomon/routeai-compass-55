@@ -31,7 +31,7 @@ export function PageHeader({
           <Button
             variant="ghost"
             size="sm"
-            onClick={backButton.onClick || (() => navigate(dashboardUrl))}
+            onClick={backButton.onClick || (() => navigate(dashboardUrl.path))}
             className="mb-4 -ml-2"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

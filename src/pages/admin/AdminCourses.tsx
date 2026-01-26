@@ -120,7 +120,7 @@ export default function AdminCourses() {
     <AdminPageLayout
       title="Cursussen"
       breadcrumbs={[
-        { label: 'Admin', href: dashboardUrl },
+        { label: 'Admin', href: dashboardUrl.path },
         { label: 'Cursussen' },
       ]}
       actions={

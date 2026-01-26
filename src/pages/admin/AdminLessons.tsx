@@ -89,7 +89,7 @@ export default function AdminLessons() {
       <AdminPageLayout
         title="Lessen"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl },
+          { label: 'Admin', href: dashboardUrl.path },
           { label: 'Lessen' },
         ]}
       >
@@ -104,7 +104,7 @@ export default function AdminLessons() {
     <AdminPageLayout
       title="Lessen"
       breadcrumbs={[
-        { label: 'Admin', href: dashboardUrl },
+        { label: 'Admin', href: dashboardUrl.path },
         { label: 'Lessen' },
       ]}
       actions={

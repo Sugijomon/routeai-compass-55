@@ -265,7 +265,7 @@ export default function AdminCourseEdit() {
       <AdminPageLayout
         title="Cursus bewerken"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl },
+          { label: 'Admin', href: dashboardUrl.path },
           { label: 'Cursussen', href: '/admin/courses' },
           { label: 'Laden...' },
         ]}
@@ -282,7 +282,7 @@ export default function AdminCourseEdit() {
       <AdminPageLayout
         title="Cursus niet gevonden"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl },
+          { label: 'Admin', href: dashboardUrl.path },
           { label: 'Cursussen', href: '/admin/courses' },
           { label: 'Fout' },
         ]}
@@ -304,7 +304,7 @@ export default function AdminCourseEdit() {
     <AdminPageLayout
       title="Cursus Bewerken"
       breadcrumbs={[
-        { label: 'Admin', href: dashboardUrl },
+        { label: 'Admin', href: dashboardUrl.path },
         { label: 'Cursussen', href: '/admin/courses' },
         { label: formData.title || 'Bewerken' },
       ]}
