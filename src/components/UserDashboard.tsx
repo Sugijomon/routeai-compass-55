@@ -35,7 +35,7 @@ import { toast } from "sonner";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const { profile, hasAiRijbewijs, aiRijbewijsObtainedAt, isLoading: profileLoading } = useUserProfile();
   const { onboardingCourse, progressPercentage, isCompleted, isLoading: courseLoading } = useOnboardingCourse();
@@ -66,8 +66,6 @@ export default function UserDashboard() {
   if (!user) {
     return null;
   }
-
-  const { signOut } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
