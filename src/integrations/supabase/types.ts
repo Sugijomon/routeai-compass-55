@@ -362,6 +362,8 @@ export type Database = {
       }
       organizations: {
         Row: {
+          contact_email: string | null
+          contact_person: string | null
           country: string | null
           created_at: string | null
           id: string
@@ -369,9 +371,15 @@ export type Database = {
           sector: string | null
           settings: Json | null
           slug: string | null
+          status: string | null
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_type: string | null
           updated_at: string | null
         }
         Insert: {
+          contact_email?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string | null
           id?: string
@@ -379,9 +387,15 @@ export type Database = {
           sector?: string | null
           settings?: Json | null
           slug?: string | null
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
           updated_at?: string | null
         }
         Update: {
+          contact_email?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string | null
           id?: string
@@ -389,6 +403,10 @@ export type Database = {
           sector?: string | null
           settings?: Json | null
           slug?: string | null
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
           updated_at?: string | null
         }
         Relationships: []
