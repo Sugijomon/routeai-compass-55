@@ -75,20 +75,22 @@ export function useAuth() {
 
 async function checkAdminRole(userId: string): Promise<boolean> {
   try {
-    // Check for any admin-level role: super_admin, org_admin, or legacy admin
+    // Check for any admin-level role - use limit(1) instead of maybeSingle()
+    // to handle users with multiple admin roles
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .in('role', ['admin', 'org_admin', 'super_admin', 'content_editor'])
-      .maybeSingle();
+      .in('role', ['org_admin', 'super_admin', 'content_editor', 'manager'])
+      .limit(1);
 
     if (error) {
       console.error('Error checking admin role:', error);
       return false;
     }
 
-    return !!data;
+    // Returns true if at least one admin role exists
+    return Array.isArray(data) && data.length > 0;
   } catch {
     return false;
   }
