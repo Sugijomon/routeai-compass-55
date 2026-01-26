@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 interface Breadcrumb {
@@ -26,11 +26,18 @@ export function AdminPageLayout({
   className,
 }: AdminPageLayoutProps) {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // Show toast first
+    toast({ title: 'Uitloggen...', description: 'Even geduld...' });
+    
+    // Use the hook's signOut which handles everything properly
+    await signOut();
+    
+    // Navigate AFTER signOut completes
     toast({ title: 'Uitgelogd', description: 'Je bent succesvol uitgelogd.' });
-    navigate('/auth');
+    navigate('/auth', { replace: true });
   };
 
   return (

@@ -67,8 +67,10 @@ export default function UserDashboard() {
     return null;
   }
 
+  const { signOut } = useAuth();
+
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     toast.success('Uitgelogd');
     navigate('/auth', { replace: true });
   };

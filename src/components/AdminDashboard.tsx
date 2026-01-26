@@ -4,7 +4,7 @@ import { Users, Award, AlertTriangle, LogOut, Shield, Wrench, GraduationCap, Bui
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth, signOut } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -99,9 +99,11 @@ export default function AdminDashboard() {
     enabled: !!profile?.org_id,
   });
 
+  const { signOut } = useAuth();
+
   const handleLogout = async () => {
     await signOut();
-    navigate("/");
+    navigate("/auth", { replace: true });
   };
 
   if (authLoading) {

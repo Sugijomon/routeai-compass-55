@@ -5,19 +5,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function SmartDashboard() {
   const navigate = useNavigate();
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin, isLoading, isSigningOut } = useAuth();
 
   useEffect(() => {
-    if (isLoading) return;
+    // Don't redirect while loading or signing out
+    if (isLoading || isSigningOut) return;
 
-    // Should generally be guarded by <AuthRoute>, but keep this safe.
+    // Not authenticated - let AuthRoute handle redirect
     if (!user) {
-      navigate('/', { replace: true });
       return;
     }
 
+    // Navigate to appropriate dashboard
     navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard', { replace: true });
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, isSigningOut, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500">
