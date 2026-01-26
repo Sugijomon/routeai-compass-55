@@ -75,11 +75,12 @@ export function useAuth() {
 
 async function checkAdminRole(userId: string): Promise<boolean> {
   try {
+    // Check for any admin-level role: super_admin, org_admin, or legacy admin
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .eq('role', 'admin')
+      .in('role', ['admin', 'org_admin', 'super_admin', 'content_editor'])
       .maybeSingle();
 
     if (error) {
