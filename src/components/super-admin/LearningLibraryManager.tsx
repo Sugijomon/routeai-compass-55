@@ -49,7 +49,9 @@ import {
   ClipboardCheck,
   Folder,
   Clock,
+  GraduationCap,
 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   useLearningLibrary,
   useCreateLearning,
@@ -300,12 +302,20 @@ export function LearningLibraryManager() {
               ))
             ) : filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  <p className="text-muted-foreground">
-                    {items?.length === 0
-                      ? "Nog geen content in de bibliotheek."
-                      : "Geen content gevonden met deze filters."}
-                  </p>
+                <TableCell colSpan={8} className="h-24">
+                  <EmptyState
+                    icon={GraduationCap}
+                    title={items?.length === 0 ? "Nog geen content in de bibliotheek" : "Geen content gevonden"}
+                    description={items?.length === 0 
+                      ? "Voeg trainingsmateriaal toe voor AI-Rijbewijs"
+                      : "Pas je zoek- of filterinstellingen aan"
+                    }
+                    action={items?.length === 0 ? {
+                      label: "Content Toevoegen",
+                      onClick: handleCreateItem
+                    } : undefined}
+                    className="py-8"
+                  />
                 </TableCell>
               </TableRow>
             ) : (

@@ -39,6 +39,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   useOrgLearningCatalog,
   useOrgLearningStats,
@@ -484,17 +485,15 @@ export default function LearningCatalogManager() {
           ))}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-medium text-lg mb-1">Geen trainingen gevonden</h3>
-            <p className="text-muted-foreground">
-              {searchQuery || filterType !== "all" || filterDifficulty !== "all"
-                ? "Probeer andere zoek- of filtercriteria"
-                : "Er zijn nog geen gepubliceerde trainingen beschikbaar"}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={GraduationCap}
+          title="Geen trainingen gevonden"
+          description={
+            searchQuery || filterType !== "all" || filterDifficulty !== "all"
+              ? "Probeer andere zoek- of filtercriteria"
+              : "Er zijn nog geen gepubliceerde trainingen beschikbaar. Vraag een Super Admin om content toe te voegen."
+          }
+        />
       )}
     </div>
   );
