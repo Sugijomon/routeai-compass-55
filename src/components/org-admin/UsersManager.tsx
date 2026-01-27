@@ -19,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatCard } from "@/components/ui/stat-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useOrgUsers, useOrgUserStats, OrgUser } from "@/hooks/useOrgUsers";
 import EditRolesDialog from "./EditRolesDialog";
 import InviteUserDialog from "./InviteUserDialog";
@@ -64,56 +66,32 @@ export default function UsersManager() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Totaal Gebruikers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{stats.totalUsers}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Met AI-Rijbewijs
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-green-600">{stats.usersWithRijbewijs}</span>
-            <span className="text-sm text-muted-foreground ml-2">
-              ({stats.totalUsers > 0 ? Math.round((stats.usersWithRijbewijs / stats.totalUsers) * 100) : 0}%)
-            </span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Org Admins
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{stats.roleBreakdown['org_admin'] || 0}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Managers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{stats.roleBreakdown['manager'] || 0}</span>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Totaal Gebruikers"
+          value={stats.totalUsers}
+          icon={Users}
+          tooltip="Alle gebruikers in je organisatie"
+        />
+        <StatCard
+          title="Met AI-Rijbewijs"
+          value={stats.usersWithRijbewijs}
+          subtitle={`${stats.totalUsers > 0 ? Math.round((stats.usersWithRijbewijs / stats.totalUsers) * 100) : 0}% voltooid`}
+          icon={Award}
+          valueClassName="text-success"
+          tooltip="Gebruikers die hun AI-Rijbewijs hebben behaald"
+        />
+        <StatCard
+          title="Org Admins"
+          value={stats.roleBreakdown['org_admin'] || 0}
+          icon={Shield}
+          tooltip="Gebruikers met beheerdersrechten"
+        />
+        <StatCard
+          title="Managers"
+          value={stats.roleBreakdown['manager'] || 0}
+          icon={Users}
+          tooltip="Gebruikers met manager rol"
+        />
       </div>
 
       {/* Users Table Card */}
@@ -152,9 +130,18 @@ export default function UsersManager() {
               ))}
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {searchTerm ? "Geen gebruikers gevonden" : "Nog geen gebruikers"}
-            </div>
+            <EmptyState
+              icon={Users}
+              title={searchTerm ? "Geen gebruikers gevonden" : "Nog geen gebruikers"}
+              description={searchTerm 
+                ? "Probeer een andere zoekterm" 
+                : "Nodig teamleden uit om te beginnen"
+              }
+              action={!searchTerm ? {
+                label: "Gebruiker uitnodigen",
+                onClick: () => setShowInviteDialog(true)
+              } : undefined}
+            />
           ) : (
             <div className="rounded-md border">
               <Table>

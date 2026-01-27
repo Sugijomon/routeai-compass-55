@@ -16,6 +16,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatCard } from "@/components/ui/stat-card";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery } from "@tanstack/react-query";
@@ -114,68 +116,35 @@ export default function OrgAdminDashboard() {
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-4 gap-6">
-          {/* Active Users */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Actieve Gebruikers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-3xl font-bold">{userStats.totalUsers}</span>
-              <p className="text-xs text-muted-foreground mt-1">
-                <Award className="inline h-3 w-3 mr-1" />
-                {userStats.usersWithRijbewijs} met AI-Rijbewijs
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Active Assessments */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <ClipboardCheck className="h-4 w-4" />
-                Actieve Beoordelingen
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
-            </CardContent>
-          </Card>
-
-          {/* Tools Enabled */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Wrench className="h-4 w-4" />
-                Tools Ingeschakeld
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-3xl font-bold">{toolsStats?.enabledCount || 0}</span>
-              <p className="text-xs text-muted-foreground mt-1">
-                €{toolsStats?.totalCost?.toFixed(2) || "0.00"}/maand
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Training Stats */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Trainingen Ingeschakeld
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-3xl font-bold">{learningStats?.enabledCount || 0}</span>
-              <p className="text-xs text-muted-foreground mt-1">
-                {learningStats?.mandatoryCount || 0} verplicht
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Actieve Gebruikers"
+            value={userStats.totalUsers}
+            subtitle={`${userStats.usersWithRijbewijs} met AI-Rijbewijs`}
+            icon={Users}
+            tooltip="Totaal aantal gebruikers in je organisatie"
+          />
+          <StatCard
+            title="Actieve Beoordelingen"
+            value="—"
+            subtitle="Coming soon"
+            icon={ClipboardCheck}
+            valueClassName="text-muted-foreground/50"
+            tooltip="AI Check beoordelingen die actief worden gebruikt"
+          />
+          <StatCard
+            title="Tools Ingeschakeld"
+            value={toolsStats?.enabledCount || 0}
+            subtitle={`€${toolsStats?.totalCost?.toFixed(2) || "0.00"}/maand`}
+            icon={Wrench}
+            tooltip="AI tools die beschikbaar zijn voor je organisatie"
+          />
+          <StatCard
+            title="Trainingen Ingeschakeld"
+            value={learningStats?.enabledCount || 0}
+            subtitle={`${learningStats?.mandatoryCount || 0} verplicht`}
+            icon={GraduationCap}
+            tooltip="Trainingsmodules die beschikbaar zijn voor je team"
+          />
         </div>
 
         {/* Tabs for different sections */}
@@ -253,14 +222,20 @@ export default function OrgAdminDashboard() {
                   <CardDescription>Beheer teamleden en hun toegangsrechten</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                    <p className="text-muted-foreground text-sm">Coming next</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-2xl font-bold">{userStats.totalUsers}</span>
+                      <span className="text-muted-foreground ml-2">gebruikers</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Beheren →
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Assessments Overview */}
-              <Card>
+              <Card className="opacity-75">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-primary" />
@@ -270,7 +245,7 @@ export default function OrgAdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                    <p className="text-muted-foreground text-sm">Coming next</p>
+                    <p className="text-muted-foreground text-sm">Binnenkort beschikbaar</p>
                   </div>
                 </CardContent>
               </Card>
@@ -278,15 +253,21 @@ export default function OrgAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="tools">
-            <ToolsCatalogManager />
+            <ErrorBoundary>
+              <ToolsCatalogManager />
+            </ErrorBoundary>
           </TabsContent>
 
           <TabsContent value="learning">
-            <LearningCatalogManager />
+            <ErrorBoundary>
+              <LearningCatalogManager />
+            </ErrorBoundary>
           </TabsContent>
 
           <TabsContent value="users">
-            <UsersManager />
+            <ErrorBoundary>
+              <UsersManager />
+            </ErrorBoundary>
           </TabsContent>
         </Tabs>
       </main>

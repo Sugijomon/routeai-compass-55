@@ -15,7 +15,8 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { StatCard } from "@/components/ui/stat-card";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useOrganizations, useOrganizationStats, useTotalUsers, Organization } from "@/hooks/useOrganizations";
@@ -85,91 +86,47 @@ export default function SuperAdminDashboard() {
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-4 gap-6">
-          {/* Total Organizations */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Totaal Organisaties
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {orgsLoading ? (
-                <Skeleton className="h-9 w-16" />
-              ) : (
-                <>
-                  <span className="text-3xl font-bold">{stats.total}</span>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stats.active} actief, {stats.test} test
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Total Users */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Totaal Gebruikers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {usersLoading ? (
-                <Skeleton className="h-9 w-16" />
-              ) : (
-                <>
-                  <span className="text-3xl font-bold">{totalUsers}</span>
-                  <p className="text-xs text-muted-foreground mt-1">All organizations</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Active Subscriptions */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Actieve Abonnementen
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {orgsLoading ? (
-                <Skeleton className="h-9 w-16" />
-              ) : (
-                <>
-                  <span className="text-3xl font-bold">{stats.active}</span>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stats.expired} verlopen
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Platform Revenue */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Platform Omzet
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Totaal Organisaties"
+            value={stats.total}
+            subtitle={`${stats.active} actief, ${stats.test} test`}
+            icon={Building2}
+            isLoading={orgsLoading}
+            tooltip="Alle geregistreerde organisaties in het platform"
+          />
+          <StatCard
+            title="Totaal Gebruikers"
+            value={totalUsers || 0}
+            subtitle="Alle organisaties"
+            icon={Users}
+            isLoading={usersLoading}
+            tooltip="Totaal aantal gebruikers over alle organisaties"
+          />
+          <StatCard
+            title="Actieve Abonnementen"
+            value={stats.active}
+            subtitle={`${stats.expired} verlopen`}
+            icon={CreditCard}
+            isLoading={orgsLoading}
+            tooltip="Organisaties met actief abonnement"
+          />
+          <StatCard
+            title="Platform Omzet"
+            value="—"
+            subtitle="Coming soon"
+            icon={TrendingUp}
+            valueClassName="text-muted-foreground/50"
+          />
         </div>
 
         {/* Organizations Table */}
-        <OrganizationsTable 
-          organizations={organizations}
-          isLoading={orgsLoading}
-          onSelectOrganization={handleSelectOrganization}
-        />
+        <ErrorBoundary>
+          <OrganizationsTable 
+            organizations={organizations}
+            isLoading={orgsLoading}
+            onSelectOrganization={handleSelectOrganization}
+          />
+        </ErrorBoundary>
 
         {/* Tools Library Management */}
         <Card>
@@ -178,10 +135,14 @@ export default function SuperAdminDashboard() {
               <Wrench className="h-5 w-5 text-primary" />
               Tools Library Beheer
             </CardTitle>
-            <CardDescription>Platform-brede AI tools bibliotheek</CardDescription>
+            <CardDescription>
+              Platform-brede AI tools bibliotheek — GPAI = General Purpose AI (EU AI Act Art. 51)
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ToolsLibraryManager />
+            <ErrorBoundary>
+              <ToolsLibraryManager />
+            </ErrorBoundary>
           </CardContent>
         </Card>
 
@@ -192,10 +153,14 @@ export default function SuperAdminDashboard() {
               <GraduationCap className="h-5 w-5 text-primary" />
               Learning Library Beheer
             </CardTitle>
-            <CardDescription>Platform-brede trainingsinhoud</CardDescription>
+            <CardDescription>
+              Platform-brede trainingsinhoud — Cursussen en modules voor AI-Rijbewijs
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <LearningLibraryManager />
+            <ErrorBoundary>
+              <LearningLibraryManager />
+            </ErrorBoundary>
           </CardContent>
         </Card>
 

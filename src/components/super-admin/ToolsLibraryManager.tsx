@@ -44,7 +44,16 @@ import {
   CheckCircle2,
   AlertTriangle,
   Building2,
+  Wrench,
+  HelpCircle,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   useToolsLibrary,
   useCreateTool,
@@ -299,12 +308,20 @@ export function ToolsLibraryManager() {
               ))
             ) : filteredTools.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  <p className="text-muted-foreground">
-                    {tools?.length === 0
-                      ? "Nog geen tools in de bibliotheek."
-                      : "Geen tools gevonden met deze filters."}
-                  </p>
+                <TableCell colSpan={8} className="h-24">
+                  <EmptyState
+                    icon={Wrench}
+                    title={tools?.length === 0 ? "Nog geen tools in de bibliotheek" : "Geen tools gevonden"}
+                    description={tools?.length === 0 
+                      ? "Voeg de eerste AI tool toe aan de platform bibliotheek"
+                      : "Pas je zoek- of filterinstellingen aan"
+                    }
+                    action={tools?.length === 0 ? {
+                      label: "Tool Toevoegen",
+                      onClick: handleCreateTool
+                    } : undefined}
+                    className="py-8"
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -323,9 +340,21 @@ export function ToolsLibraryManager() {
                   </TableCell>
                   <TableCell>
                     {tool.gpai_status ? (
-                      <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20">
-                        GPAI
-                      </Badge>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 cursor-help">
+                              GPAI
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="text-sm max-w-xs">
+                              General Purpose AI — Valt onder EU AI Act artikel 51+. 
+                              Vereist extra documentatie en transparantie.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
