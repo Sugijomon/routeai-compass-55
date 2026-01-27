@@ -362,48 +362,66 @@ export type Database = {
       }
       organizations: {
         Row: {
+          bank_account: string | null
+          bank_name: string | null
+          city: string | null
           contact_email: string | null
           contact_person: string | null
+          contact_phone: string | null
           country: string | null
           created_at: string | null
           id: string
           name: string
+          postal_code: string | null
           sector: string | null
           settings: Json | null
           slug: string | null
           status: string | null
+          street_address: string | null
           subscription_end_date: string | null
           subscription_start_date: string | null
           subscription_type: string | null
           updated_at: string | null
         }
         Insert: {
+          bank_account?: string | null
+          bank_name?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_person?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string | null
           id?: string
           name: string
+          postal_code?: string | null
           sector?: string | null
           settings?: Json | null
           slug?: string | null
           status?: string | null
+          street_address?: string | null
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_type?: string | null
           updated_at?: string | null
         }
         Update: {
+          bank_account?: string | null
+          bank_name?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_person?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string | null
           id?: string
           name?: string
+          postal_code?: string | null
           sector?: string | null
           settings?: Json | null
           slug?: string | null
           status?: string | null
+          street_address?: string | null
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_type?: string | null
