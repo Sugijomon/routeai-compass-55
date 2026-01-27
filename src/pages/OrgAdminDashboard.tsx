@@ -10,7 +10,6 @@ import {
   UserCog,
   FileText,
   Loader2,
-  Building2
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,9 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
+import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
 import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
+import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 
 export default function OrgAdminDashboard() {
   const navigate = useNavigate();
@@ -47,6 +48,9 @@ export default function OrgAdminDashboard() {
 
   // Fetch org tools stats
   const { data: toolsStats } = useOrgToolsStats();
+  
+  // Fetch org learning stats
+  const { data: learningStats } = useOrgLearningStats();
 
   const handleLogout = async () => {
     await signOut();
@@ -148,17 +152,19 @@ export default function OrgAdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Training Completion Rate */}
+          {/* Training Stats */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <GraduationCap className="h-4 w-4" />
-                Training Voltooiing
+                Trainingen Ingeschakeld
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              <span className="text-3xl font-bold">{learningStats?.enabledCount || 0}</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                {learningStats?.mandatoryCount || 0} verplicht
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -213,8 +219,14 @@ export default function OrgAdminDashboard() {
                   <CardDescription>Trainingsmateriaal voor je organisatie</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-12 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                    <p className="text-muted-foreground text-sm">Coming next</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-2xl font-bold">{learningStats?.enabledCount || 0}</span>
+                      <span className="text-muted-foreground ml-2">trainingen actief</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Beheren →
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -261,22 +273,7 @@ export default function OrgAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="learning">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5 text-primary" />
-                  Learning Catalogus
-                </CardTitle>
-                <CardDescription>
-                  Beheer welke trainingen beschikbaar zijn voor je organisatie
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                  <p className="text-muted-foreground">Coming in next step</p>
-                </div>
-              </CardContent>
-            </Card>
+            <LearningCatalogManager />
           </TabsContent>
 
           <TabsContent value="users">
