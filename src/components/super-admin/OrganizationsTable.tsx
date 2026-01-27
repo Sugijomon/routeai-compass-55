@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Search, Building2, MoreHorizontal, Eye, Edit, Ban } from "lucide-react";
+import { Search, Building2, MoreHorizontal, Eye, Edit, Ban, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Organization } from "@/hooks/useOrganizations";
+import { CreateOrganizationDialog } from "./CreateOrganizationDialog";
 
 interface OrganizationsTableProps {
   organizations: Organization[] | undefined;
@@ -106,12 +107,22 @@ export function OrganizationsTable({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
-          Organisaties Overzicht
-        </CardTitle>
-        <CardDescription>Beheer alle organisaties op het platform</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div className="space-y-1">
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary" />
+            Organisaties Overzicht
+          </CardTitle>
+          <CardDescription>Beheer alle organisaties op het platform</CardDescription>
+        </div>
+        <CreateOrganizationDialog
+          trigger={
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nieuwe Organisatie
+            </Button>
+          }
+        />
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Filters */}
