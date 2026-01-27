@@ -10,6 +10,7 @@ import {
   UserCog,
   FileText,
   Loader2,
+  Award,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +22,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
 import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
+import UsersManager from "@/components/org-admin/UsersManager";
 import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
 import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
+import { useOrgUserStats } from "@/hooks/useOrgUsers";
 
 export default function OrgAdminDashboard() {
   const navigate = useNavigate();
@@ -51,6 +54,9 @@ export default function OrgAdminDashboard() {
   
   // Fetch org learning stats
   const { data: learningStats } = useOrgLearningStats();
+
+  // Fetch org user stats
+  const userStats = useOrgUserStats();
 
   const handleLogout = async () => {
     await signOut();
@@ -117,8 +123,11 @@ export default function OrgAdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-3xl font-bold text-muted-foreground/50">—</span>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              <span className="text-3xl font-bold">{userStats.totalUsers}</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                <Award className="inline h-3 w-3 mr-1" />
+                {userStats.usersWithRijbewijs} met AI-Rijbewijs
+              </p>
             </CardContent>
           </Card>
 
@@ -277,22 +286,7 @@ export default function OrgAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCog className="h-5 w-5 text-primary" />
-                  Gebruikers & Rollen
-                </CardTitle>
-                <CardDescription>
-                  Beheer teamleden en hun toegangsrechten
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
-                  <p className="text-muted-foreground">Coming soon</p>
-                </div>
-              </CardContent>
-            </Card>
+            <UsersManager />
           </TabsContent>
         </Tabs>
       </main>
