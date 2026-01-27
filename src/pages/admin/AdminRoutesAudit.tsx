@@ -29,6 +29,8 @@ interface RouteInfo {
   issue: string | null;
   fixNeeded: string | null;
   deprecated: boolean;
+  resolved?: boolean;
+  resolvedNote?: string;
 }
 
 // Complete route inventory based on App.tsx analysis
@@ -147,6 +149,8 @@ const ROUTE_INVENTORY: RouteInfo[] = [
     issue: null,
     fixNeeded: null,
     deprecated: false,
+    resolved: true,
+    resolvedNote: "Now uses real Supabase queries (profiles, user_roles, organizations)",
   },
   {
     path: "/tools",
@@ -248,19 +252,22 @@ const AUTH_GUARD_ANALYSIS = [
     guard: "AuthRoute",
     file: "src/components/AuthRoute.tsx",
     behavior: "Redirects to /auth if not logged in, redirects to /dashboard if requireAdmin but not admin",
-    issues: ["Works correctly", "Role check uses user_roles table via useAuth hook"],
+    issues: ["✅ Works correctly", "✅ Role check uses user_roles table via useAuth hook"],
+    resolved: true,
   },
   {
-    guard: "ProtectedRoute (REMOVED)",
-    file: "src/components/ProtectedRoute.tsx",
-    behavior: "Previously used mock useAppStore",
-    issues: ["✅ DELETED - Legacy guard removed"],
+    guard: "ProtectedRoute",
+    file: "src/components/ProtectedRoute.tsx (DELETED)",
+    behavior: "Previously used mock useAppStore - no longer exists",
+    issues: ["✅ RESOLVED - Legacy guard completely removed from codebase"],
+    resolved: true,
   },
   {
-    guard: "AdminRoute (REMOVED)",
-    file: "src/components/AdminRoute.tsx",
-    behavior: "Previously used mock useAppStore",
-    issues: ["✅ DELETED - Legacy guard removed"],
+    guard: "AdminRoute",
+    file: "src/components/AdminRoute.tsx (DELETED)",
+    behavior: "Previously used mock useAppStore - no longer exists",
+    issues: ["✅ RESOLVED - Legacy guard completely removed from codebase"],
+    resolved: true,
   },
 ];
 
@@ -502,36 +509,55 @@ export default function AdminRoutesAudit() {
           </CardContent>
         </Card>
 
-        {/* Critical Issues */}
-        <Card className="border-red-500/30">
+        {/* Resolved Issues */}
+        <Card className="border-green-500/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
-              <XCircle className="h-5 w-5" />
-              Critical Issues to Fix
+            <CardTitle className="flex items-center gap-2 text-green-600">
+              <CheckCircle2 className="h-5 w-5" />
+              ✅ 2 Critical Issues Resolved
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="border-l-4 border-red-500 pl-4 py-2">
-                <h4 className="font-medium">1. AdminDashboard uses mock store</h4>
+              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
+                <h4 className="font-medium flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  1. AdminDashboard now uses real Supabase data
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  The /admin-dashboard page uses <code>useAppStore</code> which contains mock data 
-                  instead of querying real users from Supabase profiles/user_roles tables.
+                  The /admin-dashboard page now queries real data from <code>profiles</code>, 
+                  <code>user_roles</code>, and <code>organizations</code> tables instead of mock useAppStore.
                 </p>
-                <Badge variant="outline" className="mt-2">Fix: Refactor to use Supabase queries</Badge>
+                <Badge className="mt-2 bg-green-500/10 text-green-600 border-green-500/20">✅ RESOLVED</Badge>
               </div>
 
-              <div className="border-l-4 border-red-500 pl-4 py-2">
-                <h4 className="font-medium">2. Legacy auth guards still exist</h4>
+              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
+                <h4 className="font-medium flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  2. Legacy auth guards removed
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  <code>ProtectedRoute</code> and <code>AdminRoute</code> components use mock 
-                  useAppStore but are imported in App.tsx. They should be removed.
+                  <code>ProtectedRoute</code> and <code>AdminRoute</code> components have been 
+                  completely deleted. Only <code>AuthRoute</code> remains with real Supabase auth.
                 </p>
-                <Badge variant="outline" className="mt-2">Fix: Remove unused imports from App.tsx</Badge>
+                <Badge className="mt-2 bg-green-500/10 text-green-600 border-green-500/20">✅ RESOLVED</Badge>
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Remaining Minor Issues */}
+        <Card className="border-amber-500/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-600">
+              <AlertTriangle className="h-5 w-5" />
+              ⚠️ 2 Minor Issues Remaining
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               <div className="border-l-4 border-amber-500 pl-4 py-2">
-                <h4 className="font-medium">3. /tools/:toolId route missing</h4>
+                <h4 className="font-medium">1. /tools/:toolId route missing</h4>
                 <p className="text-sm text-muted-foreground">
                   ToolDetail component exists but route is not defined. Navigating to tool 
                   detail falls through to catch-all.
@@ -540,12 +566,12 @@ export default function AdminRoutesAudit() {
               </div>
 
               <div className="border-l-4 border-amber-500 pl-4 py-2">
-                <h4 className="font-medium">4. Course player shows empty</h4>
+                <h4 className="font-medium">2. Course player shows empty</h4>
                 <p className="text-sm text-muted-foreground">
                   /learn/course/:courseId shows "Cursus niet gevonden" because no published 
-                  courses exist in the database yet.
+                  courses exist in the database yet. This is expected behavior.
                 </p>
-                <Badge variant="outline" className="mt-2">Fix: Create and publish courses in admin</Badge>
+                <Badge variant="outline" className="mt-2">Expected: Create and publish courses in admin</Badge>
               </div>
             </div>
           </CardContent>
