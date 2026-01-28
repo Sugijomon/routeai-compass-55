@@ -13,7 +13,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { LessonBlock, ParagraphBlock, VideoBlock, QuizBlock } from '@/types/lesson-blocks';
+import { Switch } from '@/components/ui/switch';
+import type { 
+  LessonBlock, 
+  ParagraphBlock, 
+  VideoBlock, 
+  QuizMCBlock,
+  QuizMSBlock,
+  QuizTFBlock,
+  QuizFillBlock,
+  QuizEssayBlock,
+} from '@/types/lesson-blocks';
 import { getBlockTypeLabel } from '@/types/lesson-blocks';
 
 interface BlockEditorDialogProps {
@@ -74,6 +84,46 @@ export function BlockEditorDialog({
           newErrors.explanation = 'Uitleg is verplicht';
         }
         break;
+      case 'quiz_ms':
+        if (!editedBlock.question.trim()) {
+          newErrors.question = 'Vraag is verplicht';
+        }
+        editedBlock.options.forEach((opt, idx) => {
+          if (!opt.trim()) {
+            newErrors[`option_${idx}`] = `Optie ${String.fromCharCode(65 + idx)} is verplicht`;
+          }
+        });
+        if (editedBlock.correct_answers.length === 0) {
+          newErrors.correct_answers = 'Selecteer minstens één correct antwoord';
+        }
+        if (!editedBlock.explanation.trim()) {
+          newErrors.explanation = 'Uitleg is verplicht';
+        }
+        break;
+      case 'quiz_tf':
+        if (!editedBlock.question.trim()) {
+          newErrors.question = 'Vraag is verplicht';
+        }
+        if (!editedBlock.explanation.trim()) {
+          newErrors.explanation = 'Uitleg is verplicht';
+        }
+        break;
+      case 'quiz_fill':
+        if (!editedBlock.question.trim()) {
+          newErrors.question = 'Vraag is verplicht';
+        }
+        if (!editedBlock.correct_answer.trim()) {
+          newErrors.correct_answer = 'Correct antwoord is verplicht';
+        }
+        if (!editedBlock.explanation.trim()) {
+          newErrors.explanation = 'Uitleg is verplicht';
+        }
+        break;
+      case 'quiz_essay':
+        if (!editedBlock.question.trim()) {
+          newErrors.question = 'Vraag is verplicht';
+        }
+        break;
     }
 
     setErrors(newErrors);
@@ -115,8 +165,40 @@ export function BlockEditorDialog({
           )}
 
           {editedBlock.type === 'quiz_mc' && (
-            <QuizEditor
-              block={editedBlock as QuizBlock}
+            <QuizMCEditor
+              block={editedBlock as QuizMCBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'quiz_ms' && (
+            <QuizMSEditor
+              block={editedBlock as QuizMSBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'quiz_tf' && (
+            <QuizTFEditor
+              block={editedBlock as QuizTFBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'quiz_fill' && (
+            <QuizFillEditor
+              block={editedBlock as QuizFillBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'quiz_essay' && (
+            <QuizEssayEditor
+              block={editedBlock as QuizEssayBlock}
               errors={errors}
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
@@ -254,15 +336,15 @@ function VideoEditor({
   );
 }
 
-// Quiz Block Editor
-function QuizEditor({
+// Quiz Multiple Choice Editor
+function QuizMCEditor({
   block,
   errors,
   onChange,
 }: {
-  block: QuizBlock;
+  block: QuizMCBlock;
   errors: Record<string, string>;
-  onChange: (updates: Partial<QuizBlock>) => void;
+  onChange: (updates: Partial<QuizMCBlock>) => void;
 }) {
   const optionLabels = ['Option A', 'Option B', 'Option C', 'Option D'];
 
@@ -276,11 +358,11 @@ function QuizEditor({
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="question">
-          Question <span className="text-destructive">*</span>
+          Vraag <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="question"
-          placeholder="What is...?"
+          placeholder="Wat is...?"
           value={block.question}
           onChange={(e) => onChange({ question: e.target.value })}
           rows={3}
@@ -288,14 +370,11 @@ function QuizEditor({
         {errors.question && (
           <p className="text-sm text-destructive">{errors.question}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Markdown wordt ondersteund voor opmaak.
-        </p>
       </div>
 
       <div className="space-y-3">
         <Label>
-          Answer Options <span className="text-destructive">*</span>
+          Antwoordopties <span className="text-destructive">*</span>
         </Label>
         <RadioGroup
           value={block.correct_answer.toString()}
@@ -326,11 +405,11 @@ function QuizEditor({
 
       <div className="space-y-2">
         <Label htmlFor="explanation">
-          Explanation <span className="text-destructive">*</span>
+          Uitleg <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="explanation"
-          placeholder="Explain why this is the correct answer..."
+          placeholder="Leg uit waarom dit het correcte antwoord is..."
           value={block.explanation}
           onChange={(e) => onChange({ explanation: e.target.value })}
           rows={3}
@@ -338,14 +417,11 @@ function QuizEditor({
         {errors.explanation && (
           <p className="text-sm text-destructive">{errors.explanation}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Wordt getoond nadat de gebruiker heeft geantwoord.
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="points">Points</Label>
+          <Label htmlFor="points">Punten</Label>
           <Input
             id="points"
             type="number"
@@ -356,7 +432,7 @@ function QuizEditor({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="maxAttempts">Max Attempts</Label>
+          <Label htmlFor="maxAttempts">Max Pogingen</Label>
           <Input
             id="maxAttempts"
             type="number"
@@ -365,6 +441,443 @@ function QuizEditor({
             onChange={(e) => onChange({ max_attempts: parseInt(e.target.value) || 3 })}
           />
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Quiz Multiple Select Editor
+function QuizMSEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: QuizMSBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<QuizMSBlock>) => void;
+}) {
+  const optionLabels = ['Option A', 'Option B', 'Option C', 'Option D'];
+
+  const updateOption = (index: number, value: string) => {
+    const newOptions = [...block.options] as [string, string, string, string];
+    newOptions[index] = value;
+    onChange({ options: newOptions });
+  };
+
+  const toggleCorrectAnswer = (index: number) => {
+    const current = block.correct_answers;
+    if (current.includes(index)) {
+      onChange({ correct_answers: current.filter((i) => i !== index) });
+    } else {
+      onChange({ correct_answers: [...current, index].sort() });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="question">
+          Vraag <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="question"
+          placeholder="Welke van de volgende zijn...?"
+          value={block.question}
+          onChange={(e) => onChange({ question: e.target.value })}
+          rows={3}
+        />
+        {errors.question && (
+          <p className="text-sm text-destructive">{errors.question}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Meerdere antwoorden kunnen correct zijn.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <Label>
+          Antwoordopties <span className="text-destructive">*</span>
+        </Label>
+        {errors.correct_answers && (
+          <p className="text-sm text-destructive">{errors.correct_answers}</p>
+        )}
+        {block.options.map((option, index) => (
+          <div key={index} className="rounded-lg border p-3">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id={`option-${index}`}
+                checked={block.correct_answers.includes(index)}
+                onCheckedChange={() => toggleCorrectAnswer(index)}
+              />
+              <Label htmlFor={`option-${index}`} className="text-xs text-muted-foreground cursor-pointer">
+                Correct
+              </Label>
+              <div className="flex-1">
+                <Input
+                  placeholder={optionLabels[index]}
+                  value={option}
+                  onChange={(e) => updateOption(index, e.target.value)}
+                />
+                {errors[`option_${index}`] && (
+                  <p className="text-sm text-destructive mt-1">{errors[`option_${index}`]}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="explanation">
+          Uitleg <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="explanation"
+          placeholder="Leg uit waarom deze antwoorden correct zijn..."
+          value={block.explanation}
+          onChange={(e) => onChange({ explanation: e.target.value })}
+          rows={3}
+        />
+        {errors.explanation && (
+          <p className="text-sm text-destructive">{errors.explanation}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="points">Punten</Label>
+          <Input
+            id="points"
+            type="number"
+            min="1"
+            value={block.points}
+            onChange={(e) => onChange({ points: parseInt(e.target.value) || 10 })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="maxAttempts">Max Pogingen</Label>
+          <Input
+            id="maxAttempts"
+            type="number"
+            min="1"
+            value={block.max_attempts}
+            onChange={(e) => onChange({ max_attempts: parseInt(e.target.value) || 3 })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Quiz True/False Editor
+function QuizTFEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: QuizTFBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<QuizTFBlock>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="question">
+          Stelling <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="question"
+          placeholder="[Stelling die waar of onwaar is]"
+          value={block.question}
+          onChange={(e) => onChange({ question: e.target.value })}
+          rows={3}
+        />
+        {errors.question && (
+          <p className="text-sm text-destructive">{errors.question}</p>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <Label>Correct Antwoord</Label>
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            variant={block.correct_answer === true ? 'default' : 'outline'}
+            onClick={() => onChange({ correct_answer: true })}
+            className="flex-1"
+          >
+            ✓ Waar
+          </Button>
+          <Button
+            type="button"
+            variant={block.correct_answer === false ? 'default' : 'outline'}
+            onClick={() => onChange({ correct_answer: false })}
+            className="flex-1"
+          >
+            ✗ Onwaar
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="explanation">
+          Uitleg <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="explanation"
+          placeholder="Leg uit waarom de stelling waar/onwaar is..."
+          value={block.explanation}
+          onChange={(e) => onChange({ explanation: e.target.value })}
+          rows={3}
+        />
+        {errors.explanation && (
+          <p className="text-sm text-destructive">{errors.explanation}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="points">Punten</Label>
+          <Input
+            id="points"
+            type="number"
+            min="1"
+            value={block.points}
+            onChange={(e) => onChange({ points: parseInt(e.target.value) || 10 })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="maxAttempts">Max Pogingen</Label>
+          <Input
+            id="maxAttempts"
+            type="number"
+            min="1"
+            value={block.max_attempts}
+            onChange={(e) => onChange({ max_attempts: parseInt(e.target.value) || 3 })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Quiz Fill-in-the-blank Editor
+function QuizFillEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: QuizFillBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<QuizFillBlock>) => void;
+}) {
+  const [variationsText, setVariationsText] = useState(block.accept_variations.join('\n'));
+
+  useEffect(() => {
+    setVariationsText(block.accept_variations.join('\n'));
+  }, [block.accept_variations]);
+
+  const handleVariationsChange = (text: string) => {
+    setVariationsText(text);
+    const variations = text.split('\n').map((v) => v.trim()).filter(Boolean);
+    onChange({ accept_variations: variations });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="question">
+          Vraag <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="question"
+          placeholder="Vul het ontbrekende woord in: De hoofdstad van Nederland is _____."
+          value={block.question}
+          onChange={(e) => onChange({ question: e.target.value })}
+          rows={3}
+        />
+        {errors.question && (
+          <p className="text-sm text-destructive">{errors.question}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Gebruik _____ om aan te geven waar het antwoord moet komen.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="correct_answer">
+          Correct Antwoord <span className="text-destructive">*</span>
+        </Label>
+        <Input
+          id="correct_answer"
+          placeholder="Amsterdam"
+          value={block.correct_answer}
+          onChange={(e) => onChange({ correct_answer: e.target.value })}
+        />
+        {errors.correct_answer && (
+          <p className="text-sm text-destructive">{errors.correct_answer}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="variations">Accepteer ook (optioneel)</Label>
+        <Textarea
+          id="variations"
+          placeholder="Alternatieve correcte antwoorden, één per regel"
+          value={variationsText}
+          onChange={(e) => handleVariationsChange(e.target.value)}
+          rows={3}
+        />
+        <p className="text-xs text-muted-foreground">
+          Voeg alternatieve spellingen of synoniemen toe, één per regel.
+        </p>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="caseSensitive"
+          checked={block.case_sensitive}
+          onCheckedChange={(checked) => onChange({ case_sensitive: checked })}
+        />
+        <Label htmlFor="caseSensitive" className="text-sm font-normal cursor-pointer">
+          Hoofdlettergevoelig
+        </Label>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="placeholder">Placeholder tekst</Label>
+        <Input
+          id="placeholder"
+          placeholder="Vul hier je antwoord in..."
+          value={block.placeholder}
+          onChange={(e) => onChange({ placeholder: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="explanation">
+          Uitleg <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="explanation"
+          placeholder="Leg uit waarom dit het correcte antwoord is..."
+          value={block.explanation}
+          onChange={(e) => onChange({ explanation: e.target.value })}
+          rows={3}
+        />
+        {errors.explanation && (
+          <p className="text-sm text-destructive">{errors.explanation}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="points">Punten</Label>
+          <Input
+            id="points"
+            type="number"
+            min="1"
+            value={block.points}
+            onChange={(e) => onChange({ points: parseInt(e.target.value) || 10 })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="maxAttempts">Max Pogingen</Label>
+          <Input
+            id="maxAttempts"
+            type="number"
+            min="1"
+            value={block.max_attempts}
+            onChange={(e) => onChange({ max_attempts: parseInt(e.target.value) || 3 })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Quiz Essay Editor
+function QuizEssayEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: QuizEssayBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<QuizEssayBlock>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="question">
+          Vraag <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="question"
+          placeholder="Beschrijf in je eigen woorden..."
+          value={block.question}
+          onChange={(e) => onChange({ question: e.target.value })}
+          rows={3}
+        />
+        {errors.question && (
+          <p className="text-sm text-destructive">{errors.question}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Essay vragen worden handmatig beoordeeld.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="minWords">Minimum woorden (optioneel)</Label>
+          <Input
+            id="minWords"
+            type="number"
+            min="0"
+            placeholder="Geen minimum"
+            value={block.min_words || ''}
+            onChange={(e) => onChange({ min_words: e.target.value ? parseInt(e.target.value) : undefined })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="maxWords">Maximum woorden (optioneel)</Label>
+          <Input
+            id="maxWords"
+            type="number"
+            min="0"
+            placeholder="Geen maximum"
+            value={block.max_words || ''}
+            onChange={(e) => onChange({ max_words: e.target.value ? parseInt(e.target.value) : undefined })}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="placeholder">Placeholder tekst</Label>
+        <Input
+          id="placeholder"
+          placeholder="Schrijf hier je antwoord..."
+          value={block.placeholder}
+          onChange={(e) => onChange({ placeholder: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="points">Punten</Label>
+        <Input
+          id="points"
+          type="number"
+          min="1"
+          value={block.points}
+          onChange={(e) => onChange({ points: parseInt(e.target.value) || 20 })}
+        />
+        <p className="text-xs text-muted-foreground">
+          Punten worden toegekend na handmatige beoordeling.
+        </p>
       </div>
     </div>
   );

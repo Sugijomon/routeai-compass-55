@@ -20,10 +20,12 @@ import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CreateLessonDialog } from '@/components/admin/CreateLessonDialog';
 
 export default function ContentEditorDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('lessons');
+  const [isCreateLessonOpen, setIsCreateLessonOpen] = useState(false);
 
   // Fetch content statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -146,7 +148,7 @@ export default function ContentEditorDashboard() {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
             <Button 
-              onClick={() => navigate('/admin/lessons')}
+              onClick={() => setIsCreateLessonOpen(true)}
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
@@ -250,7 +252,7 @@ export default function ContentEditorDashboard() {
                     description="Maak je eerste les aan om te beginnen."
                     action={{
                       label: 'Nieuwe Les',
-                      onClick: () => navigate('/admin/lessons'),
+                      onClick: () => setIsCreateLessonOpen(true),
                     }}
                   />
                 )}
@@ -372,6 +374,12 @@ export default function ContentEditorDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Lesson Dialog */}
+      <CreateLessonDialog
+        open={isCreateLessonOpen}
+        onOpenChange={setIsCreateLessonOpen}
+      />
     </AppLayout>
   );
 }
