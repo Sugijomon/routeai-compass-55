@@ -1,6 +1,13 @@
 // Block type definitions for lessons
 
-export type BlockType = 'paragraph' | 'video' | 'quiz_mc';
+export type BlockType = 
+  | 'paragraph' 
+  | 'video' 
+  | 'quiz_mc' 
+  | 'quiz_ms' 
+  | 'quiz_tf' 
+  | 'quiz_fill' 
+  | 'quiz_essay';
 
 export interface BaseBlock {
   id: string;
@@ -23,7 +30,8 @@ export interface VideoBlock extends BaseBlock {
   must_watch_full: boolean;
 }
 
-export interface QuizBlock extends BaseBlock {
+// Quiz - Multiple Choice (single answer)
+export interface QuizMCBlock extends BaseBlock {
   type: 'quiz_mc';
   question: string;
   options: [string, string, string, string]; // exactly 4 options
@@ -33,7 +41,62 @@ export interface QuizBlock extends BaseBlock {
   max_attempts: number;
 }
 
-export type LessonBlock = ParagraphBlock | VideoBlock | QuizBlock;
+// Quiz - Multiple Select (multiple answers)
+export interface QuizMSBlock extends BaseBlock {
+  type: 'quiz_ms';
+  question: string;
+  options: [string, string, string, string]; // exactly 4 options
+  correct_answers: number[]; // array of 0-based indices
+  explanation: string;
+  points: number;
+  max_attempts: number;
+}
+
+// Quiz - True/False
+export interface QuizTFBlock extends BaseBlock {
+  type: 'quiz_tf';
+  question: string;
+  correct_answer: boolean; // true or false
+  explanation: string;
+  points: number;
+  max_attempts: number;
+}
+
+// Quiz - Fill-in-the-blank
+export interface QuizFillBlock extends BaseBlock {
+  type: 'quiz_fill';
+  question: string;
+  correct_answer: string;
+  accept_variations: string[]; // alternative correct answers
+  case_sensitive: boolean;
+  placeholder: string;
+  explanation: string;
+  points: number;
+  max_attempts: number;
+}
+
+// Quiz - Essay (open-ended)
+export interface QuizEssayBlock extends BaseBlock {
+  type: 'quiz_essay';
+  question: string;
+  min_words?: number;
+  max_words?: number;
+  placeholder: string;
+  points: number;
+  // Essays don't have max_attempts or correct_answer - graded manually
+}
+
+// Legacy alias for backward compatibility
+export type QuizBlock = QuizMCBlock;
+
+export type LessonBlock = 
+  | ParagraphBlock 
+  | VideoBlock 
+  | QuizMCBlock 
+  | QuizMSBlock 
+  | QuizTFBlock 
+  | QuizFillBlock 
+  | QuizEssayBlock;
 
 // Helper to generate unique block IDs
 export function generateBlockId(): string {
@@ -61,6 +124,54 @@ export function createBlock(type: BlockType, order: number): LessonBlock {
         points: 10,
         max_attempts: 3,
       };
+    case 'quiz_ms':
+      return {
+        id,
+        type,
+        order,
+        question: '',
+        options: ['', '', '', ''],
+        correct_answers: [0],
+        explanation: '',
+        points: 10,
+        max_attempts: 3,
+      };
+    case 'quiz_tf':
+      return {
+        id,
+        type,
+        order,
+        question: '',
+        correct_answer: true,
+        explanation: '',
+        points: 10,
+        max_attempts: 3,
+      };
+    case 'quiz_fill':
+      return {
+        id,
+        type,
+        order,
+        question: '',
+        correct_answer: '',
+        accept_variations: [],
+        case_sensitive: false,
+        placeholder: 'Vul hier je antwoord in...',
+        explanation: '',
+        points: 10,
+        max_attempts: 3,
+      };
+    case 'quiz_essay':
+      return {
+        id,
+        type,
+        order,
+        question: '',
+        min_words: undefined,
+        max_words: undefined,
+        placeholder: 'Schrijf hier je antwoord...',
+        points: 20,
+      };
   }
 }
 
@@ -72,7 +183,15 @@ export function getBlockTypeLabel(type: BlockType): string {
     case 'video':
       return 'Video';
     case 'quiz_mc':
-      return 'Quiz';
+      return 'Quiz - Multiple Choice';
+    case 'quiz_ms':
+      return 'Quiz - Multiple Select';
+    case 'quiz_tf':
+      return 'Quiz - Waar/Onwaar';
+    case 'quiz_fill':
+      return 'Quiz - Invulvraag';
+    case 'quiz_essay':
+      return 'Quiz - Essay';
   }
 }
 
@@ -84,8 +203,21 @@ export function getBlockTypeIcon(type: BlockType): string {
     case 'video':
       return '🎥';
     case 'quiz_mc':
-      return '❓';
+      return '🔘';
+    case 'quiz_ms':
+      return '☑️';
+    case 'quiz_tf':
+      return '✅';
+    case 'quiz_fill':
+      return '✏️';
+    case 'quiz_essay':
+      return '📄';
   }
+}
+
+// Check if block type is a quiz
+export function isQuizBlock(type: BlockType): boolean {
+  return type.startsWith('quiz_');
 }
 
 // Get preview text for a block
@@ -102,10 +234,15 @@ export function getBlockPreview(block: LessonBlock, maxLength = 50): string {
     case 'video':
       return `Video: ${block.caption || block.url || '(Geen URL)'}`;
     case 'quiz_mc':
+    case 'quiz_ms':
+    case 'quiz_tf':
+    case 'quiz_fill':
+    case 'quiz_essay':
       text = block.question;
+      const label = getBlockTypeLabel(block.type);
       if (text && text.length > maxLength) {
-        return `Quiz: ${text.substring(0, 50)}...`;
+        return `${label}: ${text.substring(0, 50)}...`;
       }
-      return text ? `Quiz: ${text}` : 'Quiz: (Geen vraag)';
+      return text ? `${label}: ${text}` : `${label}: (Geen vraag)`;
   }
 }
