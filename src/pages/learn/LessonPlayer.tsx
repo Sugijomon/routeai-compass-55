@@ -10,6 +10,10 @@ import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFoote
 import { ParagraphBlockPlayer } from '@/components/lesson-player/ParagraphBlockPlayer';
 import { VideoBlockPlayer } from '@/components/lesson-player/VideoBlockPlayer';
 import { QuizBlockPlayer } from '@/components/lesson-player/QuizBlockPlayer';
+import { QuizTrueFalsePlayer } from '@/components/lesson-player/QuizTrueFalsePlayer';
+import { QuizMultipleSelectPlayer } from '@/components/lesson-player/QuizMultipleSelectPlayer';
+import { QuizFillInPlayer } from '@/components/lesson-player/QuizFillInPlayer';
+import { QuizEssayPlayer } from '@/components/lesson-player/QuizEssayPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
 
@@ -476,6 +480,17 @@ export default function LessonPlayer() {
   const renderBlock = () => {
     if (!currentBlock) return null;
 
+    const existingResult = quizResults[currentBlock.id];
+    const commonQuizProps = {
+      key: currentBlock.id,
+      attempts: quizAttempts[currentBlock.id] ?? 0,
+      onAttempt: () => incrementQuizAttempt(currentBlock.id),
+      onCanProceed: handleCanProceed,
+      onQuizResult: recordQuizResult,
+      alreadyCompleted: isBlockCompleted,
+      previousResult: existingResult,
+    };
+
     switch (currentBlock.type) {
       case 'paragraph':
         return <ParagraphBlockPlayer block={currentBlock} />;
@@ -487,26 +502,55 @@ export default function LessonPlayer() {
           />
         );
       case 'quiz_mc':
-        // If quiz is already completed, show it as answered
-        const existingResult = quizResults[currentBlock.id];
         return (
           <QuizBlockPlayer
-            key={currentBlock.id}
             block={currentBlock}
-            attempts={quizAttempts[currentBlock.id] ?? 0}
-            onAttempt={() => incrementQuizAttempt(currentBlock.id)}
-            onCanProceed={handleCanProceed}
-            onQuizResult={recordQuizResult}
-            alreadyCompleted={isBlockCompleted}
-            previousResult={existingResult}
+            {...commonQuizProps}
           />
         );
-      default:
+      case 'quiz_ms':
         return (
-          <div className="text-muted-foreground">
-            Onbekend bloktype
+          <QuizMultipleSelectPlayer
+            block={currentBlock}
+            {...commonQuizProps}
+          />
+        );
+      case 'quiz_tf':
+        return (
+          <QuizTrueFalsePlayer
+            block={currentBlock}
+            {...commonQuizProps}
+          />
+        );
+      case 'quiz_fill':
+        return (
+          <QuizFillInPlayer
+            block={currentBlock}
+            {...commonQuizProps}
+          />
+        );
+      case 'quiz_essay':
+        return (
+          <QuizEssayPlayer
+            block={currentBlock}
+            {...commonQuizProps}
+          />
+        );
+      default: {
+        // TypeScript exhaustiveness check - this should never happen
+        const unknownBlock = currentBlock as { type: string };
+        console.warn('Unknown block type:', unknownBlock.type, currentBlock);
+        return (
+          <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <p className="text-amber-800 dark:text-amber-200 font-medium">
+              Onbekend bloktype: {unknownBlock.type}
+            </p>
+            <pre className="text-xs mt-2 text-amber-600 dark:text-amber-400 overflow-auto">
+              {JSON.stringify(currentBlock, null, 2)}
+            </pre>
           </div>
         );
+      }
     }
   };
 
