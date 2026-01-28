@@ -53,7 +53,7 @@ export function Sidebar() {
   if (canManageOrg) {
     adminItems.push(
       { label: 'Org Beheer', href: '/org-admin', icon: Users },
-      { label: 'Team Overzicht', href: '/admin/team', icon: Users },
+      { label: 'Gebruikersrollen', href: '/admin/users/roles', icon: Shield },
       { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 }
     );
   }

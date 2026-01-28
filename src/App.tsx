@@ -15,6 +15,7 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
 import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
+import UserRolesManagement from "./pages/admin/UserRolesManagement";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
@@ -184,6 +185,16 @@ export default function App() {
           element={
             <AuthRoute requireAdmin>
               <AdminRoutesAudit />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* User Roles Management */}
+        <Route 
+          path="/admin/users/roles" 
+          element={
+            <AuthRoute requireAdmin>
+              <UserRolesManagement />
             </AuthRoute>
           } 
         />
