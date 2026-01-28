@@ -1,4 +1,4 @@
-import { Shield, User, Settings, ChevronDown } from 'lucide-react';
+import { Shield, User, Settings, ChevronDown, LogOut } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -38,7 +38,7 @@ function getRoleDisplayLabel(roles: AppRole[]): string {
 }
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, hasAiRijbewijs } = useUserProfile();
 
   // Fetch actual roles from database
@@ -110,16 +110,10 @@ export function Header() {
                 Instellingen
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <div className="px-2 py-1.5">
-                <Badge 
-                  variant={hasAiRijbewijs ? 'default' : 'secondary'}
-                  className={hasAiRijbewijs ? 'status-approved' : ''}
-                >
-                  {hasAiRijbewijs 
-                    ? 'AI-Rijbewijs Actief' 
-                    : 'Geen AI-Rijbewijs'}
-                </Badge>
-              </div>
+              <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Uitloggen
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
