@@ -1,5 +1,6 @@
 import { Shield, User, Settings, ChevronDown } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/hooks/useAuth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,10 +11,54 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { AppRole } from '@/hooks/useUserRole';
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  super_admin: 'Super Admin',
+  org_admin: 'Org Admin',
+  content_editor: 'Content Editor',
+  manager: 'Manager',
+  moderator: 'Moderator',
+  user: 'Gebruiker',
+};
+
+function getRoleDisplayLabel(roles: AppRole[]): string {
+  if (!roles || roles.length === 0) return 'Gebruiker';
+  
+  // Filter out 'user' role if there are other meaningful roles
+  const meaningfulRoles = roles.filter(role => role !== 'user');
+  
+  // If no meaningful roles, show 'Gebruiker'
+  if (meaningfulRoles.length === 0) return 'Gebruiker';
+  
+  // Return all meaningful roles joined
+  return meaningfulRoles.map(role => ROLE_LABELS[role] || role).join(' / ');
+}
 
 export function Header() {
-  const { currentRole, setCurrentRole, getCurrentUser } = useAppStore();
-  const user = getCurrentUser();
+  const { user } = useAuth();
+  const { profile, hasAiRijbewijs } = useUserProfile();
+
+  // Fetch actual roles from database
+  const { data: userRoles } = useQuery({
+    queryKey: ['user-roles-display', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      return (data || []).map(r => r.role as AppRole);
+    },
+    enabled: !!user?.id,
+  });
+
+  const roleLabel = getRoleDisplayLabel(userRoles || []);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-sm">
@@ -29,33 +74,8 @@ export function Header() {
           </div>
         </div>
 
-        {/* Role Toggle & User Menu */}
+        {/* User Menu */}
         <div className="flex items-center gap-4">
-          {/* Role Toggle */}
-          <div className="flex items-center gap-2 rounded-full bg-secondary p-1">
-            <button
-              onClick={() => setCurrentRole('user')}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                currentRole === 'user'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Gebruiker
-            </button>
-            <button
-              onClick={() => setCurrentRole('org_admin')}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                currentRole === 'org_admin'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Org Admin
-            </button>
-          </div>
-
-          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
@@ -63,9 +83,9 @@ export function Header() {
                   <User className="h-4 w-4 text-primary" />
                 </div>
                 <div className="hidden text-left md:block">
-                  <p className="text-sm font-medium">{user?.name || 'Gebruiker'}</p>
+                  <p className="text-sm font-medium">{profile?.full_name || 'Gebruiker'}</p>
                   <p className="text-xs text-muted-foreground">
-                    {currentRole === 'org_admin' ? 'Administrator' : 'Medewerker'}
+                    {roleLabel}
                   </p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -74,9 +94,9 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-1">
-                  <span>{user?.name}</span>
+                  <span>{profile?.full_name || 'Gebruiker'}</span>
                   <span className="text-xs font-normal text-muted-foreground">
-                    {user?.email}
+                    {profile?.email || user?.email}
                   </span>
                 </div>
               </DropdownMenuLabel>
@@ -92,14 +112,12 @@ export function Header() {
               <DropdownMenuSeparator />
               <div className="px-2 py-1.5">
                 <Badge 
-                  variant={user?.license?.status === 'active' ? 'default' : 'secondary'}
-                  className={user?.license?.status === 'active' ? 'status-approved' : ''}
+                  variant={hasAiRijbewijs ? 'default' : 'secondary'}
+                  className={hasAiRijbewijs ? 'status-approved' : ''}
                 >
-                  {user?.license?.status === 'active' 
-                    ? 'Licentie Actief' 
-                    : user?.license?.status === 'expired'
-                    ? 'Licentie Verlopen'
-                    : 'Geen Licentie'}
+                  {hasAiRijbewijs 
+                    ? 'AI-Rijbewijs Actief' 
+                    : 'Geen AI-Rijbewijs'}
                 </Badge>
               </div>
             </DropdownMenuContent>
