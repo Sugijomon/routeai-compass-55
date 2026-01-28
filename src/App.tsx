@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RoleSelector from "./components/RoleSelector";
 import SmartDashboard from "./components/SmartDashboard";
-import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import OrgAdminDashboard from "./pages/OrgAdminDashboard";
@@ -16,7 +15,6 @@ import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
 import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
 import UserRolesManagement from "./pages/admin/UserRolesManagement";
-import AdminDashboardPage from "./pages/admin/AdminDashboard";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
@@ -93,9 +91,9 @@ export default function App() {
           } 
         />
         
-        {/* Org Admin Dashboard - requires org_admin, content_editor, or manager role */}
+        {/* Org Admin Dashboard - now at /admin */}
         <Route 
-          path="/org-admin" 
+          path="/admin" 
           element={
             <AuthRoute requireAdmin>
               <OrgAdminDashboard />
@@ -103,19 +101,18 @@ export default function App() {
           } 
         />
         
-        {/* Legacy Admin Dashboard - redirect to appropriate new dashboard */}
-        <Route 
-          path="/admin-dashboard" 
-          element={
-            <AuthRoute requireAdmin>
-              <AdminDashboard />
-            </AuthRoute>
-          } 
-        />
+        {/* Legacy URL redirects */}
+        <Route path="/admin-dashboard" element={<Navigate to="/super-admin" replace />} />
+        <Route path="/org-admin" element={<Navigate to="/admin" replace />} />
         
         {/* User Dashboard */}
         <Route 
           path="/user-dashboard" 
+          element={<Navigate to="/dashboard" replace />}
+        />
+        
+        <Route 
+          path="/dashboard" 
           element={
             <AuthRoute>
               <UserDashboard />
@@ -285,12 +282,6 @@ export default function App() {
           } 
         />
         
-        {/* Admin index route - now goes to AdminDashboard with role management */}
-        <Route path="/admin" element={
-          <AuthRoute requireAdmin>
-            <AdminDashboardPage />
-          </AuthRoute>
-        } />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
