@@ -16,6 +16,7 @@ import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
 import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
 import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
 import UserRolesManagement from "./pages/admin/UserRolesManagement";
+import AdminDashboardPage from "./pages/admin/AdminDashboard";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
@@ -244,8 +245,12 @@ export default function App() {
           } 
         />
         
-        {/* Admin redirect */}
-        <Route path="/admin" element={<Navigate to="/admin/lessons" replace />} />
+        {/* Admin index route - now goes to AdminDashboard with role management */}
+        <Route path="/admin" element={
+          <AuthRoute requireAdmin>
+            <AdminDashboardPage />
+          </AuthRoute>
+        } />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
