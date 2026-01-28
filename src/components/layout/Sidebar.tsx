@@ -3,14 +3,16 @@ import {
   LayoutDashboard, 
   GraduationCap, 
   Award, 
-  Wrench,
   Users,
   BarChart3,
   FileText,
   BookOpen,
-  ChevronRight
+  ChevronRight,
+  Edit,
+  Shield,
+  Building2
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -18,27 +20,48 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: string;
-  adminOnly?: boolean;
 }
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Training', href: '/training', icon: GraduationCap },
-  { label: 'Mijn Licentie', href: '/license', icon: Award },
-  { label: 'AI Tools', href: '/tools', icon: Wrench },
-];
-
-const adminItems: NavItem[] = [
-  { label: 'Lessen', href: '/admin/lessons', icon: BookOpen, adminOnly: true },
-  { label: 'Team Overzicht', href: '/admin/team', icon: Users, adminOnly: true },
-  { label: 'Licenties', href: '/admin/licenses', icon: FileText, adminOnly: true },
-  { label: 'Rapportages', href: '/admin/reports', icon: BarChart3, adminOnly: true },
-];
 
 export function Sidebar() {
   const location = useLocation();
-  const { currentRole } = useAppStore();
-  const isAdmin = currentRole === 'org_admin';
+  const { isSuperAdmin, isContentEditor, canManageOrg } = useUserRole();
+
+  // Base navigation items for all users
+  const navItems: NavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Training', href: '/learn', icon: GraduationCap },
+    { label: 'Mijn Licentie', href: '/license', icon: Award },
+  ];
+
+  // Content Editor navigation
+  const editorItems: NavItem[] = [
+    { label: 'Content Editor', href: '/editor', icon: Edit },
+    { label: 'Lessen', href: '/admin/lessons', icon: BookOpen },
+    { label: 'Cursussen', href: '/admin/courses', icon: FileText },
+  ];
+
+  // Admin navigation
+  const adminItems: NavItem[] = [];
+  
+  if (isSuperAdmin) {
+    adminItems.push(
+      { label: 'Super Admin', href: '/super-admin', icon: Shield },
+      { label: 'Organisaties', href: '/super-admin', icon: Building2 }
+    );
+  }
+  
+  if (canManageOrg) {
+    adminItems.push(
+      { label: 'Org Beheer', href: '/org-admin', icon: Users },
+      { label: 'Team Overzicht', href: '/admin/team', icon: Users },
+      { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 }
+    );
+  }
+
+  // Show editor section if user has content editor or super admin role
+  const showEditorSection = isSuperAdmin || isContentEditor;
+  // Show admin section if user has any admin role
+  const showAdminSection = adminItems.length > 0;
 
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r bg-card lg:block">
@@ -53,14 +76,26 @@ export function Sidebar() {
           ))}
         </div>
 
+        {/* Content Editor Navigation */}
+        {showEditorSection && (
+          <div className="mt-6 space-y-1">
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Content
+            </p>
+            {editorItems.map((item) => (
+              <NavLink key={item.href} item={item} isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')} />
+            ))}
+          </div>
+        )}
+
         {/* Admin Navigation */}
-        {isAdmin && (
+        {showAdminSection && (
           <div className="mt-6 space-y-1">
             <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Beheer
             </p>
             {adminItems.map((item) => (
-              <NavLink key={item.href} item={item} isActive={location.pathname === item.href} />
+              <NavLink key={item.href + item.label} item={item} isActive={location.pathname === item.href} />
             ))}
           </div>
         )}

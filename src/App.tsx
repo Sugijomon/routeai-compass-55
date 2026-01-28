@@ -20,6 +20,8 @@ import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
 import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
 import DebugQuiz from "./pages/DebugQuiz";
+import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
+import QuestionEditor from "./pages/editor/QuestionEditor";
 
 export default function App() {
   return (
@@ -99,6 +101,35 @@ export default function App() {
           } 
         />
         
+        {/* Content Editor Dashboard */}
+        <Route 
+          path="/editor" 
+          element={
+            <AuthRoute requireAdmin>
+              <ContentEditorDashboard />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Question Editor */}
+        <Route 
+          path="/editor/questions/new" 
+          element={
+            <AuthRoute requireAdmin>
+              <QuestionEditor />
+            </AuthRoute>
+          } 
+        />
+        
+        <Route 
+          path="/editor/questions/:questionId/edit" 
+          element={
+            <AuthRoute requireAdmin>
+              <QuestionEditor />
+            </AuthRoute>
+          } 
+        />
+        
         {/* Admin Lessons Management */}
         <Route 
           path="/admin/lessons" 
@@ -109,7 +140,7 @@ export default function App() {
           } 
         />
         
-        <Route 
+        <Route
           path="/admin/lessons/:lessonId/edit" 
           element={
             <AuthRoute requireAdmin>
