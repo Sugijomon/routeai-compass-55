@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RoleSelector from "./components/RoleSelector";
-import SmartDashboard from "./components/SmartDashboard";
+// SmartDashboard removed - no longer needed, routes directly to role-specific dashboards
 import UserDashboard from "./components/UserDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import OrgAdminDashboard from "./pages/OrgAdminDashboard";
@@ -37,12 +37,12 @@ export default function App() {
         <Route path="/" element={<RoleSelector />} />
         <Route path="/auth" element={<Auth />} />
         
-        {/* SmartDashboard - Protected with real auth */}
+        {/* User Dashboard - Protected with real auth */}
         <Route 
           path="/dashboard" 
           element={
             <AuthRoute>
-              <SmartDashboard />
+              <UserDashboard />
             </AuthRoute>
           } 
         />
@@ -105,19 +105,10 @@ export default function App() {
         <Route path="/admin-dashboard" element={<Navigate to="/super-admin" replace />} />
         <Route path="/org-admin" element={<Navigate to="/admin" replace />} />
         
-        {/* User Dashboard */}
+        {/* User Dashboard redirect */}
         <Route 
           path="/user-dashboard" 
           element={<Navigate to="/dashboard" replace />}
-        />
-        
-        <Route 
-          path="/dashboard" 
-          element={
-            <AuthRoute>
-              <UserDashboard />
-            </AuthRoute>
-          } 
         />
         
         {/* Assessment Flow - Survey V1-V6 intake */}

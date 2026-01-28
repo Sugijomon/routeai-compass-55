@@ -73,8 +73,13 @@ export default function OrgAdminDashboard() {
     );
   }
 
+  // AuthRoute handles the case when user is not logged in
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
   return (
