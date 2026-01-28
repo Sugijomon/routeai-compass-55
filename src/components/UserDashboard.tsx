@@ -63,8 +63,14 @@ export default function UserDashboard() {
     }
   }, [profileLoading, courseLoading, hasAiRijbewijs, onboardingCourse, progressPercentage, user?.id]);
 
+  // AuthRoute handles the case when user is not logged in
+  // Just render null during the loading phase, AuthRoute will redirect if needed
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
   const handleLogout = async () => {
