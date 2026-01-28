@@ -4,10 +4,10 @@ import { useUserRole } from '@/hooks/useUserRole';
  * Returns the appropriate dashboard URL based on user role.
  * Routes based on highest privilege role (priority order):
  * - super_admin → /super-admin
- * - org_admin → /org-admin
- * - content_editor → /org-admin
- * - manager → /org-admin
- * - user → /user-dashboard
+ * - org_admin → /admin
+ * - content_editor → /editor
+ * - manager → /admin
+ * - user → /dashboard
  */
 export function useDashboardRedirect() {
   const { isSuperAdmin, isOrgAdmin, isContentEditor, isManager, isLoading } = useUserRole();
@@ -17,12 +17,16 @@ export function useDashboardRedirect() {
     return { path: '/super-admin', isLoading };
   }
   
-  if (isOrgAdmin || isContentEditor || isManager) {
-    return { path: '/org-admin', isLoading };
+  if (isContentEditor) {
+    return { path: '/editor', isLoading };
+  }
+  
+  if (isOrgAdmin || isManager) {
+    return { path: '/admin', isLoading };
   }
   
   // Default: user dashboard
-  return { path: '/user-dashboard', isLoading };
+  return { path: '/dashboard', isLoading };
 }
 
 /**
@@ -33,8 +37,11 @@ export function getDashboardPathFromRoles(roles: string[]): string {
   if (roles.includes('super_admin')) {
     return '/super-admin';
   }
-  if (roles.some(r => ['org_admin', 'content_editor', 'manager'].includes(r))) {
-    return '/org-admin';
+  if (roles.includes('content_editor')) {
+    return '/editor';
   }
-  return '/user-dashboard';
+  if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
+    return '/admin';
+  }
+  return '/dashboard';
 }

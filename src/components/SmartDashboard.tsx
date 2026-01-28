@@ -17,7 +17,7 @@ export default function SmartDashboard() {
     }
 
     // Navigate to appropriate dashboard
-    navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard', { replace: true });
+    navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
   }, [user, isAdmin, isLoading, isSigningOut, navigate]);
 
   return (

@@ -13,7 +13,7 @@ export default function RoleSelector() {
   // Redirect logged in users to dashboard
   useEffect(() => {
     if (!isLoading && user) {
-      navigate(isAdmin ? "/admin-dashboard" : "/dashboard");
+      navigate(isAdmin ? "/admin" : "/dashboard");
     }
   }, [user, isLoading, isAdmin, navigate]);
 

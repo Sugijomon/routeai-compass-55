@@ -38,9 +38,9 @@ export default function NewAssessment() {
 
   const handleBack = () => {
     if (currentUser.role === "org_admin") {
-      navigate("/admin-dashboard");
+      navigate("/admin");
     } else {
-      navigate("/user-dashboard");
+      navigate("/dashboard");
     }
   };
 
