@@ -18,6 +18,7 @@ import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
+import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
 import DebugQuiz from "./pages/DebugQuiz";
 
 export default function App() {
@@ -187,6 +188,16 @@ export default function App() {
           element={
             <AuthRoute>
               <CoursePlayer />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Lesson Questions Page - Protected */}
+        <Route 
+          path="/learn/:lessonId/questions" 
+          element={
+            <AuthRoute>
+              <LessonQuestionsPage />
             </AuthRoute>
           } 
         />

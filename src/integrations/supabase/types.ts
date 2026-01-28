@@ -100,6 +100,77 @@ export type Database = {
           },
         ]
       }
+      learning_answers: {
+        Row: {
+          answered_at: string | null
+          attempt_number: number | null
+          id: string
+          is_correct: boolean | null
+          lesson_id: string
+          org_id: string | null
+          points_earned: number | null
+          question_id: string
+          time_spent_seconds: number | null
+          user_answer: Json
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          attempt_number?: number | null
+          id?: string
+          is_correct?: boolean | null
+          lesson_id: string
+          org_id?: string | null
+          points_earned?: number | null
+          question_id: string
+          time_spent_seconds?: number | null
+          user_answer: Json
+          user_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          attempt_number?: number | null
+          id?: string
+          is_correct?: boolean | null
+          lesson_id?: string
+          org_id?: string | null
+          points_earned?: number | null
+          question_id?: string
+          time_spent_seconds?: number | null
+          user_answer?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_answers_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_answers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "learning_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_catalog: {
         Row: {
           assigned_to_roles: string[] | null
@@ -237,6 +308,79 @@ export type Database = {
           },
           {
             foreignKeyName: "learning_library_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_questions: {
+        Row: {
+          correct_answer: Json
+          created_at: string | null
+          created_by: string | null
+          explanation: string | null
+          id: string
+          is_required: boolean | null
+          lesson_id: string | null
+          order_index: number
+          org_id: string | null
+          points: number | null
+          question_config: Json
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: Json
+          created_at?: string | null
+          created_by?: string | null
+          explanation?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          order_index?: number
+          org_id?: string | null
+          points?: number | null
+          question_config?: Json
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: Json
+          created_at?: string | null
+          created_by?: string | null
+          explanation?: string | null
+          id?: string
+          is_required?: boolean | null
+          lesson_id?: string | null
+          order_index?: number
+          org_id?: string | null
+          points?: number | null
+          question_config?: Json
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_questions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_questions_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -905,6 +1049,12 @@ export type Database = {
       learning_content_type: "course" | "module" | "assessment" | "document"
       learning_difficulty_level: "basic" | "intermediate" | "advanced"
       learning_status: "draft" | "published" | "deprecated"
+      question_type:
+        | "multiple_choice"
+        | "multiple_select"
+        | "true_false"
+        | "fill_in"
+        | "essay"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1044,6 +1194,13 @@ export const Constants = {
       learning_content_type: ["course", "module", "assessment", "document"],
       learning_difficulty_level: ["basic", "intermediate", "advanced"],
       learning_status: ["draft", "published", "deprecated"],
+      question_type: [
+        "multiple_choice",
+        "multiple_select",
+        "true_false",
+        "fill_in",
+        "essay",
+      ],
     },
   },
 } as const
