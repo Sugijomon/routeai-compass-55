@@ -14,8 +14,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, ArrowLeft, Loader2, Shield, Trash2 } from 'lucide-react';
+import { Users, ArrowLeft, Loader2, Shield, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppRole } from '@/hooks/useUserRole';
 
@@ -25,10 +35,7 @@ interface UserWithRoles {
   full_name: string | null;
   org_id: string;
   organization_name?: string;
-  roles: Array<{
-    id: string;
-    role: AppRole;
-  }>;
+  roles: AppRole[];
 }
 
 const ROLE_LABELS: Record<AppRole, string> = {
@@ -40,6 +47,15 @@ const ROLE_LABELS: Record<AppRole, string> = {
   user: 'User',
 };
 
+const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
+  super_admin: 'Platform-brede toegang, alle organisaties',
+  org_admin: 'Organisatie beheer en governance',
+  content_editor: 'Lessen en trainingsmateriaal maken',
+  manager: 'Team oversight en rapportage',
+  moderator: 'Inhoud modereren',
+  user: 'Basis gebruikerstoegang',
+};
+
 const ROLE_COLORS: Record<AppRole, string> = {
   super_admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
   org_admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
@@ -49,12 +65,16 @@ const ROLE_COLORS: Record<AppRole, string> = {
   user: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
 };
 
+const ALL_ROLES: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'moderator', 'user'];
+
 export default function CrossOrgUserManagement() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterOrg, setFilterOrg] = useState<string>('all');
+  const [editingUser, setEditingUser] = useState<UserWithRoles | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
 
   // Fetch all users with their roles across all organizations
   const { data: usersData, isLoading } = useQuery({
@@ -90,7 +110,7 @@ export default function CrossOrgUserManagement() {
         organization_name: orgMap.get(profile.org_id) || 'Onbekend',
         roles: roles
           .filter(r => r.user_id === profile.id)
-          .map(r => ({ id: r.id, role: r.role as AppRole }))
+          .map(r => r.role as AppRole)
       }));
 
       return usersWithRoles;
@@ -110,22 +130,54 @@ export default function CrossOrgUserManagement() {
     }
   });
 
-  // Remove role mutation
-  const removeRole = useMutation({
-    mutationFn: async (roleId: string) => {
-      const { error } = await supabase
+  // Update roles mutation
+  const updateRolesMutation = useMutation({
+    mutationFn: async ({ userId, orgId, roles }: { userId: string; orgId: string; roles: AppRole[] }) => {
+      // First, get current roles
+      const { data: currentRoles } = await supabase
         .from('user_roles')
-        .delete()
-        .eq('id', roleId);
+        .select('role')
+        .eq('user_id', userId);
 
-      if (error) throw error;
+      const currentRolesList = (currentRoles?.map(r => r.role) || []) as AppRole[];
+      
+      // Determine roles to add and remove
+      const rolesToAdd = roles.filter(r => !currentRolesList.includes(r));
+      const rolesToRemove = currentRolesList.filter(r => !roles.includes(r));
+
+      // Remove roles
+      if (rolesToRemove.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId)
+          .in('role', rolesToRemove);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // Add roles
+      if (rolesToAdd.length > 0) {
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert(
+            rolesToAdd.map(role => ({
+              user_id: userId,
+              role: role,
+              org_id: orgId
+            }))
+          );
+
+        if (insertError) throw insertError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cross-org-users'] });
-      toast.success('Rol verwijderd');
+      toast.success('Rollen bijgewerkt');
+      setEditingUser(null);
     },
     onError: () => {
-      toast.error('Kon rol niet verwijderen');
+      toast.error('Kon rollen niet bijwerken');
     }
   });
 
@@ -137,12 +189,34 @@ export default function CrossOrgUserManagement() {
       user.organization_name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = filterRole === 'all' || 
-      user.roles.some(r => r.role === filterRole);
+      user.roles.includes(filterRole as AppRole);
     
     const matchesOrg = filterOrg === 'all' || user.org_id === filterOrg;
 
     return matchesSearch && matchesRole && matchesOrg;
   });
+
+  const handleEditRoles = (user: UserWithRoles) => {
+    setEditingUser(user);
+    setSelectedRoles(user.roles || []);
+  };
+
+  const handleSaveRoles = () => {
+    if (!editingUser) return;
+    updateRolesMutation.mutate({
+      userId: editingUser.id,
+      orgId: editingUser.org_id,
+      roles: selectedRoles
+    });
+  };
+
+  const toggleRole = (role: AppRole) => {
+    setSelectedRoles(prev => 
+      prev.includes(role)
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
@@ -200,7 +274,7 @@ export default function CrossOrgUserManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle rollen</SelectItem>
-                {(Object.keys(ROLE_LABELS) as AppRole[]).map(role => (
+                {ALL_ROLES.map(role => (
                   <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
                 ))}
               </SelectContent>
@@ -233,6 +307,7 @@ export default function CrossOrgUserManagement() {
                   <TableHead>Email</TableHead>
                   <TableHead>Organisatie</TableHead>
                   <TableHead>Rollen</TableHead>
+                  <TableHead>Acties</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -252,24 +327,22 @@ export default function CrossOrgUserManagement() {
                         {user.roles.length === 0 ? (
                           <span className="text-sm text-muted-foreground italic">Geen rollen</span>
                         ) : (
-                          user.roles.map((roleAssignment) => (
-                            <div key={roleAssignment.id} className="flex items-center gap-1">
-                              <Badge className={ROLE_COLORS[roleAssignment.role]}>
-                                {ROLE_LABELS[roleAssignment.role]}
-                              </Badge>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-5 w-5"
-                                onClick={() => removeRole.mutate(roleAssignment.id)}
-                                disabled={removeRole.isPending}
-                              >
-                                <Trash2 className="h-3 w-3 text-destructive" />
-                              </Button>
-                            </div>
+                          user.roles.map((role) => (
+                            <Badge key={role} className={ROLE_COLORS[role]}>
+                              {ROLE_LABELS[role]}
+                            </Badge>
                           ))
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleEditRoles(user)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -284,22 +357,45 @@ export default function CrossOrgUserManagement() {
         </CardContent>
       </Card>
 
-      {/* Role Reference */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Rol Referentie</CardTitle>
-          <CardDescription>Beschikbare rollen in het systeem</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {(Object.entries(ROLE_LABELS) as [AppRole, string][]).map(([role, label]) => (
-              <div key={role} className="flex items-center gap-2">
-                <Badge className={ROLE_COLORS[role]}>{label}</Badge>
+      {/* Edit Roles Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rollen Bewerken</DialogTitle>
+            <DialogDescription>
+              Wijzig de rollen voor {editingUser?.full_name || editingUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {ALL_ROLES.map((role) => (
+              <div key={role} className="flex items-start space-x-3">
+                <Checkbox
+                  id={role}
+                  checked={selectedRoles.includes(role)}
+                  onCheckedChange={() => toggleRole(role)}
+                />
+                <div className="grid gap-0.5">
+                  <Label htmlFor={role} className="font-medium cursor-pointer">
+                    {ROLE_LABELS[role]}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {ROLE_DESCRIPTIONS[role]}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingUser(null)}>
+              Annuleren
+            </Button>
+            <Button onClick={handleSaveRoles} disabled={updateRolesMutation.isPending}>
+              {updateRolesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Opslaan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
