@@ -25,6 +25,12 @@ import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
 
+// Super Admin management pages
+import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
+import ToolsLibraryManagement from "./pages/super-admin/ToolsLibraryManagement";
+import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManagement";
+import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -49,6 +55,40 @@ export default function App() {
           element={
             <AuthRoute requireAdmin>
               <SuperAdminDashboard />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Super Admin Management Pages */}
+        <Route 
+          path="/super-admin/organizations" 
+          element={
+            <AuthRoute requireAdmin>
+              <OrganizationsManagement />
+            </AuthRoute>
+          } 
+        />
+        <Route 
+          path="/super-admin/tools" 
+          element={
+            <AuthRoute requireAdmin>
+              <ToolsLibraryManagement />
+            </AuthRoute>
+          } 
+        />
+        <Route 
+          path="/super-admin/content" 
+          element={
+            <AuthRoute requireAdmin>
+              <LearningLibraryManagement />
+            </AuthRoute>
+          } 
+        />
+        <Route 
+          path="/super-admin/users" 
+          element={
+            <AuthRoute requireAdmin>
+              <CrossOrgUserManagement />
             </AuthRoute>
           } 
         />

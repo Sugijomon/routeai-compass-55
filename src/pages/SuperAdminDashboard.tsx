@@ -102,7 +102,7 @@ export default function SuperAdminDashboard() {
             </p>
           </div>
           <Button variant="outline" onClick={() => navigate('/admin')}>
-            Platform Beheer
+            Platform Instellingen
           </Button>
         </div>
 
@@ -169,7 +169,7 @@ export default function SuperAdminDashboard() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Organizations Widget */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/super-admin/organizations')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -201,7 +201,7 @@ export default function SuperAdminDashboard() {
           </Card>
 
           {/* Tools Library Widget */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/super-admin/tools')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -233,7 +233,7 @@ export default function SuperAdminDashboard() {
           </Card>
 
           {/* Content Library Widget */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/lessons')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/super-admin/content')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -265,7 +265,7 @@ export default function SuperAdminDashboard() {
           </Card>
 
           {/* User Management Widget */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/users/roles')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/super-admin/users')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -360,7 +360,7 @@ export default function SuperAdminDashboard() {
                 </CardTitle>
                 <CardDescription>Real-time platform statistieken</CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
+              <Button variant="outline" size="sm" onClick={() => navigate('/super-admin/organizations')}>
                 Volledige Analytics →
               </Button>
             </div>
