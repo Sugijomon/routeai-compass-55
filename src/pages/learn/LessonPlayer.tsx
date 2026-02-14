@@ -5,8 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
-import { LessonPlayerHeader } from '@/components/lesson-player/LessonPlayerHeader';
-import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFooter';
+import { CourseSidebar } from '@/components/lesson-player/CourseSidebar';
+import { LessonContentTopBar } from '@/components/lesson-player/LessonContentTopBar';
 import { ParagraphBlockPlayer } from '@/components/lesson-player/ParagraphBlockPlayer';
 import { VideoBlockPlayer } from '@/components/lesson-player/VideoBlockPlayer';
 import { QuizBlockPlayer } from '@/components/lesson-player/QuizBlockPlayer';
@@ -16,9 +16,9 @@ import { QuizFillInPlayer } from '@/components/lesson-player/QuizFillInPlayer';
 import { QuizEssayPlayer } from '@/components/lesson-player/QuizEssayPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
-
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function LessonPlayer() {
@@ -28,7 +28,7 @@ export default function LessonPlayer() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
-  const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
+  const [_canProceedFromBlock, setCanProceedFromBlock] = useState(true);
 
   // Get authenticated user from Supabase
   useEffect(() => {
@@ -37,13 +37,12 @@ export default function LessonPlayer() {
       setUserId(user?.id ?? null);
     };
     getUser();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUserId(session?.user?.id ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
+
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
@@ -66,7 +65,6 @@ export default function LessonPlayer() {
   // Force clear cache and refetch on mount
   useEffect(() => {
     if (lessonId) {
-      // Invalidate and refetch lesson data
       queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] });
       queryClient.invalidateQueries({ queryKey: ['lesson-progress', lessonId] });
     }
@@ -77,23 +75,21 @@ export default function LessonPlayer() {
     queryKey: ['lesson', lessonId],
     queryFn: async () => {
       if (!lessonId) throw new Error('No lesson ID');
-      
       const { data, error } = await supabase
         .from('lessons')
         .select('*')
         .eq('id', lessonId)
         .eq('is_published', true)
         .single();
-
       if (error) throw error;
       return data;
     },
     enabled: !!lessonId,
-    staleTime: 0, // Always consider data stale
-    refetchOnMount: 'always', // Always refetch when component mounts
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
-  const blocks: LessonBlock[] = Array.isArray(lesson?.blocks) 
+  const blocks: LessonBlock[] = Array.isArray(lesson?.blocks)
     ? (lesson.blocks as unknown as LessonBlock[]).sort((a, b) => a.order - b.order)
     : [];
 
@@ -105,23 +101,22 @@ export default function LessonPlayer() {
     quizResults,
     startedAt,
     isLoading: progressLoading,
-    goNext,
-    goPrevious,
-    canGoPrevious,
-    isLastBlock,
+    goNext: _goNext,
+    goPrevious: _goPrevious,
+    canGoPrevious: _canGoPrevious,
+    isLastBlock: _isLastBlock,
     markBlockCompleted,
     incrementQuizAttempt,
     recordQuizResult,
     calculateFinalScore,
     blocksCompleted,
-  } = useLessonProgress({ 
-    lessonId: lessonId || '', 
+  } = useLessonProgress({
+    lessonId: lessonId || '',
     blocks,
   });
 
   // Attempt tracking
   const {
-    attempts,
     currentAttemptNumber,
     completeCurrentAttempt,
     startNewAttempt,
@@ -138,35 +133,25 @@ export default function LessonPlayer() {
     setCanProceedFromBlock(canProceed);
   }, []);
 
-  // Check if current block is already completed (for quiz restoration)
-  const isBlockCompleted = currentBlock ? blocksCompleted.includes(currentBlock.id) : false;
+  // Check if current block is already completed
+  const _isBlockCompleted = currentBlock ? blocksCompleted.includes(currentBlock.id) : false;
 
   // Handle lesson completion
   const handleComplete = async () => {
     if (!lessonId || !userId) return;
-
     try {
-      // Mark last block as completed
       if (currentBlock) {
         markBlockCompleted(currentBlock.id);
       }
-
-      // Calculate final score from quizzes
       const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
-      
-      // Calculate time spent from started_at
       let timeSpent = 0;
       if (startedAt) {
         const startTime = new Date(startedAt).getTime();
-        const now = Date.now();
-        timeSpent = Math.round((now - startTime) / 1000);
+        timeSpent = Math.round((Date.now() - startTime) / 1000);
       }
-
-      // Determine if passed
       const lessonPassingScore = lesson?.passing_score ?? 0;
       const passed = maxPoints === 0 || percentage >= lessonPassingScore;
 
-      // Complete the current attempt
       await completeCurrentAttempt({
         score: earnedPoints,
         maxScore: maxPoints,
@@ -175,7 +160,6 @@ export default function LessonPlayer() {
         timeSpent,
       });
 
-      // Create/update completion record with quiz score (best attempt logic)
       const { error } = await supabase
         .from('user_lesson_completions')
         .upsert({
@@ -184,21 +168,15 @@ export default function LessonPlayer() {
           score: percentage,
           time_spent: timeSpent,
           completed_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,lesson_id',
-        });
-
+        }, { onConflict: 'user_id,lesson_id' });
       if (error) throw error;
 
-      // Update course progress and check if course is complete
       const courseResult = await updateCourseProgress();
 
       if (courseResult?.courseComplete) {
-        // Show course completion modal
         setCourseCompletionData(courseResult);
         setShowCourseCompletionModal(true);
       } else {
-        // Show lesson completion modal with passing score from lesson
         setCompletionData({
           score: percentage,
           earnedPoints,
@@ -226,127 +204,40 @@ export default function LessonPlayer() {
     unlockedCapability: string | null;
   } | null> => {
     if (!lessonId || !userId) return null;
-
     try {
-      // Find if this lesson is part of the specified course (or any course)
-      const courseQuery = courseId 
-        ? supabase
-            .from('course_lessons')
-            .select('course_id, courses!inner(id, title, unlocks_capability)')
-            .eq('lesson_id', lessonId)
-            .eq('course_id', courseId)
-            .maybeSingle()
-        : supabase
-            .from('course_lessons')
-            .select('course_id, courses!inner(id, title, unlocks_capability)')
-            .eq('lesson_id', lessonId)
-            .maybeSingle();
-
+      const courseQuery = courseId
+        ? supabase.from('course_lessons').select('course_id, courses!inner(id, title, unlocks_capability)').eq('lesson_id', lessonId).eq('course_id', courseId).maybeSingle()
+        : supabase.from('course_lessons').select('course_id, courses!inner(id, title, unlocks_capability)').eq('lesson_id', lessonId).maybeSingle();
       const { data: courseLesson } = await courseQuery;
-
       if (!courseLesson?.course_id) return null;
 
-      const courseData = courseLesson.courses as unknown as { 
-        id: string; 
-        title: string; 
-        unlocks_capability: string | null;
-      };
-
-      // Get total lessons in course
-      const { count: totalLessons } = await supabase
-        .from('course_lessons')
-        .select('id', { count: 'exact', head: true })
-        .eq('course_id', courseLesson.course_id);
-
-      // Get all lesson IDs in this course
-      const { data: courseLessonIds } = await supabase
-        .from('course_lessons')
-        .select('lesson_id')
-        .eq('course_id', courseLesson.course_id);
-
+      const courseData = courseLesson.courses as unknown as { id: string; title: string; unlocks_capability: string | null };
+      const { count: totalLessons } = await supabase.from('course_lessons').select('id', { count: 'exact', head: true }).eq('course_id', courseLesson.course_id);
+      const { data: courseLessonIds } = await supabase.from('course_lessons').select('lesson_id').eq('course_id', courseLesson.course_id);
       const lessonIds = courseLessonIds?.map(cl => cl.lesson_id).filter(Boolean) ?? [];
-
-      // Get completed lessons for this course (including the one we just completed)
-      const { data: completedLessons } = await supabase
-        .from('user_lesson_completions')
-        .select('lesson_id, score')
-        .eq('user_id', userId)
-        .in('lesson_id', lessonIds);
+      const { data: completedLessons } = await supabase.from('user_lesson_completions').select('lesson_id, score').eq('user_id', userId).in('lesson_id', lessonIds);
 
       const lessonsCompleted = completedLessons?.length ?? 0;
       const lessonsRequired = totalLessons ?? 1;
-      const progressPercentage = Math.round((lessonsCompleted / lessonsRequired) * 100);
-
-      // Calculate average score
+      const pPct = Math.round((lessonsCompleted / lessonsRequired) * 100);
       const averageScore = completedLessons && completedLessons.length > 0
         ? Math.round(completedLessons.reduce((sum, l) => sum + (l.score ?? 0), 0) / completedLessons.length)
         : 0;
 
-      // Get existing progress
-      const { data: existingProgress } = await supabase
-        .from('user_course_progress')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('course_id', courseLesson.course_id)
-        .maybeSingle();
-
+      const { data: existingProgress } = await supabase.from('user_course_progress').select('*').eq('user_id', userId).eq('course_id', courseLesson.course_id).maybeSingle();
       if (existingProgress) {
-        await supabase
-          .from('user_course_progress')
-          .update({
-            lessons_completed: lessonsCompleted,
-            progress_percentage: progressPercentage,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', existingProgress.id);
+        await supabase.from('user_course_progress').update({ lessons_completed: lessonsCompleted, progress_percentage: pPct, updated_at: new Date().toISOString() }).eq('id', existingProgress.id);
       } else {
-        await supabase
-          .from('user_course_progress')
-          .insert({
-            user_id: userId,
-            course_id: courseLesson.course_id,
-            lessons_completed: lessonsCompleted,
-            lessons_required: lessonsRequired,
-            progress_percentage: progressPercentage,
-          });
+        await supabase.from('user_course_progress').insert({ user_id: userId, course_id: courseLesson.course_id, lessons_completed: lessonsCompleted, lessons_required: lessonsRequired, progress_percentage: pPct });
       }
 
-      // Check if course is complete
-      if (progressPercentage >= 100) {
-        // Record course completion
-        await supabase
-          .from('user_course_completions')
-          .upsert({
-            user_id: userId,
-            course_id: courseLesson.course_id,
-            final_score: averageScore,
-            capability_unlocked: courseData.unlocks_capability,
-            completed_at: new Date().toISOString(),
-          }, {
-            onConflict: 'user_id,course_id',
-          });
-
-        // If course unlocks ai_rijbewijs, update profile
+      if (pPct >= 100) {
+        await supabase.from('user_course_completions').upsert({ user_id: userId, course_id: courseLesson.course_id, final_score: averageScore, capability_unlocked: courseData.unlocks_capability, completed_at: new Date().toISOString() }, { onConflict: 'user_id,course_id' });
         if (courseData.unlocks_capability === 'ai_rijbewijs') {
-          await supabase
-            .from('profiles')
-            .update({
-              has_ai_rijbewijs: true,
-              ai_rijbewijs_obtained_at: new Date().toISOString(),
-            })
-            .eq('id', userId);
+          await supabase.from('profiles').update({ has_ai_rijbewijs: true, ai_rijbewijs_obtained_at: new Date().toISOString() }).eq('id', userId);
         }
-
-        return {
-          courseComplete: true,
-          courseTitle: courseData.title,
-          finalScore: averageScore,
-          lessonsCompleted,
-          totalLessons: lessonsRequired,
-          unlockedCapability: courseData.unlocks_capability,
-        };
+        return { courseComplete: true, courseTitle: courseData.title, finalScore: averageScore, lessonsCompleted, totalLessons: lessonsRequired, unlockedCapability: courseData.unlocks_capability };
       }
-
       return null;
     } catch (error) {
       console.error('Error updating course progress:', error);
@@ -356,57 +247,20 @@ export default function LessonPlayer() {
 
   const handleContinue = () => {
     setShowCompletionModal(false);
-    // Navigate back to course if in course context, otherwise to training
-    navigate(courseId ? `/learn/course/${courseId}` : '/training');
+    navigate(courseId ? `/learn/course/${courseId}` : '/learn');
   };
 
-  // Handle retry - delete progress and start fresh
   const handleRetry = async () => {
     if (!lessonId || !userId) return;
-    
     setShowCompletionModal(false);
     setCompletionData(null);
-    
     try {
-      console.log('Deleting progress for lesson:', lessonId);
-      
-      // Delete progress record first - await to ensure it completes
-      const { error: progressError } = await supabase
-        .from('user_lesson_progress')
-        .delete()
-        .eq('user_id', userId)
-        .eq('lesson_id', lessonId);
-      
-      if (progressError) {
-        console.error('Error deleting progress:', progressError);
-      }
-      
-      // Delete completion record as well for fresh start
-      const { error: completionError } = await supabase
-        .from('user_lesson_completions')
-        .delete()
-        .eq('user_id', userId)
-        .eq('lesson_id', lessonId);
-        
-      if (completionError) {
-        console.error('Error deleting completion:', completionError);
-      }
-      
-      console.log('Progress deleted, starting new attempt...');
-      
-      // Start a new attempt
+      await supabase.from('user_lesson_progress').delete().eq('user_id', userId).eq('lesson_id', lessonId);
+      await supabase.from('user_lesson_completions').delete().eq('user_id', userId).eq('lesson_id', lessonId);
       await startNewAttempt();
-      
-      // Invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: ['lesson-progress', lessonId] });
-      
-      // Wait for delete to propagate, then navigate with retry flag
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Navigate with retry=true flag and force reload
-      navigate(`/learn/${lessonId}?retry=true`, { replace: true });
-      
-      // Force full page reload after navigation
+      navigate(`/learn/${lessonId}?retry=true${courseId ? `&courseId=${courseId}` : ''}`, { replace: true });
       setTimeout(() => window.location.reload(), 100);
     } catch (error) {
       console.error('Error resetting lesson progress:', error);
@@ -416,11 +270,10 @@ export default function LessonPlayer() {
 
   const handleCourseComplete = () => {
     setShowCourseCompletionModal(false);
-    navigate('/user-dashboard');
+    navigate('/dashboard');
   };
 
-  // Loading states - MUST wait for progress to load before rendering blocks
-  // This prevents flashing block 0 before saved progress loads
+  // Loading states
   if (lessonLoading || progressLoading || attemptsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -432,159 +285,120 @@ export default function LessonPlayer() {
     );
   }
 
-  // Error or not found
   if (error || !lesson) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Les niet gevonden</h2>
-            <p className="text-muted-foreground mb-4">
-              Deze les bestaat niet of is niet gepubliceerd.
-            </p>
-            <button 
-              onClick={() => navigate('/training')}
-              className="text-primary hover:underline"
-            >
-              Terug naar overzicht
-            </button>
+            <p className="text-muted-foreground mb-4">Deze les bestaat niet of is niet gepubliceerd.</p>
+            <button onClick={() => navigate('/learn')} className="text-primary hover:underline">Terug naar overzicht</button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Empty lesson
   if (blocks.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Lege les</h2>
-            <p className="text-muted-foreground mb-4">
-              Deze les heeft nog geen inhoud.
-            </p>
-            <button 
-              onClick={() => navigate('/training')}
-              className="text-primary hover:underline"
-            >
-              Terug naar overzicht
-            </button>
+            <p className="text-muted-foreground mb-4">Deze les heeft nog geen inhoud.</p>
+            <button onClick={() => navigate('/learn')} className="text-primary hover:underline">Terug naar overzicht</button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Render current block
-  const renderBlock = () => {
-    if (!currentBlock) return null;
-
-    const existingResult = quizResults[currentBlock.id];
+  // Render a single block
+  const renderBlock = (block: LessonBlock) => {
+    const existingResult = quizResults[block.id];
+    const blockCompleted = blocksCompleted.includes(block.id);
     const commonQuizProps = {
-      key: currentBlock.id,
-      attempts: quizAttempts[currentBlock.id] ?? 0,
-      onAttempt: () => incrementQuizAttempt(currentBlock.id),
+      key: block.id,
+      attempts: quizAttempts[block.id] ?? 0,
+      onAttempt: () => incrementQuizAttempt(block.id),
       onCanProceed: handleCanProceed,
       onQuizResult: recordQuizResult,
-      alreadyCompleted: isBlockCompleted,
+      alreadyCompleted: blockCompleted,
       previousResult: existingResult,
     };
 
-    switch (currentBlock.type) {
+    switch (block.type) {
       case 'paragraph':
-        return <ParagraphBlockPlayer block={currentBlock} />;
+        return <ParagraphBlockPlayer key={block.id} block={block} />;
       case 'video':
-        return (
-          <VideoBlockPlayer 
-            block={currentBlock} 
-            onCanProceed={handleCanProceed} 
-          />
-        );
+        return <VideoBlockPlayer key={block.id} block={block} onCanProceed={handleCanProceed} />;
       case 'quiz_mc':
-        return (
-          <QuizBlockPlayer
-            block={currentBlock}
-            {...commonQuizProps}
-          />
-        );
+        return <QuizBlockPlayer block={block} {...commonQuizProps} />;
       case 'quiz_ms':
-        return (
-          <QuizMultipleSelectPlayer
-            block={currentBlock}
-            {...commonQuizProps}
-          />
-        );
+        return <QuizMultipleSelectPlayer block={block} {...commonQuizProps} />;
       case 'quiz_tf':
-        return (
-          <QuizTrueFalsePlayer
-            block={currentBlock}
-            {...commonQuizProps}
-          />
-        );
+        return <QuizTrueFalsePlayer block={block} {...commonQuizProps} />;
       case 'quiz_fill':
-        return (
-          <QuizFillInPlayer
-            block={currentBlock}
-            {...commonQuizProps}
-          />
-        );
+        return <QuizFillInPlayer block={block} {...commonQuizProps} />;
       case 'quiz_essay':
-        return (
-          <QuizEssayPlayer
-            block={currentBlock}
-            {...commonQuizProps}
-          />
-        );
+        return <QuizEssayPlayer block={block} {...commonQuizProps} />;
       default: {
-        // TypeScript exhaustiveness check - this should never happen
-        const unknownBlock = currentBlock as { type: string };
-        console.warn('Unknown block type:', unknownBlock.type, currentBlock);
+        const unknownBlock = block as { type: string };
         return (
-          <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <p className="text-amber-800 dark:text-amber-200 font-medium">
-              Onbekend bloktype: {unknownBlock.type}
-            </p>
-            <pre className="text-xs mt-2 text-amber-600 dark:text-amber-400 overflow-auto">
-              {JSON.stringify(currentBlock, null, 2)}
-            </pre>
+          <div key={(block as any).id} className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <p className="text-amber-800 dark:text-amber-200 font-medium">Onbekend bloktype: {unknownBlock.type}</p>
           </div>
         );
       }
     }
   };
 
+  // Check if all blocks are done (for complete button)
+  // All blocks vertical scroll - complete button at bottom
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <LessonPlayerHeader
-        title={lesson.title}
-        currentBlock={currentBlockIndex}
-        totalBlocks={blocks.length}
-        progressPercentage={progressPercentage}
+    <div className="h-screen flex overflow-hidden bg-background">
+      {/* Left: Course Sidebar */}
+      <CourseSidebar
+        courseId={courseId}
+        currentLessonId={lessonId || ''}
+        userId={userId}
       />
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container max-w-3xl mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="pt-6">
-              {renderBlock()}
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+      {/* Right: Content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <LessonContentTopBar
+          lessonTitle={lesson.title}
+          estimatedDuration={lesson.estimated_duration}
+          progressPercentage={progressPercentage}
+          currentBlock={currentBlockIndex}
+          totalBlocks={blocks.length}
+        />
 
-      <LessonPlayerFooter
-        currentBlock={currentBlockIndex}
-        totalBlocks={blocks.length}
-        canGoNext={currentBlockIndex < blocks.length - 1}
-        canGoPrevious={canGoPrevious}
-        isLastBlock={isLastBlock}
-        onNext={goNext}
-        onPrevious={goPrevious}
-        onComplete={handleComplete}
-        nextEnabled={canProceedFromBlock || isBlockCompleted}
-      />
+        {/* Scrollable content — all blocks rendered vertically */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
+            {blocks.map((block, index) => (
+              <div key={block.id} className="scroll-mt-20">
+                {renderBlock(block)}
+              </div>
+            ))}
+
+            {/* Complete button at bottom */}
+            <div className="pt-4 pb-12 flex justify-center">
+              <Button
+                size="lg"
+                onClick={handleComplete}
+                className="gap-2 px-8"
+              >
+                <CheckCircle className="h-5 w-5" />
+                Les afronden
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
 
       {/* Completion Modal */}
       {completionData && (
