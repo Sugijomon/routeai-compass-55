@@ -23,6 +23,10 @@ import type {
   QuizTFBlock,
   QuizFillBlock,
   QuizEssayBlock,
+  HeroBlock,
+  CalloutBlock,
+  KeyTakeawaysBlock,
+  SectionHeaderBlock,
 } from '@/types/lesson-blocks';
 import { getBlockTypeLabel } from '@/types/lesson-blocks';
 
@@ -124,6 +128,26 @@ export function BlockEditorDialog({
           newErrors.question = 'Vraag is verplicht';
         }
         break;
+      case 'hero':
+        if (!editedBlock.title.trim()) {
+          newErrors.title = 'Titel is verplicht';
+        }
+        break;
+      case 'callout':
+        if (!editedBlock.body.trim()) {
+          newErrors.body = 'Inhoud is verplicht';
+        }
+        break;
+      case 'key_takeaways':
+        if (editedBlock.items.every(i => !i.trim())) {
+          newErrors.items = 'Voeg minstens één punt toe';
+        }
+        break;
+      case 'section_header':
+        if (!editedBlock.title.trim()) {
+          newErrors.title = 'Titel is verplicht';
+        }
+        break;
     }
 
     setErrors(newErrors);
@@ -199,6 +223,38 @@ export function BlockEditorDialog({
           {editedBlock.type === 'quiz_essay' && (
             <QuizEssayEditor
               block={editedBlock as QuizEssayBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'hero' && (
+            <HeroEditor
+              block={editedBlock as HeroBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'callout' && (
+            <CalloutEditor
+              block={editedBlock as CalloutBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'key_takeaways' && (
+            <KeyTakeawaysEditor
+              block={editedBlock as KeyTakeawaysBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
+
+          {editedBlock.type === 'section_header' && (
+            <SectionHeaderEditor
+              block={editedBlock as SectionHeaderBlock}
               errors={errors}
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
@@ -878,6 +934,180 @@ function QuizEssayEditor({
         <p className="text-xs text-muted-foreground">
           Punten worden toegekend na handmatige beoordeling.
         </p>
+      </div>
+    </div>
+  );
+}
+
+// Hero Block Editor
+function HeroEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: HeroBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<HeroBlock>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="title">Titel <span className="text-destructive">*</span></Label>
+        <Input
+          id="title"
+          placeholder="Welkom bij deze les"
+          value={block.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+        />
+        {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="subtitle">Subtitel (optioneel)</Label>
+        <Input
+          id="subtitle"
+          placeholder="Een korte introductiezin..."
+          value={block.subtitle || ''}
+          onChange={(e) => onChange({ subtitle: e.target.value || undefined })}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Callout Block Editor
+function CalloutEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: CalloutBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<CalloutBlock>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Variant</Label>
+        <div className="flex gap-2">
+          {(['green', 'blue', 'yellow'] as const).map((v) => (
+            <Button
+              key={v}
+              type="button"
+              variant={block.variant === v ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onChange({ variant: v })}
+            >
+              {v === 'green' ? '🟢 Tip' : v === 'blue' ? '🔵 Info' : '🟡 Waarschuwing'}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="ctitle">Titel (optioneel)</Label>
+        <Input
+          id="ctitle"
+          placeholder="Let op!"
+          value={block.title || ''}
+          onChange={(e) => onChange({ title: e.target.value || undefined })}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="body">Inhoud <span className="text-destructive">*</span></Label>
+        <Textarea
+          id="body"
+          placeholder="De inhoud van de callout..."
+          value={block.body}
+          onChange={(e) => onChange({ body: e.target.value })}
+          rows={3}
+        />
+        {errors.body && <p className="text-sm text-destructive">{errors.body}</p>}
+      </div>
+    </div>
+  );
+}
+
+// Key Takeaways Block Editor
+function KeyTakeawaysEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: KeyTakeawaysBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<KeyTakeawaysBlock>) => void;
+}) {
+  const updateItem = (idx: number, value: string) => {
+    const newItems = [...block.items];
+    newItems[idx] = value;
+    onChange({ items: newItems });
+  };
+  const addItem = () => onChange({ items: [...block.items, ''] });
+  const removeItem = (idx: number) => onChange({ items: block.items.filter((_, i) => i !== idx) });
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Kernpunten <span className="text-destructive">*</span></Label>
+        {errors.items && <p className="text-sm text-destructive">{errors.items}</p>}
+        <div className="space-y-2">
+          {block.items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <span className="text-muted-foreground text-sm w-4">{idx + 1}.</span>
+              <Input
+                placeholder={`Kernpunt ${idx + 1}`}
+                value={item}
+                onChange={(e) => updateItem(idx, e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeItem(idx)}
+                disabled={block.items.length <= 1}
+              >
+                ✕
+              </Button>
+            </div>
+          ))}
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={addItem}>
+          + Punt toevoegen
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Section Header Block Editor
+function SectionHeaderEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: SectionHeaderBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<SectionHeaderBlock>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="shtitle">Sectietitel <span className="text-destructive">*</span></Label>
+        <Input
+          id="shtitle"
+          placeholder="Deel 1: Inleiding"
+          value={block.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+        />
+        {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="shsubtitle">Ondertitel (optioneel)</Label>
+        <Input
+          id="shsubtitle"
+          placeholder="Een korte beschrijving van dit onderdeel..."
+          value={block.subtitle || ''}
+          onChange={(e) => onChange({ subtitle: e.target.value || undefined })}
+        />
       </div>
     </div>
   );

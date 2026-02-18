@@ -7,7 +7,11 @@ export type BlockType =
   | 'quiz_ms' 
   | 'quiz_tf' 
   | 'quiz_fill' 
-  | 'quiz_essay';
+  | 'quiz_essay'
+  | 'hero'
+  | 'callout'
+  | 'key_takeaways'
+  | 'section_header';
 
 export interface BaseBlock {
   id: string;
@@ -86,6 +90,35 @@ export interface QuizEssayBlock extends BaseBlock {
   // Essays don't have max_attempts or correct_answer - graded manually
 }
 
+// Hero Block - big intro card
+export interface HeroBlock extends BaseBlock {
+  type: 'hero';
+  title: string;
+  subtitle?: string;
+}
+
+// Callout Block - colored info/warning box
+export type CalloutVariant = 'green' | 'blue' | 'yellow';
+export interface CalloutBlock extends BaseBlock {
+  type: 'callout';
+  variant: CalloutVariant;
+  title?: string;
+  body: string;
+}
+
+// Key Takeaways Block - closing bullet card
+export interface KeyTakeawaysBlock extends BaseBlock {
+  type: 'key_takeaways';
+  items: string[];
+}
+
+// Section Header Block - visual hierarchy divider
+export interface SectionHeaderBlock extends BaseBlock {
+  type: 'section_header';
+  title: string;
+  subtitle?: string;
+}
+
 // Legacy alias for backward compatibility
 export type QuizBlock = QuizMCBlock;
 
@@ -96,7 +129,11 @@ export type LessonBlock =
   | QuizMSBlock 
   | QuizTFBlock 
   | QuizFillBlock 
-  | QuizEssayBlock;
+  | QuizEssayBlock
+  | HeroBlock
+  | CalloutBlock
+  | KeyTakeawaysBlock
+  | SectionHeaderBlock;
 
 // Helper to generate unique block IDs
 export function generateBlockId(): string {
@@ -172,46 +209,48 @@ export function createBlock(type: BlockType, order: number): LessonBlock {
         placeholder: 'Schrijf hier je antwoord...',
         points: 20,
       };
+    case 'hero':
+      return { id, type, order, title: '', subtitle: '' };
+    case 'callout':
+      return { id, type, order, variant: 'blue', title: '', body: '' };
+    case 'key_takeaways':
+      return { id, type, order, items: [''] };
+    case 'section_header':
+      return { id, type, order, title: '', subtitle: '' };
   }
 }
 
 // Get block type label in Dutch
 export function getBlockTypeLabel(type: BlockType): string {
   switch (type) {
-    case 'paragraph':
-      return 'Paragraaf';
-    case 'video':
-      return 'Video';
-    case 'quiz_mc':
-      return 'Quiz - Multiple Choice';
-    case 'quiz_ms':
-      return 'Quiz - Multiple Select';
-    case 'quiz_tf':
-      return 'Quiz - Waar/Onwaar';
-    case 'quiz_fill':
-      return 'Quiz - Invulvraag';
-    case 'quiz_essay':
-      return 'Quiz - Essay';
+    case 'paragraph': return 'Paragraaf';
+    case 'video': return 'Video';
+    case 'quiz_mc': return 'Quiz - Multiple Choice';
+    case 'quiz_ms': return 'Quiz - Multiple Select';
+    case 'quiz_tf': return 'Quiz - Waar/Onwaar';
+    case 'quiz_fill': return 'Quiz - Invulvraag';
+    case 'quiz_essay': return 'Quiz - Essay';
+    case 'hero': return 'Hero';
+    case 'callout': return 'Callout';
+    case 'key_takeaways': return 'Kernpunten';
+    case 'section_header': return 'Sectietitel';
   }
 }
 
 // Get block type icon
 export function getBlockTypeIcon(type: BlockType): string {
   switch (type) {
-    case 'paragraph':
-      return '📝';
-    case 'video':
-      return '🎥';
-    case 'quiz_mc':
-      return '🔘';
-    case 'quiz_ms':
-      return '☑️';
-    case 'quiz_tf':
-      return '✅';
-    case 'quiz_fill':
-      return '✏️';
-    case 'quiz_essay':
-      return '📄';
+    case 'paragraph': return '📝';
+    case 'video': return '🎥';
+    case 'quiz_mc': return '🔘';
+    case 'quiz_ms': return '☑️';
+    case 'quiz_tf': return '✅';
+    case 'quiz_fill': return '✏️';
+    case 'quiz_essay': return '📄';
+    case 'hero': return '🌟';
+    case 'callout': return '💡';
+    case 'key_takeaways': return '📌';
+    case 'section_header': return '📋';
   }
 }
 
@@ -222,27 +261,31 @@ export function isQuizBlock(type: BlockType): boolean {
 
 // Get preview text for a block
 export function getBlockPreview(block: LessonBlock, maxLength = 50): string {
-  let text = '';
-  
   switch (block.type) {
-    case 'paragraph':
-      text = block.content;
-      if (text && text.length > maxLength) {
-        return text.substring(0, 100) + '...';
-      }
-      return text || '(Leeg)';
+    case 'paragraph': {
+      const text = block.content;
+      return text && text.length > maxLength ? text.substring(0, 100) + '...' : text || '(Leeg)';
+    }
     case 'video':
       return `Video: ${block.caption || block.url || '(Geen URL)'}`;
     case 'quiz_mc':
     case 'quiz_ms':
     case 'quiz_tf':
     case 'quiz_fill':
-    case 'quiz_essay':
-      text = block.question;
+    case 'quiz_essay': {
+      const text = block.question;
       const label = getBlockTypeLabel(block.type);
-      if (text && text.length > maxLength) {
-        return `${label}: ${text.substring(0, 50)}...`;
-      }
-      return text ? `${label}: ${text}` : `${label}: (Geen vraag)`;
+      return text && text.length > maxLength
+        ? `${label}: ${text.substring(0, 50)}...`
+        : text ? `${label}: ${text}` : `${label}: (Geen vraag)`;
+    }
+    case 'hero':
+      return `Hero: ${block.title || '(Geen titel)'}`;
+    case 'callout':
+      return `Callout [${block.variant}]: ${block.title || block.body || '(Leeg)'}`;
+    case 'key_takeaways':
+      return `Kernpunten: ${block.items.length} item(s)`;
+    case 'section_header':
+      return `Sectietitel: ${block.title || '(Geen titel)'}`;
   }
 }

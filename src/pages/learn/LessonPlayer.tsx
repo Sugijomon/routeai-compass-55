@@ -14,6 +14,10 @@ import { QuizTrueFalsePlayer } from '@/components/lesson-player/QuizTrueFalsePla
 import { QuizMultipleSelectPlayer } from '@/components/lesson-player/QuizMultipleSelectPlayer';
 import { QuizFillInPlayer } from '@/components/lesson-player/QuizFillInPlayer';
 import { QuizEssayPlayer } from '@/components/lesson-player/QuizEssayPlayer';
+import { HeroBlockPlayer } from '@/components/lesson-player/HeroBlockPlayer';
+import { CalloutBlockPlayer } from '@/components/lesson-player/CalloutBlockPlayer';
+import { KeyTakeawaysBlockPlayer } from '@/components/lesson-player/KeyTakeawaysBlockPlayer';
+import { SectionHeaderBlockPlayer } from '@/components/lesson-player/SectionHeaderBlockPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
 import { Button } from '@/components/ui/button';
@@ -342,10 +346,18 @@ export default function LessonPlayer() {
         return <QuizFillInPlayer block={block} {...commonQuizProps} />;
       case 'quiz_essay':
         return <QuizEssayPlayer block={block} {...commonQuizProps} />;
+      case 'hero':
+        return <HeroBlockPlayer key={block.id} block={block} />;
+      case 'callout':
+        return <CalloutBlockPlayer key={block.id} block={block} />;
+      case 'key_takeaways':
+        return <KeyTakeawaysBlockPlayer key={block.id} block={block} />;
+      case 'section_header':
+        return <SectionHeaderBlockPlayer key={block.id} block={block} />;
       default: {
         const unknownBlock = block as { type: string };
         return (
-          <div key={(block as any).id} className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <div key={(block as { id: string }).id} className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-amber-800 dark:text-amber-200 font-medium">Onbekend bloktype: {unknownBlock.type}</p>
           </div>
         );
@@ -379,7 +391,7 @@ export default function LessonPlayer() {
         {/* Scrollable content — all blocks rendered vertically */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
-            {blocks.map((block, index) => (
+            {blocks.map((block) => (
               <div key={block.id} className="scroll-mt-20">
                 {renderBlock(block)}
               </div>
