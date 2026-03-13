@@ -152,8 +152,8 @@ export default function ExamenPage() {
     setShowCompletionModal(false);
     setCompletionData(null);
     try {
+      // Reset only local progress state — do NOT delete completion records (audit trail)
       await supabase.from('user_lesson_progress').delete().eq('user_id', userId).eq('lesson_id', lessonId);
-      await supabase.from('user_lesson_completions').delete().eq('user_id', userId).eq('lesson_id', lessonId);
       await startNewAttempt();
       setTimeout(() => window.location.reload(), 200);
     } catch (err) {
