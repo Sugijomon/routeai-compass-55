@@ -22,6 +22,9 @@ import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
 import ExamenPage from "./pages/onboarding/ExamenPage";
+import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
+import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
+import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
