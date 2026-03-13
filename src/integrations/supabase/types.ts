@@ -585,6 +585,7 @@ export type Database = {
           full_name: string | null
           has_ai_rijbewijs: boolean | null
           id: string
+          import_batch_id: string | null
           org_id: string
           updated_at: string | null
         }
@@ -596,6 +597,7 @@ export type Database = {
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
           id: string
+          import_batch_id?: string | null
           org_id?: string
           updated_at?: string | null
         }
@@ -607,6 +609,7 @@ export type Database = {
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
           id?: string
+          import_batch_id?: string | null
           org_id?: string
           updated_at?: string | null
         }

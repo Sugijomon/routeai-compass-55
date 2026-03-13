@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, UserPlus, Shield, Award, Users, Edit2, Eye, UserX } from "lucide-react";
+import { Search, UserPlus, Shield, Award, Users, Edit2, Eye, UserX, FileSpreadsheet } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useOrgUsers, useOrgUserStats, OrgUser } from "@/hooks/useOrgUsers";
 import EditRolesDialog from "./EditRolesDialog";
 import InviteUserDialog from "./InviteUserDialog";
+import BulkImportDialog from "./BulkImportDialog";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -42,6 +43,7 @@ export default function UsersManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<OrgUser | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   // Filter users by search
   const filteredUsers = users?.filter(user => {
@@ -102,10 +104,16 @@ export default function UsersManager() {
               <CardTitle>Gebruikers</CardTitle>
               <CardDescription>Beheer gebruikers en hun rollen</CardDescription>
             </div>
-            <Button onClick={() => setShowInviteDialog(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Uitnodigen
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowBulkImport(true)}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Medewerkers importeren
+              </Button>
+              <Button onClick={() => setShowInviteDialog(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Uitnodigen
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -240,6 +248,11 @@ export default function UsersManager() {
       <InviteUserDialog
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
+      />
+
+      <BulkImportDialog
+        open={showBulkImport}
+        onOpenChange={setShowBulkImport}
       />
     </div>
   );
