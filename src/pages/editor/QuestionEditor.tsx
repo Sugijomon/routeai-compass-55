@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,10 +27,12 @@ const questionTypeLabels: Record<QuestionType, string> = {
 
 export default function QuestionEditor() {
   const { questionId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const isEditing = !!questionId;
+  const prefilledLessonId = searchParams.get('lessonId') || '';
 
   // Form state
   const [questionType, setQuestionType] = useState<QuestionType>('multiple_choice');
@@ -38,7 +40,7 @@ export default function QuestionEditor() {
   const [explanation, setExplanation] = useState('');
   const [points, setPoints] = useState(1);
   const [isRequired, setIsRequired] = useState(true);
-  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
+  const [selectedLessonId, setSelectedLessonId] = useState<string>(prefilledLessonId);
   
   // Type-specific config state
   const [mcOptions, setMcOptions] = useState([
@@ -207,8 +209,17 @@ export default function QuestionEditor() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['editor-questions'] });
       queryClient.invalidateQueries({ queryKey: ['content-editor-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['vragenbank-questions'] });
+      if (selectedLessonId) {
+        queryClient.invalidateQueries({ queryKey: ['lesson-questions', selectedLessonId] });
+      }
       toast.success(isEditing ? 'Vraag bijgewerkt!' : 'Vraag aangemaakt!');
-      navigate('/editor');
+      // Navigate back: if came from a lesson, go back there; otherwise go to vragenbank
+      if (prefilledLessonId) {
+        navigate(`/admin/lessons/${prefilledLessonId}/edit`);
+      } else {
+        navigate('/editor/vragen');
+      }
     },
     onError: (error) => {
       toast.error('Fout bij opslaan: ' + (error as Error).message);
@@ -253,7 +264,7 @@ export default function QuestionEditor() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/editor')}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(prefilledLessonId ? `/admin/lessons/${prefilledLessonId}/edit` : '/editor/vragen')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
