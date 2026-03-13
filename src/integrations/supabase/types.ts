@@ -617,6 +617,51 @@ export type Database = {
           },
         ]
       }
+      rijbewijs_records: {
+        Row: {
+          earned_at: string | null
+          exam_version: string
+          id: string
+          lesson_attempt_id: string | null
+          org_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          earned_at?: string | null
+          exam_version?: string
+          id?: string
+          lesson_attempt_id?: string | null
+          org_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          earned_at?: string | null
+          exam_version?: string
+          id?: string
+          lesson_attempt_id?: string | null
+          org_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rijbewijs_records_lesson_attempt_id_fkey"
+            columns: ["lesson_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rijbewijs_records_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools_catalog: {
         Row: {
           allowed_roles: string[] | null

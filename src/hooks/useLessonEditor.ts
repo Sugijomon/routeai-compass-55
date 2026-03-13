@@ -41,7 +41,7 @@ interface UseLessonEditorReturn {
 
 export function useLessonEditor({ lesson }: UseLessonEditorProps): UseLessonEditorReturn {
   const queryClient = useQueryClient();
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Local state
   const [blocks, setBlocks] = useState<LessonBlock[]>([]);

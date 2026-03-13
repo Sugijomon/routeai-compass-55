@@ -48,7 +48,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   
   // Track if initial load is complete to prevent re-fetching on tab visibility change
   const initialLoadComplete = useRef(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<Partial<LessonProgressData> | null>(null);
 
   // Get the actual authenticated user from Supabase
