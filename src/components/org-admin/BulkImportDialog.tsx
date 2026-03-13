@@ -49,7 +49,7 @@ interface ImportResult {
   error?: string;
 }
 
-const VALID_ROLES = ["user", "manager", "org_admin"];
+
 const MAX_ROWS = 250;
 
 function normalizeRole(raw: string): string {

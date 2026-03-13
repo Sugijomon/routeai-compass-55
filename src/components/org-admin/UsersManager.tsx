@@ -249,6 +249,11 @@ export default function UsersManager() {
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
       />
+
+      <BulkImportDialog
+        open={showBulkImport}
+        onOpenChange={setShowBulkImport}
+      />
     </div>
   );
 }
