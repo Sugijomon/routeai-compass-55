@@ -138,9 +138,23 @@ export default function App() {
         {/* Content Editor Dashboard */}
         <Route 
           path="/editor" 
+          element={<Navigate to="/editor/cursussen" replace />}
+        />
+        
+        <Route 
+          path="/editor/cursussen" 
           element={
             <AuthRoute requireAdmin>
-              <ContentEditorDashboard />
+              <AdminCourses />
+            </AuthRoute>
+          } 
+        />
+        
+        <Route 
+          path="/editor/vragen" 
+          element={
+            <AuthRoute requireAdmin>
+              <AdminLessons />
             </AuthRoute>
           } 
         />

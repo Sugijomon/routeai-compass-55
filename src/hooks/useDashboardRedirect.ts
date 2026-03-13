@@ -18,7 +18,7 @@ export function useDashboardRedirect() {
   }
   
   if (isContentEditor) {
-    return { path: '/editor', isLoading };
+    return { path: '/editor/cursussen', isLoading };
   }
   
   if (isOrgAdmin || isManager) {
