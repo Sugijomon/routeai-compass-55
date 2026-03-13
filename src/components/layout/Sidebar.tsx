@@ -5,12 +5,10 @@ import {
   Award, 
   Users,
   BarChart3,
-  FileText,
-  BookOpen,
   ChevronRight,
-  Edit,
   Shield,
-  Building2
+  Building2,
+  HelpCircle
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
