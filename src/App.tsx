@@ -155,7 +155,7 @@ export default function App() {
           path="/editor/vragen" 
           element={
             <AuthRoute requireAdmin>
-              <AdminLessons />
+              <VragenBank />
             </AuthRoute>
           } 
         />
