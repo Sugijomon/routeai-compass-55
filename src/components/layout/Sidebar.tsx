@@ -35,9 +35,8 @@ export function Sidebar() {
 
   // Content Editor navigation
   const editorItems: NavItem[] = [
-    { label: 'Content Editor', href: '/editor', icon: Edit },
-    { label: 'Lessen', href: '/admin/lessons', icon: BookOpen },
-    { label: 'Cursussen', href: '/admin/courses', icon: FileText },
+    { label: 'Cursussen', href: '/editor/cursussen', icon: GraduationCap },
+    { label: 'Vragenbank', href: '/editor/vragen', icon: HelpCircle },
   ];
 
   // Admin navigation
