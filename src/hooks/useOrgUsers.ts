@@ -154,14 +154,16 @@ export function useInviteUser() {
 
   return useMutation({
     mutationFn: async ({ email, role }: { email: string; role: string }) => {
-      // For now, just show a toast - actual invitation would need edge function
-      // This is a placeholder for future implementation
-      console.log('Invite user:', email, 'with role:', role, 'to org:', orgId);
-      
-      // When inviting as org_admin, also assign 'user' role so they can switch views
-      const rolesToAssign = role === 'org_admin' ? ['org_admin', 'user'] : [role];
-      
-      return { email, role, rolesToAssign };
+      if (!orgId) throw new Error('No organization ID');
+
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: { email, role, orgId },
+      });
+
+      if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || 'Uitnodiging mislukt');
+
+      return { email, role };
     },
     onSuccess: ({ email }) => {
       queryClient.invalidateQueries({ queryKey: ['org-users', orgId] });

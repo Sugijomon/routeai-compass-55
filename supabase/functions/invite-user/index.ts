@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    // Verify caller is super_admin
+    // Verify caller is super_admin or org_admin
     const callerId = claimsData.claims.sub as string
     const { data: callerRoles } = await supabaseAdmin
       .from('user_roles')
@@ -55,8 +55,9 @@ Deno.serve(async (req) => {
       .eq('user_id', callerId)
 
     const isSuperAdmin = callerRoles?.some(r => r.role === 'super_admin')
-    if (!isSuperAdmin) {
-      return new Response(JSON.stringify({ error: 'Only super admins can invite users' }), {
+    const isOrgAdmin = callerRoles?.some(r => r.role === 'org_admin')
+    if (!isSuperAdmin && !isOrgAdmin) {
+      return new Response(JSON.stringify({ error: 'Only admins can invite users' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 403,
       })
