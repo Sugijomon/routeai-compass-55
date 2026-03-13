@@ -4,17 +4,15 @@ import { LicenseStatusCard } from '@/components/dashboard/LicenseStatusCard';
 import { TrainingProgressCard } from '@/components/dashboard/TrainingProgressCard';
 import { QuickActionsCard } from '@/components/dashboard/QuickActionsCard';
 import { AdminStatsCard } from '@/components/dashboard/AdminStatsCard';
-import { useAppStore } from '@/stores/useAppStore';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Index = () => {
-  const { currentRole, getCurrentUser, getCurrentUserProgress } = useAppStore();
-  const user = getCurrentUser();
-  const progress = getCurrentUserProgress();
-  const isAdmin = currentRole === 'org_admin';
+  const { profile } = useUserProfile();
+  const { canManageOrg } = useUserRole();
 
   return (
     <AppLayout>
-      {/* Welcome Section */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
@@ -22,10 +20,10 @@ const Index = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">
-              Welkom terug, {user?.name?.split(' ')[0] || 'Gebruiker'}!
+              Welkom terug, {profile?.full_name?.split(' ')[0] || 'Gebruiker'}!
             </h1>
             <p className="text-muted-foreground">
-              {isAdmin 
+              {canManageOrg
                 ? 'Beheer het AI-gebruik binnen je organisatie'
                 : 'Bekijk je AI authority en toegestane activiteiten'}
             </p>
@@ -33,31 +31,22 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Admin View */}
-      {isAdmin && (
+      {canManageOrg && (
         <div className="mb-8">
           <AdminStatsCard />
         </div>
       )}
 
-      {/* Main Dashboard Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* License Status - Full width on mobile, 2 cols on desktop */}
         <div className="lg:col-span-2">
-          <LicenseStatusCard license={user?.license || null} />
+          <LicenseStatusCard license={null} />
         </div>
-
-        {/* Quick Actions */}
         <div>
           <QuickActionsCard />
         </div>
-
-        {/* Training Progress */}
         <div className="lg:col-span-2">
-          <TrainingProgressCard progress={progress} />
+          <TrainingProgressCard progress={null} />
         </div>
-
-        {/* Info Card */}
         <div className="rounded-xl border bg-gradient-to-br from-primary/5 to-accent p-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
             <Shield className="h-6 w-6 text-primary" />
