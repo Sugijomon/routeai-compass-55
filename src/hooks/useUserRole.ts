@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'moderator' | 'user';
+export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'user';
 
 export interface UserRoleData {
   role: AppRole | null;
