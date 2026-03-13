@@ -11,7 +11,6 @@ import {
   BookOpen, 
   FileText,
   BarChart3,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
   Activity,
