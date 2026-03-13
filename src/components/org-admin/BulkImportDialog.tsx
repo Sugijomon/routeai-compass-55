@@ -26,7 +26,6 @@ import {
   AlertCircle,
   CheckCircle2,
   XCircle,
-  Loader2,
 } from "lucide-react";
 import { useInviteUser } from "@/hooks/useOrgUsers";
 
