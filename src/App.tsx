@@ -21,6 +21,7 @@ import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
 import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
+import VragenBank from "./pages/editor/VragenBank";
 import ExamenPage from "./pages/onboarding/ExamenPage";
 import OrganisatieOnboarding from "./pages/onboarding/OrganisatieOnboarding";
 import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
