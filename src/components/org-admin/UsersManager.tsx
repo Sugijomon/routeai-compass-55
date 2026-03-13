@@ -104,10 +104,16 @@ export default function UsersManager() {
               <CardTitle>Gebruikers</CardTitle>
               <CardDescription>Beheer gebruikers en hun rollen</CardDescription>
             </div>
-            <Button onClick={() => setShowInviteDialog(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Uitnodigen
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowBulkImport(true)}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Medewerkers importeren
+              </Button>
+              <Button onClick={() => setShowInviteDialog(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Uitnodigen
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
