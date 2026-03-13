@@ -12,23 +12,13 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
-import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Course = Tables<'courses'>;
@@ -42,10 +32,11 @@ interface CourseLessonWithDetails extends CourseLesson {
 export default function AdminCourseEdit() {
   const { courseId } = useParams<{ courseId: string }>();
   const queryClient = useQueryClient();
-  const dashboardUrl = useDashboardRedirect();
-  
+
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
+  const [isAddLessonsOpen, setIsAddLessonsOpen] = useState(false);
+  const [selectedLessonIds, setSelectedLessonIds] = useState<Set<string>>(new Set());
+  const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -78,10 +69,7 @@ export default function AdminCourseEdit() {
       if (!courseId) return [];
       const { data, error } = await supabase
         .from('course_lessons')
-        .select(`
-          *,
-          lesson:lessons(*)
-        `)
+        .select('*, lesson:lessons(*)')
         .eq('course_id', courseId)
         .order('sequence_order', { ascending: true });
       if (error) throw error;
@@ -93,14 +81,13 @@ export default function AdminCourseEdit() {
     enabled: !!courseId,
   });
 
-  // Fetch all published lessons for selection
-  const { data: availableLessons } = useQuery({
-    queryKey: ['available-lessons'],
+  // Fetch all lessons for selection modal
+  const { data: allLessons } = useQuery({
+    queryKey: ['all-lessons-for-course'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lessons')
         .select('*')
-        .eq('is_published', true)
         .order('title');
       if (error) throw error;
       return data as Lesson[];
@@ -121,13 +108,17 @@ export default function AdminCourseEdit() {
     }
   }, [course]);
 
+  // Filter lessons not yet in course
+  const lessonsNotInCourse = allLessons?.filter(
+    (lesson) => !courseLessons?.some((cl) => cl.lesson_id === lesson.id)
+  ) ?? [];
+
   // Save course metadata
   const handleSaveMetadata = async () => {
     if (!courseId || !formData.title.trim()) {
       toast.error('Titel is verplicht');
       return;
     }
-
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -142,7 +133,6 @@ export default function AdminCourseEdit() {
           updated_at: new Date().toISOString(),
         })
         .eq('id', courseId);
-
       if (error) throw error;
       toast.success('Cursus opgeslagen');
       queryClient.invalidateQueries({ queryKey: ['course', courseId] });
@@ -154,33 +144,31 @@ export default function AdminCourseEdit() {
     }
   };
 
-  // Add lesson to course
-  const handleAddLesson = async () => {
-    if (!courseId || !selectedLessonId) return;
-
-    // Check if lesson is already in course
-    if (courseLessons?.some((cl) => cl.lesson_id === selectedLessonId)) {
-      toast.error('Deze les zit al in de cursus');
-      return;
-    }
-
-    const nextOrder = (courseLessons?.length ?? 0) + 1;
+  // Add multiple lessons at once
+  const handleAddSelectedLessons = async () => {
+    if (!courseId || selectedLessonIds.size === 0) return;
+    setIsAdding(true);
+    const startOrder = (courseLessons?.length ?? 0) + 1;
+    const ids = Array.from(selectedLessonIds);
 
     try {
-      const { error } = await supabase.from('course_lessons').insert({
+      const inserts = ids.map((lessonId, i) => ({
         course_id: courseId,
-        lesson_id: selectedLessonId,
-        sequence_order: nextOrder,
+        lesson_id: lessonId,
+        sequence_order: startOrder + i,
         is_required: true,
-      });
-
+      }));
+      const { error } = await supabase.from('course_lessons').insert(inserts);
       if (error) throw error;
-      toast.success('Les toegevoegd');
-      setSelectedLessonId('');
+      toast.success(`${ids.length} ${ids.length === 1 ? 'les' : 'lessen'} toegevoegd`);
+      setSelectedLessonIds(new Set());
+      setIsAddLessonsOpen(false);
       refetchLessons();
     } catch (error) {
-      console.error('Error adding lesson:', error);
-      toast.error('Kon les niet toevoegen');
+      console.error('Error adding lessons:', error);
+      toast.error('Kon lessen niet toevoegen');
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -191,18 +179,13 @@ export default function AdminCourseEdit() {
         .from('course_lessons')
         .delete()
         .eq('id', courseLessonId);
-
       if (error) throw error;
 
-      // Reorder remaining lessons
+      // Reorder remaining
       const remaining = courseLessons?.filter((cl) => cl.id !== courseLessonId) ?? [];
       for (let i = 0; i < remaining.length; i++) {
-        await supabase
-          .from('course_lessons')
-          .update({ sequence_order: i + 1 })
-          .eq('id', remaining[i].id);
+        await supabase.from('course_lessons').update({ sequence_order: i + 1 }).eq('id', remaining[i].id);
       }
-
       toast.success('Les verwijderd');
       refetchLessons();
     } catch (error) {
@@ -214,7 +197,6 @@ export default function AdminCourseEdit() {
   // Move lesson up/down
   const handleMoveLesson = async (index: number, direction: 'up' | 'down') => {
     if (!courseLessons) return;
-
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= courseLessons.length) return;
 
@@ -223,16 +205,9 @@ export default function AdminCourseEdit() {
 
     try {
       await Promise.all([
-        supabase
-          .from('course_lessons')
-          .update({ sequence_order: newIndex + 1 })
-          .eq('id', current.id),
-        supabase
-          .from('course_lessons')
-          .update({ sequence_order: index + 1 })
-          .eq('id', swap.id),
+        supabase.from('course_lessons').update({ sequence_order: newIndex + 1 }).eq('id', current.id),
+        supabase.from('course_lessons').update({ sequence_order: index + 1 }).eq('id', swap.id),
       ]);
-
       refetchLessons();
     } catch (error) {
       console.error('Error moving lesson:', error);
@@ -247,7 +222,6 @@ export default function AdminCourseEdit() {
         .from('course_lessons')
         .update({ is_required: isRequired })
         .eq('id', courseLessonId);
-
       if (error) throw error;
       refetchLessons();
     } catch (error) {
@@ -255,18 +229,23 @@ export default function AdminCourseEdit() {
     }
   };
 
-  // Filter out lessons already in the course
-  const lessonsNotInCourse = availableLessons?.filter(
-    (lesson) => !courseLessons?.some((cl) => cl.lesson_id === lesson.id)
-  );
+  // Toggle lesson selection in modal
+  const toggleLessonSelection = (id: string) => {
+    setSelectedLessonIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (courseLoading) {
     return (
       <AdminPageLayout
         title="Cursus bewerken"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl.path },
-          { label: 'Cursussen', href: '/admin/courses' },
+          { label: 'Content Editor', href: '/editor/cursussen' },
+          { label: 'Cursussen', href: '/editor/cursussen' },
           { label: 'Laden...' },
         ]}
       >
@@ -282,15 +261,15 @@ export default function AdminCourseEdit() {
       <AdminPageLayout
         title="Cursus niet gevonden"
         breadcrumbs={[
-          { label: 'Admin', href: dashboardUrl.path },
-          { label: 'Cursussen', href: '/admin/courses' },
+          { label: 'Content Editor', href: '/editor/cursussen' },
+          { label: 'Cursussen', href: '/editor/cursussen' },
           { label: 'Fout' },
         ]}
       >
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8 text-center">
           <p className="text-destructive">Cursus niet gevonden.</p>
           <Button variant="outline" className="mt-4" asChild>
-            <Link to="/admin/courses">
+            <Link to="/editor/cursussen">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Terug naar cursussen
             </Link>
@@ -304,13 +283,13 @@ export default function AdminCourseEdit() {
     <AdminPageLayout
       title="Cursus Bewerken"
       breadcrumbs={[
-        { label: 'Admin', href: dashboardUrl.path },
-        { label: 'Cursussen', href: '/admin/courses' },
+        { label: 'Content Editor', href: '/editor/cursussen' },
+        { label: 'Cursussen', href: '/editor/cursussen' },
         { label: formData.title || 'Bewerken' },
       ]}
       actions={
         <Button variant="outline" asChild>
-          <Link to="/admin/courses">
+          <Link to="/editor/cursussen">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Terug
           </Link>
@@ -321,39 +300,19 @@ export default function AdminCourseEdit() {
         {/* Main Content - Lessons */}
         <div className="space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Lessen in Cursus</CardTitle>
-              <CardDescription>
-                Voeg lessen toe en bepaal de volgorde. Gebruikers doorlopen de lessen in deze volgorde.
-              </CardDescription>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Lessen in Cursus</CardTitle>
+                <CardDescription>
+                  Voeg lessen toe en bepaal de volgorde. Gebruikers doorlopen de lessen in deze volgorde.
+                </CardDescription>
+              </div>
+              <Button onClick={() => { setSelectedLessonIds(new Set()); setIsAddLessonsOpen(true); }}>
+                <Plus className="mr-2 h-4 w-4" />
+                Lessen toevoegen
+              </Button>
             </CardHeader>
             <CardContent>
-              {/* Add Lesson */}
-              <div className="flex gap-2 mb-4">
-                <Select value={selectedLessonId} onValueChange={setSelectedLessonId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecteer een les om toe te voegen..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lessonsNotInCourse?.map((lesson) => (
-                      <SelectItem key={lesson.id} value={lesson.id}>
-                        {lesson.title}
-                      </SelectItem>
-                    ))}
-                    {lessonsNotInCourse?.length === 0 && (
-                      <SelectItem value="" disabled>
-                        Alle gepubliceerde lessen zijn al toegevoegd
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleAddLesson} disabled={!selectedLessonId}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Toevoegen
-                </Button>
-              </div>
-
-              {/* Lessons Table */}
               {courseLessons && courseLessons.length > 0 ? (
                 <Table>
                   <TableHeader>
@@ -424,7 +383,7 @@ export default function AdminCourseEdit() {
                 </Table>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  Nog geen lessen toegevoegd. Selecteer een les hierboven om te beginnen.
+                  Nog geen lessen toegevoegd. Klik op "Lessen toevoegen" om te beginnen.
                 </div>
               )}
             </CardContent>
@@ -443,9 +402,7 @@ export default function AdminCourseEdit() {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, title: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                 />
               </div>
 
@@ -454,9 +411,7 @@ export default function AdminCourseEdit() {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, description: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   rows={3}
                 />
               </div>
@@ -467,10 +422,7 @@ export default function AdminCourseEdit() {
                   id="required_for_onboarding"
                   checked={formData.required_for_onboarding}
                   onCheckedChange={(checked) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      required_for_onboarding: checked as boolean,
-                    }))
+                    setFormData((prev) => ({ ...prev, required_for_onboarding: checked as boolean }))
                   }
                 />
               </div>
@@ -480,12 +432,7 @@ export default function AdminCourseEdit() {
                 <Input
                   id="unlocks_capability"
                   value={formData.unlocks_capability}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      unlocks_capability: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, unlocks_capability: e.target.value }))}
                   placeholder="bijv. ai_rijbewijs"
                 />
               </div>
@@ -499,10 +446,7 @@ export default function AdminCourseEdit() {
                   max={100}
                   value={formData.passing_threshold}
                   onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      passing_threshold: parseInt(e.target.value) || 80,
-                    }))
+                    setFormData((prev) => ({ ...prev, passing_threshold: parseInt(e.target.value) || 80 }))
                   }
                 />
               </div>
@@ -510,24 +454,16 @@ export default function AdminCourseEdit() {
               <div className="flex items-center justify-between pt-2 border-t">
                 <div>
                   <Label htmlFor="is_published">Gepubliceerd</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Zichtbaar voor gebruikers
-                  </p>
+                  <p className="text-xs text-muted-foreground">Zichtbaar voor gebruikers</p>
                 </div>
                 <Switch
                   id="is_published"
                   checked={formData.is_published}
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({ ...prev, is_published: checked }))
-                  }
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_published: checked }))}
                 />
               </div>
 
-              <Button
-                className="w-full"
-                onClick={handleSaveMetadata}
-                disabled={isSaving}
-              >
+              <Button className="w-full" onClick={handleSaveMetadata} disabled={isSaving}>
                 {isSaving ? 'Opslaan...' : 'Wijzigingen Opslaan'}
               </Button>
             </CardContent>
@@ -559,6 +495,63 @@ export default function AdminCourseEdit() {
           </Card>
         </div>
       </div>
+
+      {/* Add Lessons Modal */}
+      <Dialog open={isAddLessonsOpen} onOpenChange={setIsAddLessonsOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Lessen toevoegen</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto -mx-6 px-6 py-2">
+            {lessonsNotInCourse.length > 0 ? (
+              <div className="space-y-1">
+                {lessonsNotInCourse.map((lesson) => (
+                  <label
+                    key={lesson.id}
+                    className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                  >
+                    <Checkbox
+                      checked={selectedLessonIds.has(lesson.id)}
+                      onCheckedChange={() => toggleLessonSelection(lesson.id)}
+                      className="mt-0.5"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm leading-tight">{lesson.title}</p>
+                      {lesson.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                          {lesson.description}
+                        </p>
+                      )}
+                      <Badge variant={lesson.is_published ? 'default' : 'secondary'} className="mt-1 text-[10px] px-1.5 py-0">
+                        {lesson.is_published ? 'Gepubliceerd' : 'Concept'}
+                      </Badge>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Alle beschikbare lessen zijn al aan deze cursus toegevoegd.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setIsAddLessonsOpen(false)}>
+              Annuleren
+            </Button>
+            <Button
+              onClick={handleAddSelectedLessons}
+              disabled={selectedLessonIds.size === 0 || isAdding}
+            >
+              {isAdding
+                ? 'Toevoegen...'
+                : `Toevoegen (${selectedLessonIds.size})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminPageLayout>
   );
 }
