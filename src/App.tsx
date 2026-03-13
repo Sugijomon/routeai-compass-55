@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RoleSelector from "./components/RoleSelector";
-// SmartDashboard removed - no longer needed, routes directly to role-specific dashboards
 import UserDashboard from "./components/UserDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import OrgAdminDashboard from "./pages/OrgAdminDashboard";
@@ -22,6 +21,7 @@ import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
 import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
+import ExamenPage from "./pages/onboarding/ExamenPage";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
@@ -273,6 +273,16 @@ export default function App() {
           } 
         />
         
+        
+        {/* Onboarding Exam — accessible without rijbewijs */}
+        <Route
+          path="/onboarding/examen"
+          element={
+            <AuthRoute skipRijbewijsCheck>
+              <ExamenPage />
+            </AuthRoute>
+          }
+        />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
