@@ -101,7 +101,17 @@ export function LessonMetadataPanel({
             <SelectContent>
               <SelectItem value="standalone">Standalone</SelectItem>
               <SelectItem value="course_module">Course Module</SelectItem>
+              <SelectItem value="ai_literacy_exam">AI Literacy Examen</SelectItem>
             </SelectContent>
+          </Select>
+          {examConflict && (
+            <Alert className="mt-2 border-orange-500/50 bg-orange-500/10">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-xs text-orange-700">
+                Let op: er bestaat al een gepubliceerd AI Literacy Examen. Als u dit examen ook publiceert, kan het systeem willekeurig één van beide tonen. Archiveer het oude examen eerst.
+              </AlertDescription>
+            </Alert>
+          )}
           </Select>
         </div>
 
