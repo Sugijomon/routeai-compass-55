@@ -20,8 +20,8 @@ interface EditRolesDialogProps {
 }
 
 const AVAILABLE_ROLES = [
-  { id: 'org_admin', label: 'Org Admin', description: 'Volledige organisatiebeheer' },
-  { id: 'manager', label: 'Manager', description: 'Teambeheer en rapportages' },
+  { id: 'org_admin', label: 'AI Verantwoordelijke', description: 'Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.' },
+  { id: 'manager', label: 'Team Manager', description: 'Teambeheer en rapportages' },
   { id: 'user', label: 'Gebruiker', description: 'Standaard toegang' },
 ];
 

@@ -90,7 +90,7 @@ export default function OrgAdminDashboard() {
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">Org Admin</Badge>
+            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">AI Verantwoordelijke</Badge>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{profile?.full_name || user.email}</span>

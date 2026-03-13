@@ -40,18 +40,18 @@ interface UserWithRoles {
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
-  org_admin: 'Org Admin',
+  org_admin: 'AI Verantwoordelijke',
   content_editor: 'Content Editor',
-  manager: 'Manager',
+  manager: 'Team Manager',
   moderator: 'Moderator',
-  user: 'User',
+  user: 'Gebruiker',
 };
 
 const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   super_admin: 'Platform-brede toegang, alle organisaties',
-  org_admin: 'Organisatie beheer en governance',
+  org_admin: 'Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.',
   content_editor: 'Lessen en trainingsmateriaal maken',
-  manager: 'Team oversight en rapportage',
+  manager: 'Teambeheer en rapportages',
   moderator: 'Inhoud modereren',
   user: 'Basis gebruikerstoegang',
 };

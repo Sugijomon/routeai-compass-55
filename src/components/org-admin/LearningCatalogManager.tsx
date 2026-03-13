@@ -69,8 +69,8 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 const ROLE_OPTIONS = [
   { value: "user", label: "Gebruiker" },
-  { value: "manager", label: "Manager" },
-  { value: "org_admin", label: "Org Admin" },
+  { value: "manager", label: "Team Manager" },
+  { value: "org_admin", label: "AI Verantwoordelijke" },
   { value: "content_editor", label: "Content Editor" },
 ];
 

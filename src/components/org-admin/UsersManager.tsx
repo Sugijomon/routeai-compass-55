@@ -29,9 +29,9 @@ import { nl } from "date-fns/locale";
 
 const ROLE_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   super_admin: { label: "Super Admin", variant: "destructive" },
-  org_admin: { label: "Org Admin", variant: "default" },
+  org_admin: { label: "AI Verantwoordelijke", variant: "default" },
   content_editor: { label: "Content Editor", variant: "secondary" },
-  manager: { label: "Manager", variant: "secondary" },
+  manager: { label: "Team Manager", variant: "secondary" },
   moderator: { label: "Moderator", variant: "outline" },
   user: { label: "Gebruiker", variant: "outline" },
 };
@@ -81,16 +81,16 @@ export default function UsersManager() {
           tooltip="Gebruikers die hun AI-Rijbewijs hebben behaald"
         />
         <StatCard
-          title="Org Admins"
+          title="AI Verantwoordelijken"
           value={stats.roleBreakdown['org_admin'] || 0}
           icon={Shield}
-          tooltip="Gebruikers met beheerdersrechten"
+          tooltip="Gebruikers met AI Verantwoordelijke rol"
         />
         <StatCard
-          title="Managers"
+          title="Team Managers"
           value={stats.roleBreakdown['manager'] || 0}
           icon={Users}
-          tooltip="Gebruikers met manager rol"
+          tooltip="Gebruikers met Team Manager rol"
         />
       </div>
 
