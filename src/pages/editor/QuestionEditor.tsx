@@ -27,10 +27,12 @@ const questionTypeLabels: Record<QuestionType, string> = {
 
 export default function QuestionEditor() {
   const { questionId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const isEditing = !!questionId;
+  const prefilledLessonId = searchParams.get('lessonId') || '';
 
   // Form state
   const [questionType, setQuestionType] = useState<QuestionType>('multiple_choice');
@@ -38,7 +40,7 @@ export default function QuestionEditor() {
   const [explanation, setExplanation] = useState('');
   const [points, setPoints] = useState(1);
   const [isRequired, setIsRequired] = useState(true);
-  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
+  const [selectedLessonId, setSelectedLessonId] = useState<string>(prefilledLessonId);
   
   // Type-specific config state
   const [mcOptions, setMcOptions] = useState([
