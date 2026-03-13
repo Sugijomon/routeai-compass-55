@@ -15,21 +15,13 @@ import {
   AlertCircle,
   CheckCircle,
   Activity,
-  LogOut,
-  Shield
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { profile } = useUserProfile();
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/auth", { replace: true });
-  };
+  const { user } = useAuth();
 
   // Fetch platform-wide KPIs
   const { data: platformKPIs } = useQuery({
@@ -73,25 +65,7 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge className="bg-red-500/10 text-red-600 border-red-500/20">Super Admin</Badge>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{profile?.full_name || user.email}</span>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Uitloggen
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <AppLayout>
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Page Header */}
         <div className="flex items-center justify-between">
@@ -419,6 +393,6 @@ export default function SuperAdminDashboard() {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </AppLayout>
   );
 }
