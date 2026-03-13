@@ -274,6 +274,16 @@ export default function App() {
         />
         
         
+        {/* Onboarding Exam — accessible without rijbewijs */}
+        <Route
+          path="/onboarding/examen"
+          element={
+            <AuthRoute skipRijbewijsCheck>
+              <ExamenPage />
+            </AuthRoute>
+          }
+        />
+        
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
         
