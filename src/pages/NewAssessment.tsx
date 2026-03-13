@@ -4,54 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Shield,
-  ClipboardCheck,
-  Search,
-} from "lucide-react";
-import { useAppStore } from "@/store/useAppStore";
+import { ArrowLeft, ArrowRight, Shield, ClipboardCheck, Search } from "lucide-react";
 
-/**
- * NewAssessment - Survey V1-V6 intake flow
- * 
- * This is the ONLY way for users to start using AI.
- * There is NO use-case catalog or predefined applications.
- * 
- * Survey Structure:
- * V1: Technical Setup
- * V2: Archetype
- * V3: Impact
- * V4: Data
- * V5: Oversight
- * V6: Safeguard (conditional)
- */
 export default function NewAssessment() {
   const navigate = useNavigate();
-  const { currentUser } = useAppStore();
   const [contextInput, setContextInput] = useState("");
-
-  if (!currentUser) {
-    return null;
-  }
-
-  const handleBack = () => {
-    if (currentUser.role === "org_admin") {
-      navigate("/admin");
-    } else {
-      navigate("/dashboard");
-    }
-  };
-
-  const handleStartSurvey = () => {
-    // TODO: Navigate to V1 step when survey is implemented
-    console.log("Starting survey with context:", contextInput);
-  };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -59,29 +19,26 @@ export default function NewAssessment() {
             <h1 className="text-xl font-semibold">RouteAI</h1>
             <Badge variant="outline">Start AI Check</Badge>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleBack}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Terug
           </Button>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="space-y-8">
-          {/* Hero Section */}
           <div className="text-center space-y-4">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-2">
               <ClipboardCheck className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-3xl font-bold">Wat wil je doen?</h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Beschrijf in je eigen woorden wat je wilt bereiken met AI. 
+              Beschrijf in je eigen woorden wat je wilt bereiken met AI.
               We begeleiden je door de juiste stappen.
             </p>
           </div>
 
-          {/* Context Input - Framing aid only */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Beschrijf je toepassing</CardTitle>
@@ -99,19 +56,13 @@ export default function NewAssessment() {
                   className="pl-10 h-12 text-base"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                💡 Dit veld is puur ter context. Je selecteert geen vooraf goedgekeurde toepassingen.
-              </p>
             </CardContent>
           </Card>
 
-          {/* Survey Preview */}
           <Card className="bg-muted/30 border-dashed">
             <CardHeader>
               <CardTitle className="text-base">Survey V1–V6</CardTitle>
-              <CardDescription>
-                Je doorloopt 6 stappen om je AI-gebruik te beoordelen
-              </CardDescription>
+              <CardDescription>Je doorloopt 6 stappen om je AI-gebruik te beoordelen</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3">
@@ -124,9 +75,7 @@ export default function NewAssessment() {
                   { id: "V6", title: "Safeguard", desc: "Extra check (indien nodig)" },
                 ].map((step) => (
                   <div key={step.id} className="flex items-center gap-3 p-3 rounded-lg bg-background">
-                    <Badge variant="outline" className="font-mono">
-                      {step.id}
-                    </Badge>
+                    <Badge variant="outline" className="font-mono">{step.id}</Badge>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{step.title}</p>
                       <p className="text-xs text-muted-foreground">{step.desc}</p>
@@ -137,27 +86,11 @@ export default function NewAssessment() {
             </CardContent>
           </Card>
 
-          {/* CTA */}
           <div className="flex justify-center">
-            <Button 
-              size="lg" 
-              className="gap-2 px-8"
-              onClick={handleStartSurvey}
-            >
+            <Button size="lg" className="gap-2 px-8">
               Start AI Check
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </div>
-
-          {/* Info Box */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 text-center">
-            <p className="text-blue-800 text-sm">
-              <strong>ℹ️ Hoe werkt het?</strong>
-            </p>
-            <p className="text-blue-700 text-sm mt-1">
-              Na de AI Check krijg je een dynamisch advies (Route + Archetype) 
-              gebaseerd op jouw specifieke situatie — niet op vooraf vastgestelde use-cases.
-            </p>
           </div>
         </div>
       </main>
