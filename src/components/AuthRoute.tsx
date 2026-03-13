@@ -13,7 +13,7 @@ interface AuthRouteProps {
 export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck = false }: AuthRouteProps) {
   const { user, isLoading, isAdmin, isSigningOut } = useAuth();
   const location = useLocation();
-  const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel } = useUserProfile();
+  const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isContentEditor } = useUserProfile();
 
   // CRITICAL: Don't redirect while signing out - this prevents the loop
   if (isSigningOut) {
@@ -49,8 +49,12 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
     return <>{children}</>;
   }
 
+  // Admin/editor roles bypass the rijbewijs exam requirement entirely
+  const isAdminOrEditor = isSuperAdmin || isOrgAdmin || isContentEditor;
+
   // Regular user without AI Rijbewijs → redirect to exam
-  if (!hasAiRijbewijs && location.pathname !== '/onboarding/examen') {
+  // But admin/editor roles bypass this check
+  if (!hasAiRijbewijs && !isAdminOrEditor && location.pathname !== '/onboarding/examen') {
     return <Navigate to="/onboarding/examen" replace />;
   }
 
