@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserRole } from '@/hooks/useUserRole';
 import { LessonBlock } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
@@ -28,6 +29,7 @@ import { toast } from 'sonner';
 export default function ExamenPage() {
   const { user, signOut } = useAuth();
   const { hasAiRijbewijs, refetch: refetchProfile } = useUserProfile();
+  const { isSuperAdmin, isOrgAdmin, isContentEditor } = useUserRole();
   const navigate = useNavigate();
   const userId = user?.id ?? null;
   const [_canProceedFromBlock, setCanProceedFromBlock] = useState(true);
@@ -41,6 +43,13 @@ export default function ExamenPage() {
     passingScore: number;
     attemptNumber: number;
   } | null>(null);
+
+  // Admin/editor roles bypass the exam - redirect to dashboard if they land here
+  useEffect(() => {
+    if (isSuperAdmin || isOrgAdmin || isContentEditor) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isSuperAdmin, isOrgAdmin, isContentEditor, navigate]);
 
   // If user already has rijbewijs, redirect to dashboard
   useEffect(() => {
