@@ -13,9 +13,9 @@ import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
-  org_admin: 'Organisatie Admin',
+  org_admin: 'AI Verantwoordelijke',
   content_editor: 'Content Editor',
-  manager: 'Manager',
+  manager: 'Team Manager',
   moderator: 'Moderator',
   user: 'Gebruiker',
 };
