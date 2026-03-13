@@ -288,6 +288,16 @@ export default function App() {
           }
         />
         
+        {/* Organisatie onboarding — admin, no rijbewijs required */}
+        <Route
+          path="/onboarding/organisatie"
+          element={
+            <AuthRoute requireAdmin skipRijbewijsCheck>
+              <OrganisatieOnboarding />
+            </AuthRoute>
+          }
+        />
+        
         {/* Shadow AI Survey */}
         <Route path="/shadow-survey" element={<AuthRoute><ShadowSurveyPage /></AuthRoute>} />
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
