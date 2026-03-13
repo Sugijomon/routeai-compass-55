@@ -516,6 +516,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          plan_type: string
           postal_code: string | null
           sector: string | null
           settings: Json | null
@@ -538,6 +539,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          plan_type?: string
           postal_code?: string | null
           sector?: string | null
           settings?: Json | null
@@ -560,6 +562,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          plan_type?: string
           postal_code?: string | null
           sector?: string | null
           settings?: Json | null
