@@ -209,8 +209,17 @@ export default function QuestionEditor() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['editor-questions'] });
       queryClient.invalidateQueries({ queryKey: ['content-editor-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['vragenbank-questions'] });
+      if (selectedLessonId) {
+        queryClient.invalidateQueries({ queryKey: ['lesson-questions', selectedLessonId] });
+      }
       toast.success(isEditing ? 'Vraag bijgewerkt!' : 'Vraag aangemaakt!');
-      navigate('/editor');
+      // Navigate back: if came from a lesson, go back there; otherwise go to vragenbank
+      if (prefilledLessonId) {
+        navigate(`/admin/lessons/${prefilledLessonId}/edit`);
+      } else {
+        navigate('/editor/vragen');
+      }
     },
     onError: (error) => {
       toast.error('Fout bij opslaan: ' + (error as Error).message);
