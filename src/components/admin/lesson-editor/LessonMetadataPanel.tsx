@@ -15,6 +15,7 @@ import { AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface LessonMetadataPanelProps {
+  lessonId?: string;
   title: string;
   description: string;
   lessonType: string;
