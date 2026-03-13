@@ -287,6 +287,11 @@ export default function App() {
           }
         />
         
+        {/* Shadow AI Survey */}
+        <Route path="/shadow-survey" element={<AuthRoute><ShadowSurveyPage /></AuthRoute>} />
+        <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
+        <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
+        
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
         
