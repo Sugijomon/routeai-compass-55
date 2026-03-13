@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users, ArrowLeft, Loader2, Shield, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppRole } from '@/hooks/useUserRole';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface UserWithRoles {
   id: string;
@@ -216,183 +217,185 @@ export default function CrossOrgUserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin')} className="mb-2">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Terug naar Dashboard
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Users className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Cross-Org User Management</h1>
-            <p className="text-muted-foreground">
-              Role management voor alle gebruikers over organisaties heen
-            </p>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="space-y-1">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin')} className="mb-2">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Terug naar Dashboard
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Cross-Org User Management</h1>
+              <p className="text-muted-foreground">
+                Role management voor alle gebruikers over organisaties heen
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Zoek op naam, email, organisatie..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <Select value={filterOrg} onValueChange={setFilterOrg}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Organisatie" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle organisaties</SelectItem>
-                {organizations?.map(org => (
-                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterRole} onValueChange={setFilterRole}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Rol" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle rollen</SelectItem>
-                {ALL_ROLES.map(role => (
-                  <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Gebruikers ({filteredUsers?.length || 0})
-          </CardTitle>
-          <CardDescription>
-            Overzicht van alle gebruikers en hun rollen over alle organisaties
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredUsers && filteredUsers.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Naam</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Organisatie</TableHead>
-                  <TableHead>Rollen</TableHead>
-                  <TableHead>Acties</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      {user.full_name || 'Onbekend'}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {user.email || '—'}
-                    </TableCell>
-                    <TableCell>
-                      {user.organization_name}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {user.roles.length === 0 ? (
-                          <span className="text-sm text-muted-foreground italic">Geen rollen</span>
-                        ) : (
-                          user.roles.map((role) => (
-                            <Badge key={role} className={ROLE_COLORS[role]}>
-                              {ROLE_LABELS[role]}
-                            </Badge>
-                          ))
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleEditRoles(user)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Geen gebruikers gevonden</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Roles Dialog */}
-      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rollen Bewerken</DialogTitle>
-            <DialogDescription>
-              Wijzig de rollen voor {editingUser?.full_name || editingUser?.email}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {ALL_ROLES.map((role) => (
-              <div key={role} className="flex items-start space-x-3">
-                <Checkbox
-                  id={role}
-                  checked={selectedRoles.includes(role)}
-                  onCheckedChange={() => toggleRole(role)}
-                />
-                <div className="grid gap-0.5">
-                  <Label htmlFor={role} className="font-medium cursor-pointer">
-                    {ROLE_LABELS[role]}
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {ROLE_DESCRIPTIONS[role]}
-                  </p>
+        {/* Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Zoek op naam, email, organisatie..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingUser(null)}>
-              Annuleren
-            </Button>
-            <Button onClick={handleSaveRoles} disabled={updateRolesMutation.isPending}>
-              {updateRolesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Opslaan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+              <Select value={filterOrg} onValueChange={setFilterOrg}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Organisatie" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle organisaties</SelectItem>
+                  {organizations?.map(org => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterRole} onValueChange={setFilterRole}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle rollen</SelectItem>
+                  {ALL_ROLES.map(role => (
+                    <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Users Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Gebruikers ({filteredUsers?.length || 0})
+            </CardTitle>
+            <CardDescription>
+              Overzicht van alle gebruikers en hun rollen over alle organisaties
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredUsers && filteredUsers.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Naam</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Organisatie</TableHead>
+                    <TableHead>Rollen</TableHead>
+                    <TableHead>Acties</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
+                        {user.full_name || 'Onbekend'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.email || '—'}
+                      </TableCell>
+                      <TableCell>
+                        {user.organization_name}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.length === 0 ? (
+                            <span className="text-sm text-muted-foreground italic">Geen rollen</span>
+                          ) : (
+                            user.roles.map((role) => (
+                              <Badge key={role} className={ROLE_COLORS[role]}>
+                                {ROLE_LABELS[role]}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleEditRoles(user)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Geen gebruikers gevonden</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Edit Roles Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rollen Bewerken</DialogTitle>
+              <DialogDescription>
+                Wijzig de rollen voor {editingUser?.full_name || editingUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {ALL_ROLES.map((role) => (
+                <div key={role} className="flex items-start space-x-3">
+                  <Checkbox
+                    id={role}
+                    checked={selectedRoles.includes(role)}
+                    onCheckedChange={() => toggleRole(role)}
+                  />
+                  <div className="grid gap-0.5">
+                    <Label htmlFor={role} className="font-medium cursor-pointer">
+                      {ROLE_LABELS[role]}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {ROLE_DESCRIPTIONS[role]}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingUser(null)}>
+                Annuleren
+              </Button>
+              <Button onClick={handleSaveRoles} disabled={updateRolesMutation.isPending}>
+                {updateRolesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Opslaan
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AppLayout>
   );
 }

@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2, Plus, Edit, Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 type OrganizationStatus = 'active' | 'inactive' | 'trial' | 'expired' | 'test' | 'suspended';
 
@@ -133,184 +134,186 @@ export default function OrganizationsManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin')} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Terug naar Dashboard
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Building2 className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Organisaties Beheer</h1>
-              <p className="text-muted-foreground">
-                Beheer alle organisaties op het RouteAI platform
-              </p>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin')} className="mb-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Terug naar Dashboard
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Organisaties Beheer</h1>
+                <p className="text-muted-foreground">
+                  Beheer alle organisaties op het RouteAI platform
+                </p>
+              </div>
             </div>
           </div>
+
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nieuwe Organisatie
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nieuwe Organisatie Aanmaken</DialogTitle>
+                <DialogDescription>
+                  Maak een nieuwe organisatie aan op het platform
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="org-name">Organisatie Naam</Label>
+                  <Input
+                    id="org-name"
+                    placeholder="Bedrijfsnaam B.V."
+                    value={newOrgName}
+                    onChange={(e) => setNewOrgName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="org-email">Contact Email</Label>
+                  <Input
+                    id="org-email"
+                    type="email"
+                    placeholder="contact@bedrijf.nl"
+                    value={newOrgEmail}
+                    onChange={(e) => setNewOrgEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Annuleren
+                </Button>
+                <Button onClick={handleCreateOrg} disabled={createOrg.isPending}>
+                  {createOrg.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {createOrg.isPending ? 'Bezig...' : 'Aanmaken'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nieuwe Organisatie
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nieuwe Organisatie Aanmaken</DialogTitle>
-              <DialogDescription>
-                Maak een nieuwe organisatie aan op het platform
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="org-name">Organisatie Naam</Label>
-                <Input
-                  id="org-name"
-                  placeholder="Bedrijfsnaam B.V."
-                  value={newOrgName}
-                  onChange={(e) => setNewOrgName(e.target.value)}
-                />
+        {/* Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Zoek op naam, email..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="org-email">Contact Email</Label>
-                <Input
-                  id="org-email"
-                  type="email"
-                  placeholder="contact@bedrijf.nl"
-                  value={newOrgEmail}
-                  onChange={(e) => setNewOrgEmail(e.target.value)}
-                />
-              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle statussen</SelectItem>
+                  <SelectItem value="active">Actief</SelectItem>
+                  <SelectItem value="trial">Trial</SelectItem>
+                  <SelectItem value="test">Test</SelectItem>
+                  <SelectItem value="inactive">Inactief</SelectItem>
+                  <SelectItem value="expired">Verlopen</SelectItem>
+                  <SelectItem value="suspended">Geschorst</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Annuleren
-              </Button>
-              <Button onClick={handleCreateOrg} disabled={createOrg.isPending}>
-                {createOrg.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {createOrg.isPending ? 'Bezig...' : 'Aanmaken'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          </CardContent>
+        </Card>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Zoek op naam, email..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+        {/* Organizations Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Organisaties ({filteredOrgs?.length || 0})</CardTitle>
+            <CardDescription>
+              Overzicht van alle organisaties op het platform
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle statussen</SelectItem>
-                <SelectItem value="active">Actief</SelectItem>
-                <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="test">Test</SelectItem>
-                <SelectItem value="inactive">Inactief</SelectItem>
-                <SelectItem value="expired">Verlopen</SelectItem>
-                <SelectItem value="suspended">Geschorst</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Organizations Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Organisaties ({filteredOrgs?.length || 0})</CardTitle>
-          <CardDescription>
-            Overzicht van alle organisaties op het platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredOrgs && filteredOrgs.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Naam</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Abonnement</TableHead>
-                  <TableHead>Sector</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Aangemaakt</TableHead>
-                  <TableHead className="text-right">Acties</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrgs.map((org) => (
-                  <TableRow key={org.id}>
-                    <TableCell className="font-medium">{org.name}</TableCell>
-                    <TableCell>
-                      <Badge className={STATUS_COLORS[org.status || 'inactive']}>
-                        {STATUS_LABELS[org.status || 'inactive'] || org.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="capitalize">{org.subscription_type || 'Basic'}</TableCell>
-                    <TableCell>{org.sector || '—'}</TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {org.contact_person && <div>{org.contact_person}</div>}
-                        {org.contact_email && (
-                          <div className="text-muted-foreground">{org.contact_email}</div>
-                        )}
-                        {!org.contact_person && !org.contact_email && '—'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {org.created_at 
-                        ? new Date(org.created_at).toLocaleDateString('nl-NL')
-                        : '—'
-                      }
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => navigate(`/super-admin/organizations/${org.id}`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            ) : filteredOrgs && filteredOrgs.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Naam</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Abonnement</TableHead>
+                    <TableHead>Sector</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Aangemaakt</TableHead>
+                    <TableHead className="text-right">Acties</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-8">
-              <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Geen organisaties gevonden</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrgs.map((org) => (
+                    <TableRow key={org.id}>
+                      <TableCell className="font-medium">{org.name}</TableCell>
+                      <TableCell>
+                        <Badge className={STATUS_COLORS[org.status || 'inactive']}>
+                          {STATUS_LABELS[org.status || 'inactive'] || org.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="capitalize">{org.subscription_type || 'Basic'}</TableCell>
+                      <TableCell>{org.sector || '—'}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {org.contact_person && <div>{org.contact_person}</div>}
+                          {org.contact_email && (
+                            <div className="text-muted-foreground">{org.contact_email}</div>
+                          )}
+                          {!org.contact_person && !org.contact_email && '—'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {org.created_at 
+                          ? new Date(org.created_at).toLocaleDateString('nl-NL')
+                          : '—'
+                        }
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => navigate(`/super-admin/organizations/${org.id}`)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-8">
+                <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Geen organisaties gevonden</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
   );
 }
