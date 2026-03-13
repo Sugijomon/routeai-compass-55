@@ -38,7 +38,7 @@ export function getDashboardPathFromRoles(roles: string[]): string {
     return '/super-admin';
   }
   if (roles.includes('content_editor')) {
-    return '/editor';
+    return '/editor/cursussen';
   }
   if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
     return '/admin';

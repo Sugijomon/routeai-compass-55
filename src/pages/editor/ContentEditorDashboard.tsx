@@ -1,385 +1,285 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BookOpen, 
-  FileText, 
-  HelpCircle, 
-  Plus,
-  BarChart3,
-  Eye,
-  Edit,
-  GraduationCap
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { GraduationCap, BookOpen, CheckCircle, Plus, Trash2 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CreateLessonDialog } from '@/components/admin/CreateLessonDialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 export default function ContentEditorDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('lessons');
-  const [isCreateLessonOpen, setIsCreateLessonOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
-  // Fetch content statistics
+  // Fetch courses with lesson counts
+  const { data: courses, isLoading } = useQuery({
+    queryKey: ['editor-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*, course_lessons(id)')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['content-editor-stats'],
+    queryKey: ['editor-course-stats'],
     queryFn: async () => {
-      const [lessonsRes, questionsRes, libraryRes] = await Promise.all([
-        supabase.from('lessons').select('id, is_published'),
-        supabase.from('learning_questions').select('id'),
-        supabase.from('learning_library').select('id, status')
+      const [coursesRes, lessonsRes] = await Promise.all([
+        supabase.from('courses').select('id, is_published'),
+        supabase.from('lessons').select('id'),
       ]);
-
-      const lessons = lessonsRes.data || [];
-      const libraryItems = libraryRes.data || [];
-      
+      const allCourses = coursesRes.data || [];
       return {
-        totalLessons: lessons.length,
-        publishedLessons: lessons.filter(l => l.is_published).length,
-        totalQuestions: questionsRes.data?.length || 0,
-        totalLibraryItems: libraryItems.length,
-        publishedLibraryItems: libraryItems.filter(i => i.status === 'published').length,
+        totalCourses: allCourses.length,
+        totalLessons: lessonsRes.data?.length || 0,
+        totalPublished: allCourses.filter((c) => c.is_published).length,
       };
-    }
+    },
   });
 
-  // Fetch lessons
-  const { data: lessons, isLoading: lessonsLoading } = useQuery({
-    queryKey: ['editor-lessons'],
-    queryFn: async () => {
+  const handleCreate = async () => {
+    if (!newTitle.trim()) {
+      toast.error('Titel is verplicht');
+      return;
+    }
+    setIsCreating(true);
+    try {
       const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      
-      if (error) throw error;
-      return data;
-    }
-  });
+        .from('courses')
+        .insert({ title: newTitle.trim(), description: newDescription.trim() || null })
+        .select('id')
+        .single();
 
-  // Fetch questions
-  const { data: questions, isLoading: questionsLoading } = useQuery({
-    queryKey: ['editor-questions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('learning_questions')
-        .select('*, lessons(title)')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      
       if (error) throw error;
-      return data;
+      setIsCreateOpen(false);
+      setNewTitle('');
+      setNewDescription('');
+      navigate(`/admin/courses/${data.id}/edit`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Kon cursus niet aanmaken');
+    } finally {
+      setIsCreating(false);
     }
-  });
+  };
 
-  // Fetch learning library items
-  const { data: libraryItems, isLoading: libraryLoading } = useQuery({
-    queryKey: ['editor-library'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('learning_library')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      // Delete course_lessons first, then course
+      await supabase.from('course_lessons').delete().eq('course_id', deleteId);
+      const { error } = await supabase.from('courses').delete().eq('id', deleteId);
       if (error) throw error;
-      return data;
+      toast.success('Cursus verwijderd');
+      queryClient.invalidateQueries({ queryKey: ['editor-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['editor-course-stats'] });
+    } catch (err) {
+      console.error(err);
+      toast.error('Kon cursus niet verwijderen');
+    } finally {
+      setDeleteId(null);
     }
-  });
-
-  const publishedPercentage = stats?.totalLessons 
-    ? Math.round((stats.publishedLessons / stats.totalLessons) * 100)
-    : 0;
+  };
 
   return (
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Content Editor</h1>
-            <p className="text-muted-foreground">
-              Beheer leermodules, lessen en vragen voor het RouteAI platform
-            </p>
-          </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Mijn Cursussen</h1>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nieuwe cursus
+          </Button>
         </div>
 
-        {/* Statistics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Stats */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            title="Cursussen"
+            value={statsLoading ? '-' : stats?.totalCourses || 0}
+            icon={GraduationCap}
+            isLoading={statsLoading}
+          />
           <StatCard
             title="Lessen"
             value={statsLoading ? '-' : stats?.totalLessons || 0}
-            subtitle={`${stats?.publishedLessons || 0} gepubliceerd`}
             icon={BookOpen}
+            isLoading={statsLoading}
           />
           <StatCard
-            title="Vragen"
-            value={statsLoading ? '-' : stats?.totalQuestions || 0}
-            subtitle="Alle vraagtypen"
-            icon={HelpCircle}
-          />
-          <StatCard
-            title="Bibliotheek"
-            value={statsLoading ? '-' : stats?.totalLibraryItems || 0}
-            subtitle={`${stats?.publishedLibraryItems || 0} gepubliceerd`}
-            icon={GraduationCap}
-          />
-          <StatCard
-            title="Publicatie Status"
-            value={statsLoading ? '-' : `${publishedPercentage}%`}
-            subtitle="Content gepubliceerd"
-            icon={BarChart3}
+            title="Gepubliceerd"
+            value={statsLoading ? '-' : stats?.totalPublished || 0}
+            icon={CheckCircle}
+            isLoading={statsLoading}
           />
         </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Snelle Acties</CardTitle>
-            <CardDescription>Maak nieuwe content aan</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Button 
-              onClick={() => setIsCreateLessonOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Nieuwe Les
-            </Button>
-            <Button 
-              onClick={() => navigate('/editor/questions/new')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Nieuwe Vraag
-            </Button>
-            <Button 
-              onClick={() => navigate('/admin/courses')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Nieuwe Cursus
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Content Library */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Content Bibliotheek</CardTitle>
-            <CardDescription>Bekijk en beheer alle content</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="lessons">
-                  Lessen ({stats?.totalLessons || 0})
-                </TabsTrigger>
-                <TabsTrigger value="questions">
-                  Vragen ({stats?.totalQuestions || 0})
-                </TabsTrigger>
-                <TabsTrigger value="library">
-                  Bibliotheek ({stats?.totalLibraryItems || 0})
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Lessons Tab */}
-              <TabsContent value="lessons" className="mt-0">
-                {lessonsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-20 w-full" />
-                    ))}
-                  </div>
-                ) : lessons && lessons.length > 0 ? (
-                  <div className="space-y-3">
-                    {lessons.map((lesson) => (
-                      <div
-                        key={lesson.id}
-                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+        {/* Course list */}
+        {isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 rounded-xl" />
+            ))}
+          </div>
+        ) : courses && courses.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => {
+              const lessonCount = (course.course_lessons as any[])?.length ?? 0;
+              return (
+                <Card
+                  key={course.id}
+                  className="group relative overflow-hidden transition-shadow hover:shadow-md"
+                >
+                  <CardContent className="flex h-full flex-col p-5">
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <h3 className="font-semibold leading-tight line-clamp-2">
+                        {course.title}
+                      </h3>
+                      <Badge
+                        variant={course.is_published ? 'default' : 'secondary'}
+                        className="shrink-0"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <BookOpen className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{lesson.title}</p>
-                            {lesson.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">
-                                {lesson.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant={lesson.is_published ? 'default' : 'secondary'}>
-                                {lesson.is_published ? 'Gepubliceerd' : 'Concept'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/admin/lessons/${lesson.id}/edit`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/learn/${lesson.id}`)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={FileText}
-                    title="Nog geen lessen"
-                    description="Maak je eerste les aan om te beginnen."
-                    action={{
-                      label: 'Nieuwe Les',
-                      onClick: () => setIsCreateLessonOpen(true),
-                    }}
-                  />
-                )}
-              </TabsContent>
+                        {course.is_published ? 'Gepubliceerd' : 'Concept'}
+                      </Badge>
+                    </div>
 
-              {/* Questions Tab */}
-              <TabsContent value="questions" className="mt-0">
-                {questionsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-20 w-full" />
-                    ))}
-                  </div>
-                ) : questions && questions.length > 0 ? (
-                  <div className="space-y-3">
-                    {questions.map((question) => (
-                      <div
-                        key={question.id}
-                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium line-clamp-1">
-                            {question.question_text}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Les: {(question as any).lessons?.title || 'Onbekend'}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline">
-                              {question.question_type.replace('_', ' ')}
-                            </Badge>
-                            <Badge variant="secondary">
-                              {question.points} {question.points === 1 ? 'punt' : 'punten'}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/editor/questions/${question.id}/edit`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={HelpCircle}
-                    title="Nog geen vragen"
-                    description="Voeg vragen toe aan lessen om de kennis van gebruikers te testen."
-                    action={{
-                      label: 'Nieuwe Vraag',
-                      onClick: () => navigate('/editor/questions/new'),
-                    }}
-                  />
-                )}
-              </TabsContent>
+                    {course.description && (
+                      <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
+                        {course.description}
+                      </p>
+                    )}
 
-              {/* Library Tab */}
-              <TabsContent value="library" className="mt-0">
-                {libraryLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-20 w-full" />
-                    ))}
-                  </div>
-                ) : libraryItems && libraryItems.length > 0 ? (
-                  <div className="space-y-3">
-                    {libraryItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <GraduationCap className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{item.title}</p>
-                            {item.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">
-                                {item.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant={item.status === 'published' ? 'default' : 'secondary'}>
-                                {item.status === 'published' ? 'Gepubliceerd' : 'Concept'}
-                              </Badge>
-                              <Badge variant="outline">
-                                {item.content_type}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/super-admin`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    <div className="mt-auto flex items-center justify-between pt-3 border-t">
+                      <span className="text-xs text-muted-foreground">
+                        {lessonCount} {lessonCount === 1 ? 'les' : 'lessen'}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/admin/courses/${course.id}/edit`)}
+                        >
+                          Bewerken
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setDeleteId(course.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={GraduationCap}
-                    title="Bibliotheek is leeg"
-                    description="Voeg cursussen en modules toe aan de leerbibliotheek."
-                  />
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            icon={GraduationCap}
+            title="Maak je eerste cursus aan"
+            description="Cursussen bundelen lessen in een logische volgorde. Begin met het aanmaken van je eerste cursus."
+            action={{
+              label: 'Nieuwe cursus',
+              onClick: () => setIsCreateOpen(true),
+            }}
+          />
+        )}
       </div>
 
-      {/* Create Lesson Dialog */}
-      <CreateLessonDialog
-        open={isCreateLessonOpen}
-        onOpenChange={setIsCreateLessonOpen}
-      />
+      {/* Create dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nieuwe cursus aanmaken</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-title">Titel *</Label>
+              <Input
+                id="new-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="bijv. AI Rijbewijs Basiscursus"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-desc">Beschrijving</Label>
+              <Textarea
+                id="new-desc"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Korte omschrijving van de cursus..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+              Annuleren
+            </Button>
+            <Button onClick={handleCreate} disabled={isCreating || !newTitle.trim()}>
+              {isCreating ? 'Aanmaken...' : 'Aanmaken & bewerken'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cursus verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deze actie kan niet ongedaan worden. De cursus en alle koppelingen met lessen worden verwijderd. De lessen zelf blijven bestaan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }

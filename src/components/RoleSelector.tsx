@@ -27,7 +27,7 @@ export default function RoleSelector() {
     if (isSuperAdmin) {
       path = '/super-admin';
     } else if (isContentEditor) {
-      path = '/editor';
+      path = '/editor/cursussen';
     } else if (isOrgAdmin || isManager) {
       path = '/admin';
     }

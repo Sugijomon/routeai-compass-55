@@ -145,7 +145,7 @@ export default function App() {
           path="/editor/cursussen" 
           element={
             <AuthRoute requireAdmin>
-              <AdminCourses />
+              <ContentEditorDashboard />
             </AuthRoute>
           } 
         />
