@@ -665,6 +665,170 @@ export type Database = {
           },
         ]
       }
+      shadow_survey_reports: {
+        Row: {
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          import_status: string | null
+          imported_to_routeai_at: string | null
+          org_id: string
+          report_data: Json
+          survey_version: string
+        }
+        Insert: {
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          import_status?: string | null
+          imported_to_routeai_at?: string | null
+          org_id: string
+          report_data?: Json
+          survey_version?: string
+        }
+        Update: {
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          import_status?: string | null
+          imported_to_routeai_at?: string | null
+          org_id?: string
+          report_data?: Json
+          survey_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shadow_survey_reports_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shadow_survey_runs: {
+        Row: {
+          ai_maturity_score: number | null
+          amnesty_acknowledged: boolean | null
+          department: string | null
+          id: string
+          org_id: string
+          role_description: string | null
+          submitted_at: string | null
+          survey_version: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_maturity_score?: number | null
+          amnesty_acknowledged?: boolean | null
+          department?: string | null
+          id?: string
+          org_id: string
+          role_description?: string | null
+          submitted_at?: string | null
+          survey_version?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_maturity_score?: number | null
+          amnesty_acknowledged?: boolean | null
+          department?: string | null
+          id?: string
+          org_id?: string
+          role_description?: string | null
+          submitted_at?: string | null
+          survey_version?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shadow_survey_runs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_discoveries: {
+        Row: {
+          data_types_used: string[] | null
+          department: string | null
+          id: string
+          org_id: string
+          resulting_tool_id: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          survey_run_id: string | null
+          tool_name: string
+          use_case: string | null
+          use_frequency: string | null
+          vendor: string | null
+        }
+        Insert: {
+          data_types_used?: string[] | null
+          department?: string | null
+          id?: string
+          org_id: string
+          resulting_tool_id?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          survey_run_id?: string | null
+          tool_name: string
+          use_case?: string | null
+          use_frequency?: string | null
+          vendor?: string | null
+        }
+        Update: {
+          data_types_used?: string[] | null
+          department?: string | null
+          id?: string
+          org_id?: string
+          resulting_tool_id?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          survey_run_id?: string | null
+          tool_name?: string
+          use_case?: string | null
+          use_frequency?: string | null
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_discoveries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_discoveries_resulting_tool_id_fkey"
+            columns: ["resulting_tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_discoveries_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "shadow_survey_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools_catalog: {
         Row: {
           allowed_roles: string[] | null
