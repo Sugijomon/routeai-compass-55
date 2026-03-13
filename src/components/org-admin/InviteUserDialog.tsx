@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Mail } from "lucide-react";
 import { useInviteUser } from "@/hooks/useOrgUsers";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface InviteUserDialogProps {
   open: boolean;
@@ -28,11 +31,36 @@ interface InviteUserDialogProps {
 export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialogProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("user");
+  const [checking, setChecking] = useState(false);
   const inviteUser = useInviteUser();
+  const { profile } = useUserProfile();
 
   const handleInvite = async () => {
     if (!email.trim()) return;
-    
+
+    // Check org_admin limit before inviting
+    if (role === "org_admin" && profile?.org_id) {
+      setChecking(true);
+      try {
+        const { count, error } = await supabase
+          .from("user_roles")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", profile.org_id)
+          .eq("role", "org_admin");
+
+        if (!error && (count ?? 0) >= 2) {
+          toast.error(
+            "Deze organisatie heeft al 2 AI Verantwoordelijken. Verwijder eerst een bestaande AI Verantwoordelijke om een nieuwe toe te voegen."
+          );
+          setChecking(false);
+          return;
+        }
+      } catch {
+        // Allow invite to proceed; DB trigger is the hard guard
+      }
+      setChecking(false);
+    }
+
     await inviteUser.mutateAsync({ email: email.trim(), role });
     setEmail("");
     setRole("user");
@@ -92,8 +120,8 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuleren
           </Button>
-          <Button onClick={handleInvite} disabled={!email.trim() || inviteUser.isPending}>
-            {inviteUser.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleInvite} disabled={!email.trim() || inviteUser.isPending || checking}>
+            {(inviteUser.isPending || checking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Uitnodigen
           </Button>
         </DialogFooter>

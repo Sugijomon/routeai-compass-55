@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import {
   Dialog,
@@ -28,6 +28,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useInviteUser } from "@/hooks/useOrgUsers";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -48,7 +50,6 @@ interface ImportResult {
   success: boolean;
   error?: string;
 }
-
 
 const MAX_ROWS = 250;
 
@@ -81,6 +82,7 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inviteUser = useInviteUser();
+  const { profile } = useUserProfile();
 
   const validRows = rows.filter((r) => !r.error);
   const errorRows = rows.filter((r) => !!r.error);
@@ -97,6 +99,47 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
     if (!val) reset();
     onOpenChange(val);
   };
+
+  // Validate org_admin limit when rows change to step 2
+  useEffect(() => {
+    if (step !== 2 || rows.length === 0 || !profile?.org_id) return;
+
+    const orgAdminImportCount = rows.filter((r) => !r.error && r.rol === "org_admin").length;
+    if (orgAdminImportCount === 0) return;
+
+    const checkLimit = async () => {
+      const { count, error } = await supabase
+        .from("user_roles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", profile.org_id)
+        .eq("role", "org_admin");
+
+      if (error) return;
+
+      const currentAdmins = count ?? 0;
+      const slotsAvailable = Math.max(0, 2 - currentAdmins);
+
+      if (orgAdminImportCount > slotsAvailable) {
+        // Mark excess org_admin rows with error
+        let adminsSeen = 0;
+        setRows((prev) =>
+          prev.map((row) => {
+            if (row.error || row.rol !== "org_admin") return row;
+            adminsSeen++;
+            if (adminsSeen > slotsAvailable) {
+              return {
+                ...row,
+                error: "Limiet: max. 2 AI Verantwoordelijken per organisatie",
+              };
+            }
+            return row;
+          })
+        );
+      }
+    };
+
+    checkLimit();
+  }, [step, rows.length, profile?.org_id]);
 
   const parseFile = useCallback((file: File) => {
     const reader = new FileReader();
