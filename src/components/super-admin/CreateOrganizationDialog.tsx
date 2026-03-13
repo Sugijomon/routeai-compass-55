@@ -130,20 +130,51 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         .single();
 
       if (error) throw error;
-      return result;
+
+      // Invite the contact person as org_admin
+      let inviteError: string | null = null;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData?.session?.access_token;
+
+        const response = await supabase.functions.invoke('invite-user', {
+          body: {
+            email: data.email,
+            role: 'org_admin',
+            orgId: result.id,
+            name: data.contactPerson,
+          },
+        });
+
+        if (response.error) {
+          inviteError = response.error.message || 'Uitnodiging mislukt';
+        } else if (response.data && !response.data.success) {
+          inviteError = response.data.error || 'Uitnodiging mislukt';
+        }
+      } catch (err: unknown) {
+        inviteError = err instanceof Error ? err.message : 'Uitnodiging mislukt';
+      }
+
+      return { ...result, inviteError, email: data.email };
     },
     onSuccess: (data) => {
-      toast({
-        title: "Organisatie aangemaakt",
-        description: `Organisatie "${data.name}" is succesvol aangemaakt.`,
-      });
       queryClient.invalidateQueries({ queryKey: ["organizations-all"] });
       queryClient.invalidateQueries({ queryKey: ["total-users-platform"] });
       setOpen(false);
       form.reset();
-      
-      // Log for future welcome email feature
-      console.log("[CreateOrganization] New org created:", data.id, "- Welcome email pending");
+
+      if (data.inviteError) {
+        toast({
+          title: "Organisatie aangemaakt",
+          description: `Organisatie "${data.name}" is aangemaakt, maar de uitnodiging naar ${data.email} is mislukt: ${data.inviteError}. Verstuur de uitnodiging handmatig.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Organisatie aangemaakt en uitnodiging verstuurd",
+          description: `Organisatie "${data.name}" is succesvol aangemaakt en een uitnodiging is verstuurd naar ${data.email}.`,
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
