@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -11,8 +12,10 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LessonMetadataPanelProps {
+  lessonId?: string;
   title: string;
   description: string;
   lessonType: string;
@@ -28,6 +31,7 @@ interface LessonMetadataPanelProps {
 }
 
 export function LessonMetadataPanel({
+  lessonId,
   title,
   description,
   lessonType,
@@ -41,6 +45,24 @@ export function LessonMetadataPanel({
   onPassingScoreChange,
   onPublishedChange,
 }: LessonMetadataPanelProps) {
+  const [examConflict, setExamConflict] = useState(false);
+
+  useEffect(() => {
+    if (lessonType !== 'ai_literacy_exam') {
+      setExamConflict(false);
+      return;
+    }
+    const check = async () => {
+      const { count } = await supabase
+        .from('lessons')
+        .select('id', { count: 'exact', head: true })
+        .eq('lesson_type', 'ai_literacy_exam')
+        .eq('is_published', true)
+        .neq('id', lessonId ?? '');
+      setExamConflict((count ?? 0) > 0);
+    };
+    check();
+  }, [lessonType, lessonId]);
   return (
     <div className="rounded-lg border bg-card p-4 space-y-4">
       <h3 className="font-semibold">Les Instellingen</h3>
@@ -79,8 +101,17 @@ export function LessonMetadataPanel({
             <SelectContent>
               <SelectItem value="standalone">Standalone</SelectItem>
               <SelectItem value="course_module">Course Module</SelectItem>
+              <SelectItem value="ai_literacy_exam">AI Literacy Examen</SelectItem>
             </SelectContent>
           </Select>
+          {examConflict && (
+            <Alert className="mt-2 border-orange-500/50 bg-orange-500/10">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-xs text-orange-700">
+                Let op: er bestaat al een gepubliceerd AI Literacy Examen. Als u dit examen ook publiceert, kan het systeem willekeurig één van beide tonen. Archiveer het oude examen eerst.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         <div className="space-y-2">

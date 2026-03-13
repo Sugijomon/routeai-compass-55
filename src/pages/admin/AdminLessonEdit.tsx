@@ -138,6 +138,7 @@ export default function AdminLessonEdit() {
         {/* Sidebar - Metadata Panel */}
         <div className="space-y-4">
           <LessonMetadataPanel
+            lessonId={lessonId}
             title={editor.title}
             description={editor.description}
             lessonType={editor.lessonType}
