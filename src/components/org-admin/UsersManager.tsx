@@ -81,16 +81,16 @@ export default function UsersManager() {
           tooltip="Gebruikers die hun AI-Rijbewijs hebben behaald"
         />
         <StatCard
-          title="Org Admins"
+          title="AI Verantwoordelijken"
           value={stats.roleBreakdown['org_admin'] || 0}
           icon={Shield}
-          tooltip="Gebruikers met beheerdersrechten"
+          tooltip="Gebruikers met AI Verantwoordelijke rol"
         />
         <StatCard
-          title="Managers"
+          title="Team Managers"
           value={stats.roleBreakdown['manager'] || 0}
           icon={Users}
-          tooltip="Gebruikers met manager rol"
+          tooltip="Gebruikers met Team Manager rol"
         />
       </div>
 

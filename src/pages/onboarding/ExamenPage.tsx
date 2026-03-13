@@ -214,7 +214,7 @@ export default function ExamenPage() {
             <Shield className="h-12 w-12 text-muted-foreground mx-auto" />
             <h2 className="text-xl font-semibold">Examen niet beschikbaar</h2>
             <p className="text-muted-foreground">
-              Er is nog geen AI Literacy examen gepubliceerd. Neem contact op met je organisatiebeheerder.
+              Er is nog geen AI Literacy examen gepubliceerd. Neem contact op met je AI Verantwoordelijke.
             </p>
             <Button variant="outline" onClick={handleSignOut} className="gap-2 mt-4">
               <LogOut className="h-4 w-4" /> Uitloggen

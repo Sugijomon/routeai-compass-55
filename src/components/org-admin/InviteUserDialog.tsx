@@ -72,10 +72,15 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="user">Gebruiker</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="org_admin">Org Admin</SelectItem>
+                <SelectItem value="manager">Team Manager</SelectItem>
+                <SelectItem value="org_admin">AI Verantwoordelijke</SelectItem>
               </SelectContent>
             </Select>
+            {role === 'org_admin' && (
+              <p className="text-xs text-muted-foreground">
+                Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.
+              </p>
+            )}
           </div>
 
           <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">

@@ -22,9 +22,9 @@ const ROLE_LABELS: Record<AppRole, string> = {
 
 const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   super_admin: 'Platform-breed beheer',
-  org_admin: 'Organisatie beheer',
+  org_admin: 'Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.',
   content_editor: 'Content creatie en beheer',
-  manager: 'Team oversight',
+  manager: 'Teambeheer en rapportages',
   moderator: 'Community moderatie',
   user: 'Basis leerrechten',
 };
