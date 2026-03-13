@@ -116,7 +116,7 @@ export function useUpdateUserRoles() {
       if (roles.length > 0) {
         const rolesToInsert = roles.map(role => ({
           user_id: userId,
-          role: role as 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'moderator' | 'user',
+          role: role as 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'user',
           org_id: orgId,
         }));
 

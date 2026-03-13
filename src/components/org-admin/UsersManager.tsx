@@ -33,7 +33,6 @@ const ROLE_LABELS: Record<string, { label: string; variant: "default" | "seconda
   org_admin: { label: "AI Verantwoordelijke", variant: "default" },
   content_editor: { label: "Content Editor", variant: "secondary" },
   manager: { label: "Team Manager", variant: "secondary" },
-  moderator: { label: "Moderator", variant: "outline" },
   user: { label: "Gebruiker", variant: "outline" },
 };
 

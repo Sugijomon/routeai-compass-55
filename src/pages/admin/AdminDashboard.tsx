@@ -21,14 +21,13 @@ import {
 } from 'lucide-react';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 
-type AppRole = 'super_admin' | 'org_admin' | 'content_editor' | 'manager' | 'moderator' | 'user';
+type AppRole = 'super_admin' | 'org_admin' | 'content_editor' | 'manager' | 'user';
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
   org_admin: 'Organisatie Admin',
   content_editor: 'Content Editor',
   manager: 'Manager',
-  moderator: 'Moderator',
   user: 'Gebruiker',
 };
 
@@ -37,7 +36,6 @@ const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   org_admin: 'Organisatie beheer',
   content_editor: 'Content creatie en beheer',
   manager: 'Team oversight',
-  moderator: 'Community moderatie',
   user: 'Basis leerrechten',
 };
 

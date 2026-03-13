@@ -47,7 +47,7 @@ export function useUserRole(): UserRoleData {
   const roles = rolesData ?? [];
 
   // Determine highest privilege role (priority order)
-  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'moderator', 'user'];
+  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'user'];
   const role = roleHierarchy.find(r => roles.includes(r)) ?? null;
   
   // Individual role checks (based on ALL roles user has)
