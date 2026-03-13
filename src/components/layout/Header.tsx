@@ -1,6 +1,7 @@
-import { Shield, User, Settings, ChevronDown, LogOut } from 'lucide-react';
+import { Shield, User, Settings, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,22 +24,31 @@ const ROLE_LABELS: Record<AppRole, string> = {
   user: 'Gebruiker',
 };
 
+const PRIVILEGED_ROLES: AppRole[] = ['super_admin', 'org_admin', 'content_editor'];
+
 function getRoleDisplayLabel(roles: AppRole[]): string {
   if (!roles || roles.length === 0) return 'Gebruiker';
-  
-  // Filter out 'user' role if there are other meaningful roles
   const meaningfulRoles = roles.filter(role => role !== 'user');
-  
-  // If no meaningful roles, show 'Gebruiker'
   if (meaningfulRoles.length === 0) return 'Gebruiker';
-  
-  // Return all meaningful roles joined
   return meaningfulRoles.map(role => ROLE_LABELS[role] || role).join(' / ');
+}
+
+function getAdminPath(roles: AppRole[]): string {
+  if (roles.includes('super_admin')) return '/super-admin';
+  if (roles.includes('content_editor')) return '/editor/cursussen';
+  if (roles.includes('org_admin')) return '/admin';
+  return '/admin';
+}
+
+function isAdminRoute(pathname: string): boolean {
+  return pathname.startsWith('/admin') || pathname.startsWith('/editor') || pathname.startsWith('/super-admin');
 }
 
 export function Header() {
   const { user, signOut } = useAuth();
-  const { profile, hasAiRijbewijs } = useUserProfile();
+  const { profile } = useUserProfile();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Fetch actual roles from database
   const { data: userRoles } = useQuery({
@@ -57,7 +67,25 @@ export function Header() {
     enabled: !!user?.id,
   });
 
-  const roleLabel = getRoleDisplayLabel(userRoles || []);
+  const roles = userRoles || [];
+  const roleLabel = getRoleDisplayLabel(roles);
+
+  // Determine if user can switch views
+  const hasPrivilegedRole = roles.some(r => PRIVILEGED_ROLES.includes(r));
+  const hasUserRole = roles.includes('user');
+  const canSwitchView = hasPrivilegedRole && hasUserRole;
+
+  // Current active view based on URL
+  const isInAdminView = isAdminRoute(location.pathname);
+  const isInEmployeeView = !isInAdminView;
+
+  const handleSwitchToAdmin = () => {
+    navigate(getAdminPath(roles));
+  };
+
+  const handleSwitchToEmployee = () => {
+    navigate('/dashboard');
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-sm">
@@ -75,6 +103,14 @@ export function Header() {
 
         {/* User Menu */}
         <div className="flex items-center gap-4">
+          {/* Employee view indicator */}
+          {canSwitchView && isInEmployeeView && (
+            <Badge variant="outline" className="hidden gap-1.5 border-primary/30 bg-primary/5 text-primary md:flex">
+              <Eye className="h-3 w-3" />
+              Medewerker weergave
+            </Badge>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
@@ -99,6 +135,41 @@ export function Header() {
                   </span>
                 </div>
               </DropdownMenuLabel>
+
+              {/* View Switcher */}
+              {canSwitchView && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    Weergave wisselen
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={handleSwitchToAdmin}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Beheerder
+                    </span>
+                    {isInAdminView && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleSwitchToEmployee}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Medewerker
+                    </span>
+                    {isInEmployeeView && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                </>
+              )}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />

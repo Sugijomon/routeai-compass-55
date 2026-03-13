@@ -157,7 +157,11 @@ export function useInviteUser() {
       // For now, just show a toast - actual invitation would need edge function
       // This is a placeholder for future implementation
       console.log('Invite user:', email, 'with role:', role, 'to org:', orgId);
-      return { email, role };
+      
+      // When inviting as org_admin, also assign 'user' role so they can switch views
+      const rolesToAssign = role === 'org_admin' ? ['org_admin', 'user'] : [role];
+      
+      return { email, role, rolesToAssign };
     },
     onSuccess: ({ email }) => {
       queryClient.invalidateQueries({ queryKey: ['org-users', orgId] });
