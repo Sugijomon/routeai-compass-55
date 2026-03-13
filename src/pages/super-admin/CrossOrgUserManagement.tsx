@@ -43,7 +43,6 @@ const ROLE_LABELS: Record<AppRole, string> = {
   org_admin: 'AI Verantwoordelijke',
   content_editor: 'Content Editor',
   manager: 'Team Manager',
-  moderator: 'Moderator',
   user: 'Gebruiker',
 };
 
@@ -52,7 +51,6 @@ const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   org_admin: 'Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.',
   content_editor: 'Lessen en trainingsmateriaal maken',
   manager: 'Teambeheer en rapportages',
-  moderator: 'Inhoud modereren',
   user: 'Basis gebruikerstoegang',
 };
 
@@ -61,11 +59,10 @@ const ROLE_COLORS: Record<AppRole, string> = {
   org_admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   content_editor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   manager: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  moderator: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
   user: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
 };
 
-const ALL_ROLES: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'moderator', 'user'];
+const ALL_ROLES: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'user'];
 
 export default function CrossOrgUserManagement() {
   const navigate = useNavigate();

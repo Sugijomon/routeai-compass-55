@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'moderator' | 'user';
+export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'user';
 
 export interface UserRoleData {
   role: AppRole | null;
@@ -47,7 +47,7 @@ export function useUserRole(): UserRoleData {
   const roles = rolesData ?? [];
 
   // Determine highest privilege role (priority order)
-  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'moderator', 'user'];
+  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'user'];
   const role = roleHierarchy.find(r => roles.includes(r)) ?? null;
   
   // Individual role checks (based on ALL roles user has)

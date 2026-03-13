@@ -20,7 +20,6 @@ const ROLE_LABELS: Record<AppRole, string> = {
   org_admin: 'AI Verantwoordelijke',
   content_editor: 'Content Editor',
   manager: 'Team Manager',
-  moderator: 'Moderator',
   user: 'Gebruiker',
 };
 
