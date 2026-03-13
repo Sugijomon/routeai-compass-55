@@ -112,7 +112,6 @@ export function LessonMetadataPanel({
               </AlertDescription>
             </Alert>
           )}
-          </Select>
         </div>
 
         <div className="space-y-2">
