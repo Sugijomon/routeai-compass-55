@@ -31,6 +31,7 @@ interface LessonMetadataPanelProps {
 }
 
 export function LessonMetadataPanel({
+  lessonId,
   title,
   description,
   lessonType,
@@ -44,6 +45,24 @@ export function LessonMetadataPanel({
   onPassingScoreChange,
   onPublishedChange,
 }: LessonMetadataPanelProps) {
+  const [examConflict, setExamConflict] = useState(false);
+
+  useEffect(() => {
+    if (lessonType !== 'ai_literacy_exam') {
+      setExamConflict(false);
+      return;
+    }
+    const check = async () => {
+      const { count } = await supabase
+        .from('lessons')
+        .select('id', { count: 'exact', head: true })
+        .eq('lesson_type', 'ai_literacy_exam')
+        .eq('is_published', true)
+        .neq('id', lessonId ?? '');
+      setExamConflict((count ?? 0) > 0);
+    };
+    check();
+  }, [lessonType, lessonId]);
   return (
     <div className="rounded-lg border bg-card p-4 space-y-4">
       <h3 className="font-semibold">Les Instellingen</h3>
