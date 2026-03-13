@@ -43,6 +43,7 @@ export default function UsersManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<OrgUser | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   // Filter users by search
   const filteredUsers = users?.filter(user => {
