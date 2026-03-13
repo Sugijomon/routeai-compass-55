@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useOrgUsers, useOrgUserStats, OrgUser } from "@/hooks/useOrgUsers";
 import EditRolesDialog from "./EditRolesDialog";
 import InviteUserDialog from "./InviteUserDialog";
+import BulkImportDialog from "./BulkImportDialog";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
