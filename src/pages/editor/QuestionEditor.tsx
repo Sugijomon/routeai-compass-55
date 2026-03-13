@@ -264,7 +264,7 @@ export default function QuestionEditor() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/editor')}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(prefilledLessonId ? `/admin/lessons/${prefilledLessonId}/edit` : '/editor/vragen')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
