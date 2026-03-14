@@ -156,19 +156,12 @@ export default function ExamenPage() {
     }
   };
 
-  const handleRetry = async () => {
-    if (!lessonId || !userId) return;
+  const handleRetry = () => {
+    // Pure local state reset — no Supabase calls
     setShowCompletionModal(false);
     setCompletionData(null);
-    try {
-      // Reset only local progress state — do NOT delete completion records (audit trail)
-      await supabase.from('user_lesson_progress').delete().eq('user_id', userId).eq('lesson_id', lessonId);
-      await startNewAttempt();
-      setTimeout(() => window.location.reload(), 200);
-    } catch (err) {
-      console.error('Error resetting exam:', err);
-      toast.error('Kon examen niet resetten.');
-    }
+    // Force full page reload to reset all local component state
+    window.location.reload();
   };
 
   const handleSignOut = async () => {
