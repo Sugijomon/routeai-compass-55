@@ -1,14 +1,53 @@
 import ReactMarkdown from 'react-markdown';
-import { ParagraphBlock } from '@/types/lesson-blocks';
+import type { ParagraphBlock } from '@/types/lesson-blocks';
 
 interface ParagraphBlockPlayerProps {
   block: ParagraphBlock;
 }
 
+function getImageStyles(block: ParagraphBlock): {
+  wrapperClass: string;
+  imgClass: string;
+  imgStyle: React.CSSProperties;
+} {
+  const widthClass =
+    block.image_width === 'small' ? 'max-w-xs' :
+    block.image_width === 'full'  ? 'w-full' :
+    'max-w-sm';
+
+  const alignClass =
+    block.image_align === 'left'  ? 'mr-auto' :
+    block.image_align === 'right' ? 'ml-auto' :
+    'mx-auto';
+
+  const imgStyle: React.CSSProperties = {};
+  const frameClass =
+    block.image_frame === 'shadow'   ? 'shadow-lg' :
+    block.image_frame === 'rounded'  ? 'rounded-xl' :
+    block.image_frame === 'circle'   ? 'rounded-full object-cover aspect-square' :
+    block.image_frame === 'border'   ? 'border-4 border-primary' :
+    '';
+
+  if (block.image_frame === 'polaroid') {
+    imgStyle.padding = '10px';
+    imgStyle.background = 'white';
+    imgStyle.boxShadow = '2px 4px 12px rgba(0,0,0,0.15)';
+    imgStyle.transform = 'rotate(-1deg)';
+    imgStyle.display = 'inline-block';
+  }
+
+  return {
+    wrapperClass: `${widthClass} ${alignClass} block`,
+    imgClass: `w-full ${frameClass}`,
+    imgStyle,
+  };
+}
+
 export function ParagraphBlockPlayer({ block }: ParagraphBlockPlayerProps) {
+  const styles = getImageStyles(block);
+
   return (
     <div className="space-y-6">
-      {/* Markdown content */}
       <div className="prose prose-slate max-w-none">
         <ReactMarkdown
           components={{
@@ -56,20 +95,24 @@ export function ParagraphBlockPlayer({ block }: ParagraphBlockPlayerProps) {
         </ReactMarkdown>
       </div>
 
-      {/* Optional image */}
       {block.image_url && (
-        <div className="space-y-2">
-          <img
-            src={block.image_url}
-            alt={block.image_caption || 'Lesson image'}
-            className="rounded-lg w-full max-w-2xl mx-auto shadow-md"
-          />
+        <figure className="my-4">
+          <div
+            className={styles.wrapperClass}
+            style={block.image_frame === 'polaroid' ? styles.imgStyle : {}}
+          >
+            <img
+              src={block.image_url}
+              alt={block.image_caption || ''}
+              className={styles.imgClass}
+            />
+          </div>
           {block.image_caption && (
-            <p className="text-center text-sm text-muted-foreground italic">
+            <figcaption className="text-center text-sm text-muted-foreground mt-2 italic">
               {block.image_caption}
-            </p>
+            </figcaption>
           )}
-        </div>
+        </figure>
       )}
     </div>
   );
