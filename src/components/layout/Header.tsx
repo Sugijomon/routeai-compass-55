@@ -35,7 +35,7 @@ function getRoleDisplayLabel(roles: AppRole[]): string {
 
 function getAdminPath(roles: AppRole[]): string {
   if (roles.includes('super_admin')) return '/super-admin';
-  if (roles.includes('content_editor')) return '/editor/cursussen';
+  if (roles.includes('content_editor')) return '/editor/dashboard';
   if (roles.includes('org_admin')) return '/admin';
   return '/admin';
 }
