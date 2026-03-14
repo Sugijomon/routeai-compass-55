@@ -26,8 +26,7 @@ import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 import { useOrgUserStats } from "@/hooks/useOrgUsers";
 
 export default function OrgAdminDashboard() {
-  const navigate = useNavigate();
-  const { user, signOut, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { profile } = useUserProfile();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -55,11 +54,6 @@ export default function OrgAdminDashboard() {
 
   // Fetch org user stats
   const userStats = useOrgUserStats();
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/auth", { replace: true });
-  };
 
   if (authLoading) {
     return (
