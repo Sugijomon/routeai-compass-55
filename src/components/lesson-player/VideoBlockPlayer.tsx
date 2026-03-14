@@ -35,6 +35,8 @@ declare global {
     YT: {
       Player: new (elementId: string, config: {
         videoId: string;
+        width?: string | number;
+        height?: string | number;
         playerVars?: Record<string, number | string>;
         events?: {
           onReady?: (event: { target: YTPlayer }) => void;
