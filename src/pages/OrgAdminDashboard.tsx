@@ -248,6 +248,6 @@ export default function OrgAdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </AppLayout>
   );
 }
