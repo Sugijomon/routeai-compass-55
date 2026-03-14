@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   ClipboardCheck, 
   Wrench, 
   GraduationCap, 
-  LogOut, 
-  Shield,
   UserCog,
   FileText,
   Loader2,
-  Award,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/ui/stat-card";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -22,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/layout/AppLayout";
 import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
 import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
 import UsersManager from "@/components/org-admin/UsersManager";
