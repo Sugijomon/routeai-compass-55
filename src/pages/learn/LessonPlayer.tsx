@@ -19,6 +19,7 @@ import { HeroBlockPlayer } from '@/components/lesson-player/HeroBlockPlayer';
 import { CalloutBlockPlayer } from '@/components/lesson-player/CalloutBlockPlayer';
 import { KeyTakeawaysBlockPlayer } from '@/components/lesson-player/KeyTakeawaysBlockPlayer';
 import { SectionHeaderBlockPlayer } from '@/components/lesson-player/SectionHeaderBlockPlayer';
+import { DownloadBlockPlayer } from '@/components/lesson-player/DownloadBlockPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
 
