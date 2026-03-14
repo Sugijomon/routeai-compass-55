@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LessonBlock, LessonTopic, parseLessonContent, flattenTopicBlocks } from '@/types/lesson-blocks';
+import { LessonBlock, LessonTopic, parseLessonContent } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
 import { CourseSidebar } from '@/components/lesson-player/CourseSidebar';
