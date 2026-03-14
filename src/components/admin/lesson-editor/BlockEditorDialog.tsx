@@ -265,6 +265,14 @@ export function BlockEditorDialog({
               onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
             />
           )}
+
+          {editedBlock.type === 'download' && (
+            <DownloadEditor
+              block={editedBlock as DownloadBlock}
+              errors={errors}
+              onChange={(updates) => setEditedBlock({ ...editedBlock, ...updates })}
+            />
+          )}
         </div>
 
         <DialogFooter>
