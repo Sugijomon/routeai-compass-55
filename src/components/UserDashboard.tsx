@@ -385,12 +385,12 @@ export default function UserDashboard() {
         </main>
 
         {/* Welcome Modal */}
-        <WelcomeModal 
-          open={showWelcomeModal} 
-          onOpenChange={setShowWelcomeModal}
-          courseId={onboardingCourse?.id ?? null}
-        />
-      </div>
-    </TooltipProvider>
-  );
-}
+          <WelcomeModal 
+            open={showWelcomeModal} 
+            onOpenChange={setShowWelcomeModal}
+            courseId={onboardingCourse?.id ?? null}
+          />
+        </AppLayout>
+      </TooltipProvider>
+    );
+  }
