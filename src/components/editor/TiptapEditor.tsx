@@ -159,6 +159,21 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
 
+        <ToolbarButton
+          title="Inspringing vergroten"
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={htmlMode || !editor.can().sinkListItem('listItem')}
+        >
+          <span className="text-xs font-mono">→</span>
+        </ToolbarButton>
+        <ToolbarButton
+          title="Inspringing verkleinen"
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={htmlMode || !editor.can().liftListItem('listItem')}
+        >
+          <span className="text-xs font-mono">←</span>
+        </ToolbarButton>
+
         <Divider />
 
         <ToolbarButton onClick={() => { setShowLinkInput(v => !v); setLinkUrl(editor.getAttributes('link').href || ''); }} active={editor.isActive('link')} disabled={htmlMode} title="Link">
@@ -219,10 +234,10 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
           editor={editor}
           className="prose prose-sm max-w-none p-3 min-h-[160px] focus-within:outline-none
             [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[140px]
-            [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5 [&_.ProseMirror_ul]:my-2
-            [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_ol]:my-2
-            [&_.ProseMirror_li]:my-0.5
-            [&_.ProseMirror_li>p]:inline [&_.ProseMirror_li>p]:m-0
+            [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5 [&_.ProseMirror_ul]:my-2 [&_.ProseMirror_ul]:list-outside [&_.ProseMirror_ul]:space-y-0
+            [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_ol]:my-2 [&_.ProseMirror_ol]:list-outside [&_.ProseMirror_ol]:space-y-0
+            [&_.ProseMirror_li]:my-0 [&_.ProseMirror_li]:pl-1
+            [&_.ProseMirror_li>p]:inline [&_.ProseMirror_li>p]:m-0 [&_.ProseMirror_li>p]:leading-snug
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
