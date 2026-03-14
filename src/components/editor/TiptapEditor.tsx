@@ -50,7 +50,7 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
       const json = JSON.parse(content);
       const current = JSON.stringify(editor.getJSON());
       if (current !== content) {
-        editor.commands.setContent(json, false);
+        editor.commands.setContent(json, { emitUpdate: false });
       }
     } catch { /* plain text fallback — don't replace */ }
   }, [content]);
