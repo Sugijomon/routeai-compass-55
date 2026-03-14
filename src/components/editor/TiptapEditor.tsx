@@ -219,6 +219,10 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
           editor={editor}
           className="prose prose-sm max-w-none p-3 min-h-[160px] focus-within:outline-none
             [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[140px]
+            [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5
+            [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5
+            [&_.ProseMirror_li]:my-0.5
+            [&_.ProseMirror_li_p]:inline [&_.ProseMirror_li_p]:m-0
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground
             [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
