@@ -24,6 +24,9 @@ export interface ParagraphBlock extends BaseBlock {
   content: string;
   image_url?: string;
   image_caption?: string;
+  image_width?: 'small' | 'medium' | 'full';
+  image_align?: 'left' | 'center' | 'right';
+  image_frame?: 'none' | 'shadow' | 'rounded' | 'polaroid' | 'border' | 'circle';
 }
 
 export interface VideoBlock extends BaseBlock {

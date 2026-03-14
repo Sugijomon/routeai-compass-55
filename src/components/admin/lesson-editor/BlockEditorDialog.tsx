@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,11 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Upload, X, AlignLeft, AlignCenter, AlignRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import type { 
   LessonBlock, 
   ParagraphBlock, 
@@ -282,6 +287,42 @@ function ParagraphEditor({
   errors: Record<string, string>;
   onChange: (updates: Partial<ParagraphBlock>) => void;
 }) {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filename = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from('lesson-images')
+        .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('lesson-images').getPublicUrl(filename);
+      onChange({ image_url: data.publicUrl });
+    } catch {
+      toast.error('Afbeelding uploaden mislukt');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const frameOptions: Array<{ value: ParagraphBlock['image_frame']; label: string; style: React.CSSProperties }> = [
+    { value: 'none', label: 'Geen', style: { background: 'hsl(var(--muted))' } },
+    { value: 'shadow', label: 'Schaduw', style: { background: 'hsl(var(--muted))', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' } },
+    { value: 'rounded', label: 'Afgerond', style: { background: 'hsl(var(--muted))', borderRadius: '12px' } },
+    { value: 'polaroid', label: 'Polaroid', style: { background: 'white', padding: '4px', boxShadow: '2px 4px 12px rgba(0,0,0,0.15)', transform: 'rotate(-1deg)' } },
+    { value: 'border', label: 'Rand', style: { background: 'hsl(var(--muted))', border: '3px solid hsl(var(--primary))' } },
+    { value: 'circle', label: 'Cirkel', style: { background: 'hsl(var(--muted))', borderRadius: '50%' } },
+  ];
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -303,24 +344,142 @@ function ParagraphEditor({
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="imageUrl">Image URL (optional)</Label>
-        <Input
-          id="imageUrl"
-          placeholder="https://... (optional)"
-          value={block.image_url || ''}
-          onChange={(e) => onChange({ image_url: e.target.value || undefined })}
-        />
-      </div>
+      {/* Image Panel */}
+      <div className="space-y-3 border rounded-lg p-4">
+        <Label className="text-base font-semibold">Afbeelding</Label>
 
-      <div className="space-y-2">
-        <Label htmlFor="imageCaption">Image Caption (optional)</Label>
-        <Input
-          id="imageCaption"
-          placeholder="Caption for the image..."
-          value={block.image_caption || ''}
-          onChange={(e) => onChange({ image_caption: e.target.value || undefined })}
-        />
+        {/* Section A: Image source */}
+        <Tabs defaultValue="url" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="url" className="flex-1">URL</TabsTrigger>
+            <TabsTrigger value="upload" className="flex-1">Upload</TabsTrigger>
+          </TabsList>
+          <TabsContent value="url" className="space-y-2">
+            <Input
+              placeholder="https://..."
+              value={block.image_url || ''}
+              onChange={(e) => onChange({ image_url: e.target.value || undefined })}
+            />
+          </TabsContent>
+          <TabsContent value="upload" className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              {uploading ? 'Uploaden...' : 'Afbeelding kiezen'}
+            </Button>
+          </TabsContent>
+        </Tabs>
+
+        {/* Thumbnail preview */}
+        {block.image_url && (
+          <div className="flex items-start gap-3">
+            <img
+              src={block.image_url}
+              alt="Preview"
+              className="max-h-20 rounded border object-cover"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 shrink-0"
+              onClick={() => onChange({
+                image_url: undefined,
+                image_caption: undefined,
+                image_width: undefined,
+                image_align: undefined,
+                image_frame: undefined,
+              })}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Caption */}
+        {block.image_url && (
+          <div className="space-y-1">
+            <Label htmlFor="imageCaption" className="text-sm">Bijschrift (optioneel)</Label>
+            <Input
+              id="imageCaption"
+              placeholder="Bijschrift bij de afbeelding..."
+              value={block.image_caption || ''}
+              onChange={(e) => onChange({ image_caption: e.target.value || undefined })}
+            />
+          </div>
+        )}
+
+        {/* Section B: Size and alignment */}
+        {block.image_url && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Grootte en uitlijning</Label>
+            <div className="flex gap-4 items-center flex-wrap">
+              <ToggleGroup
+                type="single"
+                value={block.image_width || 'medium'}
+                onValueChange={(v) => v && onChange({ image_width: v as ParagraphBlock['image_width'] })}
+                variant="outline"
+              >
+                <ToggleGroupItem value="small" className="text-xs px-3">Klein</ToggleGroupItem>
+                <ToggleGroupItem value="medium" className="text-xs px-3">Medium</ToggleGroupItem>
+                <ToggleGroupItem value="full" className="text-xs px-3">Volledig</ToggleGroupItem>
+              </ToggleGroup>
+
+              <ToggleGroup
+                type="single"
+                value={block.image_align || 'center'}
+                onValueChange={(v) => v && onChange({ image_align: v as ParagraphBlock['image_align'] })}
+                variant="outline"
+              >
+                <ToggleGroupItem value="left"><AlignLeft className="h-4 w-4" /></ToggleGroupItem>
+                <ToggleGroupItem value="center"><AlignCenter className="h-4 w-4" /></ToggleGroupItem>
+                <ToggleGroupItem value="right"><AlignRight className="h-4 w-4" /></ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </div>
+        )}
+
+        {/* Section C: Frame style */}
+        {block.image_url && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Kader</Label>
+            <div className="flex gap-2 flex-wrap">
+              {frameOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onChange({ image_frame: opt.value })}
+                  className={`flex flex-col items-center gap-1 p-1.5 rounded-md transition-all ${
+                    (block.image_frame || 'none') === opt.value
+                      ? 'ring-2 ring-primary bg-accent'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  <div
+                    className="w-12 h-12 flex items-center justify-center"
+                    style={opt.style}
+                  />
+                  <span className="text-[10px] text-muted-foreground">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
