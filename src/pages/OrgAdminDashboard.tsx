@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   ClipboardCheck, 
   Wrench, 
   GraduationCap, 
-  LogOut, 
-  Shield,
   UserCog,
   FileText,
   Loader2,
-  Award,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/ui/stat-card";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -22,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/layout/AppLayout";
 import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
 import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
 import UsersManager from "@/components/org-admin/UsersManager";
@@ -30,8 +26,7 @@ import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 import { useOrgUserStats } from "@/hooks/useOrgUsers";
 
 export default function OrgAdminDashboard() {
-  const navigate = useNavigate();
-  const { user, signOut, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { profile } = useUserProfile();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -60,11 +55,6 @@ export default function OrgAdminDashboard() {
   // Fetch org user stats
   const userStats = useOrgUserStats();
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/auth", { replace: true });
-  };
-
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -83,25 +73,7 @@ export default function OrgAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">RouteAI</h1>
-            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">AI Verantwoordelijke</Badge>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{profile?.full_name || user.email}</span>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Uitloggen
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <AppLayout>
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}
@@ -276,6 +248,6 @@ export default function OrgAdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </AppLayout>
   );
 }
