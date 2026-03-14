@@ -11,7 +11,8 @@ export type BlockType =
   | 'hero'
   | 'callout'
   | 'key_takeaways'
-  | 'section_header';
+  | 'section_header'
+  | 'download';
 
 export interface BaseBlock {
   id: string;
