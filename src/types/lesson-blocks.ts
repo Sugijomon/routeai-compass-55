@@ -123,6 +123,17 @@ export interface SectionHeaderBlock extends BaseBlock {
   subtitle?: string;
 }
 
+// Download Block - attachable file
+export interface DownloadBlock extends BaseBlock {
+  type: 'download';
+  file_url: string;
+  file_name: string;
+  file_size?: number;
+  file_type?: string;
+  label?: string;
+  description?: string;
+}
+
 // Legacy alias for backward compatibility
 export type QuizBlock = QuizMCBlock;
 
@@ -137,7 +148,8 @@ export type LessonBlock =
   | HeroBlock
   | CalloutBlock
   | KeyTakeawaysBlock
-  | SectionHeaderBlock;
+  | SectionHeaderBlock
+  | DownloadBlock;
 
 // ── Topic-based lesson structure (v2) ──
 
