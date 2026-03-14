@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useUserRole } from '@/hooks/useUserRole';
-import { LessonBlock } from '@/types/lesson-blocks';
+import { LessonBlock, parseLessonContent, flattenTopicBlocks } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
 import { LessonContentTopBar } from '@/components/lesson-player/LessonContentTopBar';
