@@ -17,7 +17,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
