@@ -85,7 +85,6 @@ export default function LessonPlayer() {
 
   // Parse topics from lesson blocks
   const topics: LessonTopic[] = lesson ? parseLessonContent(lesson.blocks) : [];
-  const allBlocks = flattenTopicBlocks(topics);
 
   const {
     currentTopicIndex,

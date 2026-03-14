@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { LessonBlock, LessonTopic, parseLessonContent, flattenTopicBlocks } from '@/types/lesson-blocks';
+import { LessonTopic, flattenTopicBlocks } from '@/types/lesson-blocks';
 import { toast } from 'sonner';
 
 interface LessonProgressData {

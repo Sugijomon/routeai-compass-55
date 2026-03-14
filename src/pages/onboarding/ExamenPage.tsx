@@ -75,9 +75,8 @@ export default function ExamenPage() {
   });
 
   const lessonId = lesson?.id ?? '';
-  const blocks: LessonBlock[] = Array.isArray(lesson?.blocks)
-    ? (lesson.blocks as unknown as LessonBlock[]).sort((a, b) => a.order - b.order)
-    : [];
+  const topics = lesson ? parseLessonContent(lesson.blocks) : [];
+  const blocks: LessonBlock[] = flattenTopicBlocks(topics);
 
   const {
     currentBlockIndex,
@@ -91,7 +90,7 @@ export default function ExamenPage() {
     recordQuizResult,
     calculateFinalScore,
     blocksCompleted,
-  } = useLessonProgress({ lessonId, blocks });
+  } = useLessonProgress({ lessonId, topics });
 
   const {
     currentAttemptNumber,
