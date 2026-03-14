@@ -139,6 +139,7 @@ export default function LessonPlayer() {
     quizResults,
     startedAt,
     isLoading: progressLoading,
+    goToBlock,
     goNext,
     goPrevious,
     canGoPrevious,
@@ -356,12 +357,7 @@ export default function LessonPlayer() {
 
   // Handle tab click — navigate to any block freely
   const handleTabClick = (index: number) => {
-    // Jump to the target block
-    if (index < currentBlockIndex) {
-      for (let i = 0; i < currentBlockIndex - index; i++) goPrevious();
-    } else if (index > currentBlockIndex) {
-      for (let i = 0; i < index - currentBlockIndex; i++) goNext();
-    }
+    goToBlock(index);
   };
 
   // Loading states
@@ -479,18 +475,19 @@ export default function LessonPlayer() {
             <div className="flex gap-1 px-4 py-2 min-w-max">
               {blocks.map((block, index) => {
                 const isActive = index === currentBlockIndex;
-                const isCompleted = index < currentBlockIndex || blocksCompleted.includes(block.id);
+                const isCompleted = blocksCompleted.includes(block.id);
 
                 return (
                   <button
                     key={block.id}
                     onClick={() => handleTabClick(index)}
-                    disabled={false}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors',
-                      isActive && 'bg-primary text-primary-foreground shadow-sm',
-                      !isActive && isCompleted && 'bg-muted text-muted-foreground hover:bg-muted/80',
-                      !isActive && !isCompleted && 'text-muted-foreground hover:bg-muted/50',
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors cursor-pointer',
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : isCompleted
+                          ? 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          : 'text-muted-foreground hover:bg-muted/50'
                     )}
                   >
                     {isCompleted && !isActive && (
