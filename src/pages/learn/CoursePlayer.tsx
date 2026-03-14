@@ -158,7 +158,7 @@ export default function CoursePlayer() {
     if (!courseLessons) return null;
     for (let i = 0; i < courseLessons.length; i++) {
       const status = getLessonStatus(i, courseLessons[i].lesson_id);
-      if (status === 'current') {
+      if (status === 'available') {
         return courseLessons[i];
       }
     }
