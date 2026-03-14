@@ -367,10 +367,12 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     
     console.log('Going to block:', index);
     
+    setCurrentBlockIndex(index);
+    
     setProgressData(prev => {
       if (!prev) {
-        // No progress row yet — create minimal local state and trigger save
-        const newProgress: LessonProgressData = {
+        saveProgress({ current_block_index: index });
+        return {
           id: '',
           user_id: '',
           lesson_id: lessonId,
@@ -382,8 +384,6 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
           started_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
-        saveProgress({ current_block_index: index });
-        return newProgress;
       }
       saveProgress({ current_block_index: index });
       return { ...prev, current_block_index: index };
