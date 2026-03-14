@@ -327,6 +327,7 @@ export function getBlockTypeIcon(type: BlockType): string {
     case 'callout': return '💡';
     case 'key_takeaways': return '📌';
     case 'section_header': return '📋';
+    case 'download': return '📥';
   }
 }
 
