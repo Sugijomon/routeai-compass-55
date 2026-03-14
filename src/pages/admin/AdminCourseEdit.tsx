@@ -335,7 +335,12 @@ export default function AdminCourseEdit() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{cl.lesson?.title}</p>
+                            <button
+                              className="font-medium text-left hover:text-primary hover:underline transition-colors"
+                              onClick={() => navigate(`/admin/lessons/${cl.lesson_id}/edit`)}
+                            >
+                              {cl.lesson?.title}
+                            </button>
                             {cl.lesson?.description && (
                               <p className="text-sm text-muted-foreground line-clamp-1">
                                 {cl.lesson.description}
