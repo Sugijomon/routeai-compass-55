@@ -1285,3 +1285,158 @@ function SectionHeaderEditor({
     </div>
   );
 }
+
+// Download Block Editor
+function DownloadEditor({
+  block,
+  errors,
+  onChange,
+}: {
+  block: DownloadBlock;
+  errors: Record<string, string>;
+  onChange: (updates: Partial<DownloadBlock>) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filename = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from('lesson-files')
+        .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('lesson-files').getPublicUrl(filename);
+      onChange({
+        file_url: data.publicUrl,
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+      });
+      toast.success('Bestand geüpload');
+    } catch {
+      toast.error('Upload mislukt. Controleer of de storage bucket bestaat.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* File upload section */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Bestand</Label>
+
+        {block.file_url ? (
+          <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+            <Upload className="h-5 w-5 text-muted-foreground shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{block.file_name || block.file_url}</p>
+              {block.file_size && (
+                <p className="text-xs text-muted-foreground">{formatFileSize(block.file_size)}</p>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onChange({ file_url: '', file_name: '', file_size: undefined, file_type: undefined })}
+            >
+              Verwijderen
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.png,.jpg,.jpeg,.gif,.zip"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <div
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/30 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="h-8 w-8 mx-auto text-muted-foreground animate-spin" />
+              ) : (
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+              )}
+              <p className="mt-2 text-sm font-medium">
+                {uploading ? 'Uploaden...' : 'Klik om een bestand te uploaden'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                PDF, Word, Excel, afbeeldingen — max 20MB
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex-1 border-t" />
+              <span className="text-xs text-muted-foreground">of voer URL in</span>
+              <div className="flex-1 border-t" />
+            </div>
+
+            <Input
+              placeholder="https://..."
+              value={block.file_url}
+              onChange={(e) => onChange({
+                file_url: e.target.value,
+                file_name: block.file_name || e.target.value.split('/').pop() || '',
+              })}
+            />
+          </div>
+        )}
+        {errors.file_url && <p className="text-sm text-destructive">{errors.file_url}</p>}
+      </div>
+
+      {/* File display name */}
+      <div className="space-y-2">
+        <Label htmlFor="dlFileName">Bestandsnaam (weergave)</Label>
+        <Input
+          id="dlFileName"
+          placeholder="document.pdf"
+          value={block.file_name}
+          onChange={(e) => onChange({ file_name: e.target.value })}
+        />
+      </div>
+
+      {/* Optional description */}
+      <div className="space-y-2">
+        <Label htmlFor="dlDescription">Omschrijving (optioneel)</Label>
+        <Input
+          id="dlDescription"
+          placeholder="Korte omschrijving van het bestand..."
+          value={block.description || ''}
+          onChange={(e) => onChange({ description: e.target.value || undefined })}
+        />
+      </div>
+
+      {/* Button label */}
+      <div className="space-y-2">
+        <Label htmlFor="dlLabel">Knoptekst</Label>
+        <Input
+          id="dlLabel"
+          placeholder="Download"
+          value={block.label || ''}
+          onChange={(e) => onChange({ label: e.target.value || undefined })}
+        />
+      </div>
+    </div>
+  );
+}
