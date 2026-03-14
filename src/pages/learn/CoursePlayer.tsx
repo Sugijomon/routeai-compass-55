@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   CheckCircle, 
   ArrowRight, 
-  Lock, 
   BookOpen, 
   ArrowLeft,
   GraduationCap,
