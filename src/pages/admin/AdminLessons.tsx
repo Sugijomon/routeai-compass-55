@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, BookOpen, Clock, FileText, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, BookOpen, Clock, FileText, GraduationCap, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -43,7 +45,9 @@ export default function AdminLessons() {
   const dashboardUrl = useDashboardRedirect();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deleteLesson, setDeleteLesson] = useState<LessonWithCourses | null>(null);
-
+  const [search, setSearch] = useState('');
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   // Fetch all lessons with course linkages
   const { data: lessons, isLoading, error } = useQuery({
     queryKey: ['admin-lessons'],
@@ -97,6 +101,32 @@ export default function AdminLessons() {
     return mins > 0 ? `${hours}u ${mins}m` : `${hours}u`;
   };
 
+  const uniqueCourses = useMemo(() => {
+    const seen = new Map<string, string>();
+    lessons?.forEach(l =>
+      l.course_lessons?.forEach(cl => {
+        if (cl.courses?.id) seen.set(cl.courses.id, cl.courses.title);
+      })
+    );
+    return Array.from(seen.entries()).map(([id, title]) => ({ id, title }));
+  }, [lessons]);
+
+  const filtered = useMemo(() => {
+    return lessons?.filter(l => {
+      const matchSearch = !search ||
+        l.title.toLowerCase().includes(search.toLowerCase());
+      const matchCourse =
+        courseFilter === 'all' ? true :
+        courseFilter === 'none' ? (l.course_lessons?.length ?? 0) === 0 :
+        l.course_lessons?.some(cl => cl.courses?.id === courseFilter);
+      const matchStatus =
+        statusFilter === 'all' ? true :
+        statusFilter === 'published' ? l.is_published === true :
+        l.is_published === false;
+      return matchSearch && matchCourse && matchStatus;
+    }) ?? [];
+  }, [lessons, search, courseFilter, statusFilter]);
+
   if (error) {
     return (
       <AdminPageLayout
@@ -127,11 +157,46 @@ export default function AdminLessons() {
         </Button>
       }
     >
+      {/* Filter controls */}
+      <div className="flex gap-3 items-center mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Zoek op lesnaam..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-52">
+            <SelectValue placeholder="Alle cursussen" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle cursussen</SelectItem>
+            <SelectItem value="none">— Niet gekoppeld</SelectItem>
+            {uniqueCourses.map(c => (
+              <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Alle statussen" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle statussen</SelectItem>
+            <SelectItem value="published">Gepubliceerd</SelectItem>
+            <SelectItem value="concept">Concept</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
-      ) : lessons && lessons.length > 0 ? (
+      ) : filtered.length > 0 ? (
         <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
@@ -144,7 +209,7 @@ export default function AdminLessons() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lessons.map((lesson) => (
+              {filtered.map((lesson) => (
                 <TableRow key={lesson.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
