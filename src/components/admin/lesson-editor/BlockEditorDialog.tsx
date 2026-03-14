@@ -154,6 +154,11 @@ export function BlockEditorDialog({
           newErrors.title = 'Titel is verplicht';
         }
         break;
+      case 'download':
+        if (!editedBlock.file_url.trim() && !editedBlock.file_name.trim()) {
+          newErrors.file_url = 'Upload een bestand of voer een URL in';
+        }
+        break;
     }
 
     setErrors(newErrors);
