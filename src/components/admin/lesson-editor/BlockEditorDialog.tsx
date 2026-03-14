@@ -32,6 +32,7 @@ import type {
   CalloutBlock,
   KeyTakeawaysBlock,
   SectionHeaderBlock,
+  DownloadBlock,
 } from '@/types/lesson-blocks';
 import { getBlockTypeLabel } from '@/types/lesson-blocks';
 
