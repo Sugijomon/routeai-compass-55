@@ -32,7 +32,7 @@ interface CourseSidebarProps {
   topics?: LessonTopic[];  // topics of the current lesson, passed from LessonPlayer
 }
 
-export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockIndex }: CourseSidebarProps) {
+export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockIndex, topics }: CourseSidebarProps) {
   const navigate = useNavigate();
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set(['main']));
   const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
