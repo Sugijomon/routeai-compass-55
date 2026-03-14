@@ -148,6 +148,8 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
 
       youtubePlayerRef.current = new window.YT.Player(playerDiv.id, {
         videoId: id,
+        width: '100%',
+        height: '100%',
         playerVars: {
           rel: 0,
           modestbranding: 1,
@@ -183,6 +185,17 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
           },
         },
       });
+
+      setTimeout(() => {
+        const iframe = containerRef.current?.querySelector('iframe');
+        if (iframe) {
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+        }
+      }, 500);
     };
 
     loadYouTubeAPI();
