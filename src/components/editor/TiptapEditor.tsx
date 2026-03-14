@@ -7,9 +7,10 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect, useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { generateHTML } from '@tiptap/html';
 import {
   Bold, Italic, UnderlineIcon, Heading2, Heading3,
-  List, ListOrdered, Link2, Image as ImageIcon, X
+  List, ListOrdered, Link2, Image as ImageIcon, X, Code2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,8 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [htmlMode, setHtmlMode] = useState(false);
+  const [htmlContent, setHtmlContent] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -80,6 +83,25 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
     }
   }, [editor]);
 
+  const enterHtmlMode = () => {
+    if (!editor) return;
+    const html = generateHTML(editor.getJSON(), [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      Underline,
+      Link,
+      Image,
+    ]);
+    setHtmlContent(html);
+    setHtmlMode(true);
+  };
+
+  const exitHtmlMode = () => {
+    if (!editor) return;
+    editor.commands.setContent(htmlContent, { emitUpdate: true });
+    onChange(JSON.stringify(editor.getJSON()));
+    setHtmlMode(false);
+  };
+
   if (!editor) return null;
 
   const ToolbarButton = ({ onClick, active, disabled, children, title }: {
@@ -109,41 +131,41 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
       {/* Toolbar */}
       <div className="flex items-center gap-0.5 px-2 py-1.5 border-b bg-muted/30 flex-wrap">
 
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Vet">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} disabled={htmlMode} title="Vet">
           <Bold className="h-4 w-4" />
         </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Cursief">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} disabled={htmlMode} title="Cursief">
           <Italic className="h-4 w-4" />
         </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Onderstreept">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} disabled={htmlMode} title="Onderstreept">
           <UnderlineIcon className="h-4 w-4" />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} title="Kop 2">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} disabled={htmlMode} title="Kop 2">
           <Heading2 className="h-4 w-4" />
         </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} title="Kop 3">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} disabled={htmlMode} title="Kop 3">
           <Heading3 className="h-4 w-4" />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Ongeordende lijst">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} disabled={htmlMode} title="Ongeordende lijst">
           <List className="h-4 w-4" />
         </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Geordende lijst">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} disabled={htmlMode} title="Geordende lijst">
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton onClick={() => { setShowLinkInput(v => !v); setLinkUrl(editor.getAttributes('link').href || ''); }} active={editor.isActive('link')} title="Link">
+        <ToolbarButton onClick={() => { setShowLinkInput(v => !v); setLinkUrl(editor.getAttributes('link').href || ''); }} active={editor.isActive('link')} disabled={htmlMode} title="Link">
           <Link2 className="h-4 w-4" />
         </ToolbarButton>
 
-        <ToolbarButton onClick={() => document.getElementById('tiptap-img-upload')?.click()} disabled={isUploading} title="Afbeelding">
+        <ToolbarButton onClick={() => document.getElementById('tiptap-img-upload')?.click()} disabled={isUploading || htmlMode} title="Afbeelding">
           <ImageIcon className="h-4 w-4" />
         </ToolbarButton>
         <input
@@ -153,10 +175,19 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ''; }}
         />
+
+        <Divider />
+        <ToolbarButton
+          title="HTML broncode"
+          onClick={htmlMode ? exitHtmlMode : enterHtmlMode}
+          active={htmlMode}
+        >
+          <Code2 className="h-3.5 w-3.5" />
+        </ToolbarButton>
       </div>
 
       {/* Link input bar */}
-      {showLinkInput && (
+      {showLinkInput && !htmlMode && (
         <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/20">
           <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
           <Input
@@ -175,7 +206,26 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
       )}
 
       {/* Editor content */}
-      <EditorContent editor={editor} className="prose prose-sm max-w-none p-4 min-h-[150px] focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none" />
+      {htmlMode ? (
+        <textarea
+          value={htmlContent}
+          onChange={(e) => setHtmlContent(e.target.value)}
+          className="w-full min-h-[160px] p-3 font-mono text-xs bg-muted/20 border-0
+                     outline-none resize-y text-foreground"
+          spellCheck={false}
+        />
+      ) : (
+        <EditorContent
+          editor={editor}
+          className="prose prose-sm max-w-none p-3 min-h-[160px] focus-within:outline-none
+            [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[140px]
+            [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
+            [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground
+            [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
+            [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left
+            [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0"
+        />
+      )}
     </div>
   );
 }
