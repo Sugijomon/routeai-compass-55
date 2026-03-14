@@ -367,6 +367,7 @@ export default function LessonPlayer() {
         currentLessonId={lessonId || ''}
         userId={userId}
         currentBlockIndex={currentTopicIndex}
+        topics={topics}
       />
 
       {/* Right: Content area */}

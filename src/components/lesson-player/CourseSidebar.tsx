@@ -127,14 +127,45 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
 
   if (!courseId || !course) {
     return (
-      <aside className="w-[280px] shrink-0 flex flex-col" style={{ backgroundColor: '#0f2744' }}>
-        <div className="p-4">
-          <button onClick={() => navigate('/learn')} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-4">
+      <aside className="w-[280px] shrink-0 flex flex-col overflow-hidden" style={{ backgroundColor: '#0f2744' }}>
+        {/* Header */}
+        <div className="p-4 border-b border-white/10">
+          <button onClick={() => navigate('/learn')} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-3">
             <ArrowLeft className="h-4 w-4" />
-            Terug
+            Terug naar overzicht
           </button>
           <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Losse les</h2>
         </div>
+
+        {/* Topics list */}
+        {topics && topics.length > 0 && (
+          <div className="flex-1 overflow-y-auto py-2">
+            <div className="px-4 py-2.5 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              Onderwerpen
+            </div>
+            <div className="space-y-0.5">
+              {topics.map((topic, idx) => {
+                const isActive = idx === currentBlockIndex;
+                return (
+                  <div
+                    key={topic.id}
+                    className={cn(
+                      'flex items-center gap-2 pl-8 pr-4 py-2 text-sm',
+                      isActive
+                        ? 'text-white border-l-2 border-sky-400 bg-sky-500/10'
+                        : 'text-white/50 border-l-2 border-transparent',
+                    )}
+                  >
+                    <span className="shrink-0 w-4 text-center text-xs font-medium">
+                      {idx + 1}
+                    </span>
+                    <span className="truncate">{topic.title}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </aside>
     );
   }
