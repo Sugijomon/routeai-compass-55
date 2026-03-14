@@ -68,7 +68,14 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   }, []);
   
   const totalBlocks = blocks.length;
-  const currentBlockIndex = progressData?.current_block_index ?? 0;
+  const [currentBlockIndex, setCurrentBlockIndex] = useState<number>(0);
+
+  // Initialize currentBlockIndex from progressData ONCE when the record first loads
+  useEffect(() => {
+    if (progressData !== null && progressData !== undefined) {
+      setCurrentBlockIndex(progressData.current_block_index ?? 0);
+    }
+  }, [progressData?.id]);
   const blocksCompleted = progressData?.blocks_completed ?? [];
   const quizAttempts = progressData?.quiz_attempts ?? {};
   const quizResults = progressData?.quiz_results ?? {};
