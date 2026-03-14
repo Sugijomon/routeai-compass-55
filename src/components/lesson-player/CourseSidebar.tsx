@@ -164,8 +164,8 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
     });
   };
 
-  const handleLessonClick = (lessonId: string | null, status: string) => {
-    if (!lessonId || status === 'locked') return;
+  const handleLessonClick = (lessonId: string | null) => {
+    if (!lessonId) return;
     navigate(`/learn/${lessonId}${courseId ? `?courseId=${courseId}` : ''}`);
   };
 
