@@ -136,8 +136,8 @@ export default function AdminLessons() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Titel</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead className="w-[35%]">Titel</TableHead>
+                <TableHead>Gebruikt in</TableHead>
                 <TableHead>Duur</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Acties</TableHead>
@@ -158,32 +158,37 @@ export default function AdminLessons() {
                             {lesson.description}
                           </p>
                         )}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          <Badge variant={lesson.course_lessons?.length > 0 ? 'outline' : 'secondary'} className="text-[10px]">
+                            {lesson.course_lessons?.length > 0 ? 'Cursusles' : 'Standalone'}
+                          </Badge>
+                          {lesson.lesson_type === 'ai_literacy_exam' && (
+                            <Badge className="text-[10px] bg-blue-500/15 text-blue-700 border-blue-500/30 hover:bg-blue-500/20">
+                              <GraduationCap className="h-3 w-3 mr-1" />
+                              Rijbewijs Examen
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant={lesson.lesson_type === 'standalone' ? 'secondary' : 'outline'}>
-                        {lesson.lesson_type === 'standalone' ? 'Standalone' : lesson.lesson_type === 'ai_literacy_exam' ? 'Examen' : 'Course Module'}
-                      </Badge>
-                      {lesson.lesson_type === 'ai_literacy_exam' && (() => {
-                        const publishedExamCount = lessons?.filter(
-                          (l) => l.lesson_type === 'ai_literacy_exam' && l.is_published
-                        ).length ?? 0;
-                        const isConflict = publishedExamCount > 1 && lesson.is_published;
-                        return (
-                          <Badge
-                            variant={isConflict ? 'destructive' : 'default'}
-                            className={isConflict
-                              ? 'bg-orange-500/15 text-orange-700 border-orange-500/30 hover:bg-orange-500/20'
-                              : 'bg-blue-500/15 text-blue-700 border-blue-500/30 hover:bg-blue-500/20'
-                            }
-                          >
-                            <GraduationCap className="h-3 w-3 mr-1" />
-                            {isConflict ? 'Conflict — meerdere examens gepubliceerd' : 'Rijbewijs Examen'}
+                    {lesson.course_lessons?.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {lesson.course_lessons.slice(0, 2).map((cl) => (
+                          <Badge key={cl.course_id} variant="secondary" className="text-xs">
+                            {cl.courses?.title}
                           </Badge>
-                        );
-                      })()}
+                        ))}
+                        {lesson.course_lessons.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{lesson.course_lessons.length - 2} meer
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">— Niet gekoppeld</span>
+                    )}
                     </div>
                   </TableCell>
                   <TableCell>
