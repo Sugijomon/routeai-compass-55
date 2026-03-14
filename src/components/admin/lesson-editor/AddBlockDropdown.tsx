@@ -1,4 +1,4 @@
-import { FileText, Video, HelpCircle, CheckSquare, ToggleLeft, Edit3, MessageSquare, Sparkles, AlertCircle, List, Heading } from 'lucide-react';
+import { FileText, Video, HelpCircle, CheckSquare, ToggleLeft, Edit3, MessageSquare, Sparkles, AlertCircle, List, Heading, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BlockType } from '@/types/lesson-blocks';
 
