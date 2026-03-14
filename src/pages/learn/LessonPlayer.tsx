@@ -490,19 +490,17 @@ export default function LessonPlayer() {
               {blocks.map((block, index) => {
                 const isActive = index === currentBlockIndex;
                 const isCompleted = index < currentBlockIndex || blocksCompleted.includes(block.id);
-                const isReachable = index <= currentBlockIndex;
 
                 return (
                   <button
                     key={block.id}
-                    onClick={() => isReachable && handleTabClick(index)}
-                    disabled={!isReachable}
+                    onClick={() => handleTabClick(index)}
+                    disabled={false}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors',
                       isActive && 'bg-primary text-primary-foreground shadow-sm',
                       !isActive && isCompleted && 'bg-muted text-muted-foreground hover:bg-muted/80',
-                      !isActive && !isCompleted && !isReachable && 'text-muted-foreground/40 cursor-not-allowed',
-                      !isActive && !isCompleted && isReachable && 'text-muted-foreground hover:bg-muted/50',
+                      !isActive && !isCompleted && 'text-muted-foreground hover:bg-muted/50',
                     )}
                   >
                     {isCompleted && !isActive && (
