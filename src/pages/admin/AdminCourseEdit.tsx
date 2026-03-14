@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
@@ -17,7 +17,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, GripVertical, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -32,6 +32,7 @@ interface CourseLessonWithDetails extends CourseLesson {
 export default function AdminCourseEdit() {
   const { courseId } = useParams<{ courseId: string }>();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
   const [isAddLessonsOpen, setIsAddLessonsOpen] = useState(false);
@@ -334,7 +335,12 @@ export default function AdminCourseEdit() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{cl.lesson?.title}</p>
+                            <button
+                              className="font-medium text-left hover:text-primary hover:underline transition-colors"
+                              onClick={() => navigate(`/admin/lessons/${cl.lesson_id}/edit`)}
+                            >
+                              {cl.lesson?.title}
+                            </button>
                             {cl.lesson?.description && (
                               <p className="text-sm text-muted-foreground line-clamp-1">
                                 {cl.lesson.description}
@@ -352,6 +358,14 @@ export default function AdminCourseEdit() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Les bewerken"
+                              onClick={() => navigate(`/admin/lessons/${cl.lesson_id}/edit`)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
