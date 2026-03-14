@@ -280,7 +280,7 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
     <div className="space-y-4">
       {/* Caption */}
       {block.caption && (
-        <p className="text-lg text-muted-foreground text-center">{block.caption}</p>
+        <p className="text-lg text-muted-foreground text-left">{block.caption}</p>
       )}
 
       {/* Video container */}
