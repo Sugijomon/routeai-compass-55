@@ -374,65 +374,67 @@ export default function AdminLessonEdit() {
           </TabsContent>
 
           {/* Questions Tab */}
-          <TabsContent value="questions">
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Vragen voor deze les</h3>
-                <Button
-                  size="sm"
-                  onClick={() => navigate(`/editor/questions/new?lessonId=${lessonId}`)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nieuwe vraag
-                </Button>
-              </div>
-
-              {questionsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          {editor.lessonType === 'ai_literacy_exam' && (
+            <TabsContent value="questions">
+              <div className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">Vragen voor deze les</h3>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate(`/editor/questions/new?lessonId=${lessonId}`)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nieuwe vraag
+                  </Button>
                 </div>
-              ) : questions && questions.length > 0 ? (
-                <div className="space-y-2">
-                  {questions.map((q) => (
-                    <div
-                      key={q.id}
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0 flex-1 mr-3">
-                        <p className="text-sm font-medium line-clamp-1">{q.question_text}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                            {questionTypeLabels[q.question_type] || q.question_type}
-                          </Badge>
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                            {q.points} {q.points === 1 ? 'punt' : 'punten'}
-                          </Badge>
+
+                {questionsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  </div>
+                ) : questions && questions.length > 0 ? (
+                  <div className="space-y-2">
+                    {questions.map((q) => (
+                      <div
+                        key={q.id}
+                        className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0 flex-1 mr-3">
+                          <p className="text-sm font-medium line-clamp-1">{q.question_text}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                              {questionTypeLabels[q.question_type] || q.question_type}
+                            </Badge>
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {q.points} {q.points === 1 ? 'punt' : 'punten'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/editor/questions/${q.id}/edit`)}>
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteQuestionId(q.id)}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/editor/questions/${q.id}/edit`)}>
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteQuestionId(q.id)}>
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={HelpCircle}
-                  title="Nog geen vragen voor deze les"
-                  description="Voeg vragen toe om de kennis van gebruikers te toetsen."
-                  action={{
-                    label: 'Nieuwe vraag',
-                    onClick: () => navigate(`/editor/questions/new?lessonId=${lessonId}`),
-                  }}
-                />
-              )}
-            </div>
-          </TabsContent>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={HelpCircle}
+                    title="Nog geen vragen voor deze les"
+                    description="Voeg vragen toe om de kennis van gebruikers te toetsen."
+                    action={{
+                      label: 'Nieuwe vraag',
+                      onClick: () => navigate(`/editor/questions/new?lessonId=${lessonId}`),
+                    }}
+                  />
+                )}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Sidebar - Metadata Panel */}
