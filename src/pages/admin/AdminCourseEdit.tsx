@@ -361,6 +361,14 @@ export default function AdminCourseEdit() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              title="Les bewerken"
+                              onClick={() => navigate(`/admin/lessons/${cl.lesson_id}/edit`)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => handleMoveLesson(index, 'up')}
                               disabled={index === 0}
                             >
