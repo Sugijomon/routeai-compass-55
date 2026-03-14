@@ -66,7 +66,7 @@ export default function LessonPlayer() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
-  const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
+  
 
   // Get authenticated user from Supabase
   useEffect(() => {
