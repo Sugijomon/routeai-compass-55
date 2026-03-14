@@ -289,21 +289,14 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
 
                       {/* Lesson title — clickable to navigate */}
                       <button
-                        onClick={() => handleLessonClick(cl.lesson_id, status)}
-                        disabled={status === 'locked'}
+                        onClick={() => handleLessonClick(cl.lesson_id)}
                         className={cn(
-                          'truncate leading-snug text-left flex-1 min-w-0',
+                          'truncate leading-snug text-left flex-1 min-w-0 hover:text-white',
                           isActive ? 'text-white font-medium' : 'text-slate-300',
-                          status === 'locked' && 'text-slate-500',
-                          status !== 'locked' && 'hover:text-white',
                         )}
                       >
                         {cl.lesson?.title || `Les ${index + 1}`}
                       </button>
-
-                      {status === 'locked' && (
-                        <Lock className="h-3 w-3 text-slate-600 ml-auto shrink-0" />
-                      )}
                     </div>
 
                     {/* Expanded blocks */}
