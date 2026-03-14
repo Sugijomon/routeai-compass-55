@@ -20,6 +20,7 @@ import TrainingOverview from "./pages/learn/TrainingOverview";
 import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
 import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
+import EditorDashboard from "./pages/editor/EditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
 import VragenBank from "./pages/editor/VragenBank";
 import ExamenPage from "./pages/onboarding/ExamenPage";
@@ -137,6 +138,16 @@ export default function App() {
         />
         
         {/* Content Editor Dashboard */}
+        <Route 
+          path="/editor/dashboard" 
+          element={
+            <AuthRoute requireAdmin>
+              <EditorDashboard />
+            </AuthRoute>
+          } 
+        />
+        
+        {/* Content Editor redirect */}
         <Route 
           path="/editor" 
           element={<Navigate to="/editor/cursussen" replace />}
