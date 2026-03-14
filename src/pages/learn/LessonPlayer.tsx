@@ -364,20 +364,13 @@ export default function LessonPlayer() {
     navigate('/dashboard');
   };
 
-  // Handle tab click — only allow clicking completed blocks
+  // Handle tab click — navigate to any block freely
   const handleTabClick = (index: number) => {
-    if (index <= currentBlockIndex) {
-      // Navigate to that block by calling goNext/goPrevious repeatedly is not ideal
-      // Instead we need a direct set — but prompt says don't change hooks
-      // We can use goPrevious/goNext but that's awkward. Let's just navigate to the index
-      // by using the progress hook. Since we can't change the hook, we'll work around it.
-      // Actually canGoPrevious and goNext are available. For clicking completed tabs,
-      // let's just set the block index by repeated calls... that's bad.
-      // We'll need to check if there's a way. Let me just allow it for now by navigating.
-      // Actually the simplest: just call goNext/goPrevious isn't feasible for jumps.
-      // The prompt says "do not change hooks" so we must work within constraints.
-      // For completed blocks, clicking navigates back — we can't do arbitrary jumps without
-      // changing the hook. Let's skip tab click navigation for now and just show visual state.
+    // Jump to the target block
+    if (index < currentBlockIndex) {
+      for (let i = 0; i < currentBlockIndex - index; i++) goPrevious();
+    } else if (index > currentBlockIndex) {
+      for (let i = 0; i < index - currentBlockIndex; i++) goNext();
     }
   };
 
