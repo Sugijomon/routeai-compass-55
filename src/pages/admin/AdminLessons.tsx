@@ -209,7 +209,7 @@ export default function AdminLessons() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lessons.map((lesson) => (
+              {filtered.map((lesson) => (
                 <TableRow key={lesson.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
