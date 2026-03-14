@@ -139,14 +139,11 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
   const completedCount = completedLessonIds.length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  const getLessonStatus = (index: number, lessonId: string | null): 'completed' | 'active' | 'locked' => {
+  const getLessonStatus = (_index: number, lessonId: string | null): 'completed' | 'active' | 'locked' => {
     if (!lessonId) return 'locked';
     if (lessonId === currentLessonId) return 'active';
     if (completedLessonIds.includes(lessonId)) return 'completed';
-    if (index === 0) return 'active';
-    const prevId = courseLessons[index - 1]?.lesson_id;
-    if (prevId && completedLessonIds.includes(prevId)) return 'active';
-    return 'locked';
+    return 'active';
   };
 
   const toggleUnit = (unitId: string) => {
