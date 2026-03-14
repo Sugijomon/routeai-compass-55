@@ -159,6 +159,21 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
 
+        <ToolbarButton
+          title="Inspringing vergroten"
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={htmlMode || !editor.can().sinkListItem('listItem')}
+        >
+          <span className="text-xs font-mono">→</span>
+        </ToolbarButton>
+        <ToolbarButton
+          title="Inspringing verkleinen"
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={htmlMode || !editor.can().liftListItem('listItem')}
+        >
+          <span className="text-xs font-mono">←</span>
+        </ToolbarButton>
+
         <Divider />
 
         <ToolbarButton onClick={() => { setShowLinkInput(v => !v); setLinkUrl(editor.getAttributes('link').href || ''); }} active={editor.isActive('link')} disabled={htmlMode} title="Link">
