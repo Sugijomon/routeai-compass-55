@@ -134,9 +134,6 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
       // Invite the contact person as org_admin
       let inviteError: string | null = null;
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const accessToken = sessionData?.session?.access_token;
-
         const response = await supabase.functions.invoke('invite-user', {
           body: {
             email: data.email,
