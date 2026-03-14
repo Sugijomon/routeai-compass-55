@@ -268,7 +268,7 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
 
   // Flush pending save immediately
   const flushSave = useCallback(async () => {
-    if (!progressData?.id || !pendingSaveRef.current) return;
+    if (!userId || !lessonId || !pendingSaveRef.current) return;
     
     const updates = pendingSaveRef.current;
     pendingSaveRef.current = null;
@@ -283,21 +283,25 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     try {
       const { error } = await supabase
         .from('user_lesson_progress')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', progressData.id);
+        .upsert(
+          {
+            user_id: userId,
+            lesson_id: lessonId,
+            ...updates,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,lesson_id' }
+        );
 
       if (error) throw error;
     } catch (error) {
       console.error('Error saving progress:', error);
     }
-  }, [progressData?.id]);
+  }, [userId, lessonId]);
 
   // Debounced save progress to database
   const saveProgress = useCallback(async (updates: Partial<LessonProgressData>) => {
-    if (!progressData?.id) return;
+    if (!userId || !lessonId) return;
 
     // Merge with pending updates
     pendingSaveRef.current = {
@@ -322,18 +326,22 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
       try {
         const { error } = await supabase
           .from('user_lesson_progress')
-          .update({
-            ...toSave,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', progressData.id);
+          .upsert(
+            {
+              user_id: userId,
+              lesson_id: lessonId,
+              ...toSave,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id,lesson_id' }
+          );
 
         if (error) throw error;
       } catch (error) {
         console.error('Error saving progress:', error);
       }
     }, 800);
-  }, [progressData?.id]);
+  }, [userId, lessonId]);
 
   // Auto-save every 10 seconds if there are pending changes
   useEffect(() => {

@@ -201,6 +201,14 @@ export default function App() {
         />
         
         <Route
+          path="/admin/lessons/new"
+          element={
+            <AuthRoute requireAdmin>
+              <AdminLessonEdit />
+            </AuthRoute>
+          }
+        />
+        <Route
           path="/admin/lessons/:lessonId/edit" 
           element={
             <AuthRoute requireAdmin>
