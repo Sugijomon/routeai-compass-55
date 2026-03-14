@@ -480,15 +480,19 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
   }, [blocks, quizResults]);
 
   const goNext = useCallback(() => {
-    const currentBlock = blocks[currentBlockIndex];
-    if (currentBlock) {
-      markBlockCompleted(currentBlock.id);
+    if (currentBlockIndex < totalBlocks - 1) {
+      const currentBlock = blocks[currentBlockIndex];
+      if (currentBlock) {
+        markBlockCompleted(currentBlock.id);
+      }
+      goToBlock(currentBlockIndex + 1);
     }
-    goToBlock(currentBlockIndex + 1);
-  }, [currentBlockIndex, blocks, markBlockCompleted, goToBlock]);
+  }, [currentBlockIndex, totalBlocks, blocks, markBlockCompleted, goToBlock]);
 
   const goPrevious = useCallback(() => {
-    goToBlock(currentBlockIndex - 1);
+    if (currentBlockIndex > 0) {
+      goToBlock(currentBlockIndex - 1);
+    }
   }, [currentBlockIndex, goToBlock]);
 
   const canGoPrevious = currentBlockIndex > 0;
