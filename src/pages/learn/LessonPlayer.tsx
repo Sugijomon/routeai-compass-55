@@ -166,14 +166,9 @@ export default function LessonPlayer() {
 
   const currentBlock = blocks[currentBlockIndex];
 
-  // All blocks are always navigable — no gating
-  useEffect(() => {
-    setCanProceedFromBlock(true);
-  }, [currentBlockIndex]);
-
-  // Handle block proceed state
-  const handleCanProceed = useCallback((canProceed: boolean) => {
-    setCanProceedFromBlock(canProceed);
+  // Handle block proceed state (no-op, kept for VideoBlockPlayer callback)
+  const handleCanProceed = useCallback((_canProceed: boolean) => {
+    // No gating — all blocks always allow proceeding
   }, []);
 
   // Tab progress percentage
