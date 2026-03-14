@@ -135,6 +135,63 @@ export type LessonBlock =
   | KeyTakeawaysBlock
   | SectionHeaderBlock;
 
+// ── Topic-based lesson structure (v2) ──
+
+export interface LessonTopic {
+  id: string;           // uuid, generated client-side
+  title: string;        // displayed as tab label
+  order: number;        // 0-based
+  blocks: LessonBlock[]; // all existing block types
+}
+
+export interface LessonContent {
+  version: 2;
+  topics: LessonTopic[];
+}
+
+// Parse lesson content safely — handles both legacy flat arrays and new topic structure
+export function parseLessonContent(raw: unknown): LessonTopic[] {
+  // New format: { version: 2, topics: [...] }
+  if (raw && typeof raw === 'object' && 'topics' in (raw as object)) {
+    const content = raw as LessonContent;
+    return content.topics || [];
+  }
+
+  // Legacy format: flat array of blocks → migrate on the fly
+  if (Array.isArray(raw)) {
+    return (raw as LessonBlock[]).map((block, index) => ({
+      id: `migrated-${block.id || index}`,
+      title: getLegacyTopicTitle(block, index),
+      order: index,
+      blocks: [block],
+    }));
+  }
+
+  return [];
+}
+
+function getLegacyTopicTitle(block: LessonBlock, index: number): string {
+  switch (block.type) {
+    case 'section_header': return (block as any).title || `Onderwerp ${index + 1}`;
+    case 'hero': return (block as any).title || `Onderwerp ${index + 1}`;
+    case 'quiz_mc':
+    case 'quiz_ms':
+    case 'quiz_tf':
+    case 'quiz_fill':
+    case 'quiz_essay': return 'Oefenvraag';
+    case 'video': return 'Video';
+    default: return `Onderwerp ${index + 1}`;
+  }
+}
+
+export function serializeLessonContent(topics: LessonTopic[]): object {
+  return { version: 2, topics };
+}
+
+export function flattenTopicBlocks(topics: LessonTopic[]): LessonBlock[] {
+  return topics.flatMap(t => t.blocks);
+}
+
 // Helper to generate unique block IDs
 export function generateBlockId(): string {
   return crypto.randomUUID();

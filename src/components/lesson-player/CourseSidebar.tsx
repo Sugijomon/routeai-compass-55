@@ -13,7 +13,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
-import type { LessonBlock } from '@/types/lesson-blocks';
+import { LessonTopic, parseLessonContent } from '@/types/lesson-blocks';
 
 type Lesson = Tables<'lessons'>;
 
@@ -28,41 +28,7 @@ interface CourseSidebarProps {
   courseId: string | null;
   currentLessonId: string;
   userId: string | null;
-  currentBlockIndex: number;
-}
-
-function getBlockDisplayTitle(block: LessonBlock): string {
-  switch (block.type) {
-    case 'paragraph': {
-      const text = block.content?.replace(/<[^>]*>/g, '').trim();
-      return text ? (text.length > 40 ? text.substring(0, 40) + '…' : text) : 'Tekst';
-    }
-    case 'section_header':
-      return block.title || 'Sectietitel';
-    case 'hero':
-      return block.title || 'Introductie';
-    case 'video':
-      return block.caption || 'Video';
-    case 'callout':
-      return block.title || 'Callout';
-    case 'key_takeaways':
-      return 'Kernpunten';
-    case 'quiz_mc':
-    case 'quiz_ms':
-    case 'quiz_tf':
-    case 'quiz_fill':
-    case 'quiz_essay': {
-      const q = block.question?.trim();
-      return q ? (q.length > 40 ? q.substring(0, 40) + '…' : q) : 'Oefenvraag';
-    }
-    default:
-      return 'Onderdeel';
-  }
-}
-
-function parseLessonBlocks(lesson: Lesson): LessonBlock[] {
-  if (!Array.isArray(lesson.blocks)) return [];
-  return (lesson.blocks as unknown as LessonBlock[]).sort((a, b) => a.order - b.order);
+  currentBlockIndex: number; // now represents currentTopicIndex
 }
 
 export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockIndex }: CourseSidebarProps) {
@@ -81,23 +47,17 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
     }
   }, [currentLessonId]);
 
-  // Fetch course info
   const { data: course } = useQuery({
     queryKey: ['sidebar-course', courseId],
     queryFn: async () => {
       if (!courseId) return null;
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', courseId)
-        .single();
+      const { data, error } = await supabase.from('courses').select('*').eq('id', courseId).single();
       if (error) throw error;
       return data;
     },
     enabled: !!courseId,
   });
 
-  // Fetch course lessons
   const { data: courseLessons = [] } = useQuery({
     queryKey: ['sidebar-course-lessons', courseId],
     queryFn: async () => {
@@ -108,15 +68,11 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
         .eq('course_id', courseId)
         .order('sequence_order', { ascending: true });
       if (error) throw error;
-      return (data || []).map(cl => ({
-        ...cl,
-        lesson: cl.lesson as Lesson,
-      })) as CourseLessonItem[];
+      return (data || []).map(cl => ({ ...cl, lesson: cl.lesson as Lesson })) as CourseLessonItem[];
     },
     enabled: !!courseId,
   });
 
-  // Fetch completed lessons
   const { data: completedLessonIds = [] } = useQuery({
     queryKey: ['sidebar-completions', courseId, userId],
     queryFn: async () => {
@@ -138,8 +94,8 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
   const completedCount = completedLessonIds.length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  const getLessonStatus = (_index: number, lessonId: string | null): 'completed' | 'active' | 'locked' => {
-    if (!lessonId) return 'locked';
+  const getLessonStatus = (_index: number, lessonId: string | null): 'completed' | 'active' => {
+    if (!lessonId) return 'active';
     if (lessonId === currentLessonId) return 'active';
     if (completedLessonIds.includes(lessonId)) return 'completed';
     return 'active';
@@ -168,21 +124,15 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
     navigate(`/learn/${lessonId}${courseId ? `?courseId=${courseId}` : ''}`);
   };
 
-  // If no courseId, show minimal sidebar
   if (!courseId || !course) {
     return (
       <aside className="w-[280px] shrink-0 flex flex-col" style={{ backgroundColor: '#0f2744' }}>
         <div className="p-4">
-          <button
-            onClick={() => navigate('/learn')}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-4"
-          >
+          <button onClick={() => navigate('/learn')} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-4">
             <ArrowLeft className="h-4 w-4" />
             Terug
           </button>
-          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-            Losse les
-          </h2>
+          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Losse les</h2>
         </div>
       </aside>
     );
@@ -194,16 +144,11 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
     <aside className="w-[280px] shrink-0 flex flex-col overflow-hidden" style={{ backgroundColor: '#0f2744' }}>
       {/* Course header */}
       <div className="p-4 border-b border-white/10">
-        <button
-          onClick={() => navigate(courseId ? `/learn/course/${courseId}` : '/learn')}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-3"
-        >
+        <button onClick={() => navigate(courseId ? `/learn/course/${courseId}` : '/learn')} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-3">
           <ArrowLeft className="h-4 w-4" />
           Cursusoverzicht
         </button>
-        <h2 className="text-white font-semibold text-sm leading-snug line-clamp-2">
-          {course.title}
-        </h2>
+        <h2 className="text-white font-semibold text-sm leading-snug line-clamp-2">{course.title}</h2>
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Voortgang</span>
@@ -220,15 +165,9 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
             onClick={() => toggleUnit('main')}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-300 uppercase tracking-wider hover:bg-white/5 transition-colors"
           >
-            {isMainExpanded ? (
-              <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-            ) : (
-              <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-            )}
+            {isMainExpanded ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
             <span className="truncate">Lessen</span>
-            <span className="ml-auto text-slate-500 font-normal">
-              {completedCount}/{totalLessons}
-            </span>
+            <span className="ml-auto text-slate-500 font-normal">{completedCount}/{totalLessons}</span>
           </button>
 
           {isMainExpanded && (
@@ -237,7 +176,8 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                 const status = getLessonStatus(index, cl.lesson_id);
                 const isActive = cl.lesson_id === currentLessonId;
                 const isLessonExpanded = cl.lesson_id ? expandedLessons.has(cl.lesson_id) : false;
-                const lessonBlocks = cl.lesson ? parseLessonBlocks(cl.lesson) : [];
+                // Parse topics for this lesson
+                const lessonTopics: LessonTopic[] = cl.lesson ? parseLessonContent(cl.lesson.blocks) : [];
                 const isCompleted = status === 'completed';
 
                 return (
@@ -250,8 +190,7 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                         !isActive && 'hover:bg-white/5 border-l-2 border-transparent',
                       )}
                     >
-                      {/* Chevron toggle */}
-                      {lessonBlocks.length > 0 ? (
+                      {lessonTopics.length > 0 ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -259,17 +198,12 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                           }}
                           className="shrink-0 p-0.5 -ml-0.5 hover:bg-white/10 rounded transition-colors"
                         >
-                          {isLessonExpanded ? (
-                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-                          ) : (
-                            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-                          )}
+                          {isLessonExpanded ? <ChevronDown className="h-3.5 w-3.5 text-slate-400" /> : <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
                         </button>
                       ) : (
                         <span className="shrink-0 w-4.5" />
                       )}
 
-                      {/* Status icon */}
                       <span className="shrink-0">
                         {isCompleted ? (
                           <CheckCircle className="h-4 w-4 text-sky-400 fill-sky-400" />
@@ -285,7 +219,6 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                         )}
                       </span>
 
-                      {/* Lesson title — clickable to navigate */}
                       <button
                         onClick={() => handleLessonClick(cl.lesson_id)}
                         className={cn(
@@ -297,33 +230,31 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                       </button>
                     </div>
 
-                    {/* Expanded blocks */}
-                    {isLessonExpanded && lessonBlocks.length > 0 && (
+                    {/* Expanded topics (instead of blocks) */}
+                    {isLessonExpanded && lessonTopics.length > 0 && (
                       <div className="pb-1">
-                        {lessonBlocks.map((block, blockIdx) => {
-                          const isActiveBlock = isActive && blockIdx === currentBlockIndex;
-                          const isBlockDone = isCompleted || (isActive && blockIdx < currentBlockIndex);
+                        {lessonTopics.map((topic, topicIdx) => {
+                          const isActiveTopic = isActive && topicIdx === currentBlockIndex;
+                          const isTopicDone = isCompleted || (isActive && topicIdx < currentBlockIndex);
 
                           return (
                             <div
-                              key={block.id}
+                              key={topic.id}
                               className={cn(
                                 'flex items-center gap-2 pl-12 pr-4 py-1.5 text-xs',
-                                isActiveBlock
+                                isActiveTopic
                                   ? 'text-white border-l-2 border-sky-400 bg-sky-500/10'
                                   : 'text-white/50 border-l-2 border-transparent',
                               )}
                             >
-                              {isBlockDone ? (
+                              {isTopicDone ? (
                                 <CheckCircle className="h-3 w-3 text-sky-400 fill-sky-400 shrink-0" />
                               ) : (
                                 <span className="text-white/30 shrink-0 w-3 text-center text-[10px] font-medium">
-                                  {blockIdx + 1}
+                                  {topicIdx + 1}
                                 </span>
                               )}
-                              <span className="truncate">
-                                {getBlockDisplayTitle(block)}
-                              </span>
+                              <span className="truncate">{topic.title}</span>
                             </div>
                           );
                         })}
@@ -337,7 +268,7 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
         </div>
       </div>
 
-      {/* Bottom: AI Rijbewijs counter */}
+      {/* Bottom */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-sky-500/20 flex items-center justify-center shrink-0">
@@ -345,9 +276,7 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
           </div>
           <div className="min-w-0">
             <p className="text-xs text-slate-400">AI Rijbewijs</p>
-            <p className="text-sm text-white font-medium">
-              {completedCount}/{totalLessons} lessen
-            </p>
+            <p className="text-sm text-white font-medium">{completedCount}/{totalLessons} lessen</p>
           </div>
         </div>
       </div>

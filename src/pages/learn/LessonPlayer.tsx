@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LessonBlock } from '@/types/lesson-blocks';
+import { LessonBlock, LessonTopic, parseLessonContent, flattenTopicBlocks } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
 import { CourseSidebar } from '@/components/lesson-player/CourseSidebar';
@@ -27,38 +27,6 @@ import { Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-function getBlockTabTitle(block: LessonBlock): string {
-  switch (block.type) {
-    case 'paragraph': {
-      const text = block.content?.replace(/<[^>]*>/g, '').trim();
-      return text ? (text.length > 40 ? text.substring(0, 40) + '…' : text) : 'Tekst';
-    }
-    case 'section_header':
-      return block.title || 'Sectietitel';
-    case 'hero':
-      return block.title || 'Introductie';
-    case 'video':
-      return block.caption || 'Video';
-    case 'callout':
-      return block.title || 'Callout';
-    case 'key_takeaways':
-      return 'Kernpunten';
-    case 'quiz_mc':
-    case 'quiz_ms':
-    case 'quiz_tf':
-    case 'quiz_fill':
-    case 'quiz_essay': {
-      const q = block.question?.trim();
-      return q ? (q.length > 40 ? q.substring(0, 40) + '…' : q) : 'Oefenvraag';
-    }
-    default:
-      return 'Onderdeel';
-  }
-}
-
-
-
-
 export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [searchParams] = useSearchParams();
@@ -66,9 +34,7 @@ export default function LessonPlayer() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
-  
 
-  // Get authenticated user from Supabase
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -84,23 +50,14 @@ export default function LessonPlayer() {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
-    score: number;
-    earnedPoints: number;
-    maxPoints: number;
-    timeSpent: number;
-    hasQuizzes: boolean;
-    passingScore: number;
-    attemptNumber: number;
+    score: number; earnedPoints: number; maxPoints: number;
+    timeSpent: number; hasQuizzes: boolean; passingScore: number; attemptNumber: number;
   } | null>(null);
   const [courseCompletionData, setCourseCompletionData] = useState<{
-    courseTitle: string;
-    finalScore: number;
-    lessonsCompleted: number;
-    totalLessons: number;
-    unlockedCapability: string | null;
+    courseTitle: string; finalScore: number; lessonsCompleted: number;
+    totalLessons: number; unlockedCapability: string | null;
   } | null>(null);
 
-  // Force clear cache and refetch on mount
   useEffect(() => {
     if (lessonId) {
       queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] });
@@ -108,7 +65,6 @@ export default function LessonPlayer() {
     }
   }, [lessonId, queryClient]);
 
-  // Fetch lesson data
   const { data: lesson, isLoading: lessonLoading, error } = useQuery({
     queryKey: ['lesson', lessonId],
     queryFn: async () => {
@@ -127,23 +83,22 @@ export default function LessonPlayer() {
     refetchOnMount: 'always',
   });
 
-  const blocks: LessonBlock[] = Array.isArray(lesson?.blocks)
-    ? (lesson.blocks as unknown as LessonBlock[]).sort((a, b) => a.order - b.order)
-    : [];
+  // Parse topics from lesson blocks
+  const topics: LessonTopic[] = lesson ? parseLessonContent(lesson.blocks) : [];
+  const allBlocks = flattenTopicBlocks(topics);
 
-  // Progress tracking
   const {
-    currentBlockIndex,
+    currentTopicIndex,
     progressPercentage: _progressPercentage,
     quizAttempts,
     quizResults,
     startedAt,
     isLoading: progressLoading,
-    goToBlock,
+    goToTopic,
     goNext,
     goPrevious,
     canGoPrevious,
-    isLastBlock,
+    isLastTopic,
     markBlockCompleted,
     incrementQuizAttempt,
     recordQuizResult,
@@ -151,10 +106,9 @@ export default function LessonPlayer() {
     blocksCompleted,
   } = useLessonProgress({
     lessonId: lessonId || '',
-    blocks,
+    topics,
   });
 
-  // Attempt tracking
   const {
     currentAttemptNumber,
     completeCurrentAttempt,
@@ -165,36 +119,31 @@ export default function LessonPlayer() {
     userId,
   });
 
-  const currentBlock = blocks[currentBlockIndex];
+  const currentTopic = topics[currentTopicIndex];
 
-  // Handle block proceed state (no-op, kept for VideoBlockPlayer callback)
-  const handleCanProceed = useCallback((_canProceed: boolean) => {
-    // No gating — all blocks always allow proceeding
-  }, []);
+  const handleCanProceed = useCallback((_canProceed: boolean) => {}, []);
 
-  // Tab progress percentage
-  const tabProgressPercentage = blocks.length > 0
-    ? Math.round(((currentBlockIndex + 1) / blocks.length) * 100)
+  // Tab progress percentage based on topics
+  const tabProgressPercentage = topics.length > 0
+    ? Math.round(((currentTopicIndex + 1) / topics.length) * 100)
     : 0;
 
-  // Handle next
   const handleNext = () => {
-    if (!currentBlock) return;
-    markBlockCompleted(currentBlock.id);
-    if (isLastBlock) {
+    if (!currentTopic) return;
+    // Mark all blocks in current topic completed
+    currentTopic.blocks.forEach(b => markBlockCompleted(b.id));
+    if (isLastTopic) {
       handleComplete();
     } else {
       goNext();
     }
   };
 
-  // Handle previous — go to previous block, or previous lesson in course
   const handlePrevious = async () => {
-    if (currentBlockIndex > 0) {
+    if (currentTopicIndex > 0) {
       goPrevious();
       return;
     }
-    // First block — try navigating to previous lesson in course
     if (courseId && lessonId) {
       try {
         const { data: courseLessons } = await supabase
@@ -218,12 +167,11 @@ export default function LessonPlayer() {
     }
   };
 
-  // Handle lesson completion
   const handleComplete = async () => {
     if (!lessonId || !userId) return;
     try {
-      if (currentBlock) {
-        markBlockCompleted(currentBlock.id);
+      if (currentTopic) {
+        currentTopic.blocks.forEach(b => markBlockCompleted(b.id));
       }
       const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
       let timeSpent = 0;
@@ -234,38 +182,24 @@ export default function LessonPlayer() {
       const lessonPassingScore = lesson?.passing_score ?? 0;
       const passed = maxPoints === 0 || percentage >= lessonPassingScore;
 
-      await completeCurrentAttempt({
-        score: earnedPoints,
-        maxScore: maxPoints,
-        percentage,
-        passed,
-        timeSpent,
-      });
+      await completeCurrentAttempt({ score: earnedPoints, maxScore: maxPoints, percentage, passed, timeSpent });
 
       const { error } = await supabase
         .from('user_lesson_completions')
         .upsert({
-          user_id: userId,
-          lesson_id: lessonId,
-          score: percentage,
-          time_spent: timeSpent,
-          completed_at: new Date().toISOString(),
+          user_id: userId, lesson_id: lessonId, score: percentage,
+          time_spent: timeSpent, completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,lesson_id' });
       if (error) throw error;
 
       const courseResult = await updateCourseProgress();
-
       if (courseResult?.courseComplete) {
         setCourseCompletionData(courseResult);
         setShowCourseCompletionModal(true);
       } else {
         setCompletionData({
-          score: percentage,
-          earnedPoints,
-          maxPoints,
-          timeSpent,
-          hasQuizzes: maxPoints > 0,
-          passingScore: lessonPassingScore,
+          score: percentage, earnedPoints, maxPoints, timeSpent,
+          hasQuizzes: maxPoints > 0, passingScore: lessonPassingScore,
           attemptNumber: currentAttemptNumber,
         });
         setShowCompletionModal(true);
@@ -276,14 +210,9 @@ export default function LessonPlayer() {
     }
   };
 
-  // Update course progress when lesson is completed
   const updateCourseProgress = async (): Promise<{
-    courseComplete: boolean;
-    courseTitle: string;
-    finalScore: number;
-    lessonsCompleted: number;
-    totalLessons: number;
-    unlockedCapability: string | null;
+    courseComplete: boolean; courseTitle: string; finalScore: number;
+    lessonsCompleted: number; totalLessons: number; unlockedCapability: string | null;
   } | null> => {
     if (!lessonId || !userId) return null;
     try {
@@ -292,27 +221,22 @@ export default function LessonPlayer() {
         : supabase.from('course_lessons').select('course_id, courses!inner(id, title, unlocks_capability)').eq('lesson_id', lessonId).maybeSingle();
       const { data: courseLesson } = await courseQuery;
       if (!courseLesson?.course_id) return null;
-
       const courseData = courseLesson.courses as unknown as { id: string; title: string; unlocks_capability: string | null };
       const { count: totalLessons } = await supabase.from('course_lessons').select('id', { count: 'exact', head: true }).eq('course_id', courseLesson.course_id);
       const { data: courseLessonIds } = await supabase.from('course_lessons').select('lesson_id').eq('course_id', courseLesson.course_id);
       const lessonIds = courseLessonIds?.map(cl => cl.lesson_id).filter(Boolean) ?? [];
       const { data: completedLessons } = await supabase.from('user_lesson_completions').select('lesson_id, score').eq('user_id', userId).in('lesson_id', lessonIds);
-
       const lessonsCompleted = completedLessons?.length ?? 0;
       const lessonsRequired = totalLessons ?? 1;
       const pPct = Math.round((lessonsCompleted / lessonsRequired) * 100);
       const averageScore = completedLessons && completedLessons.length > 0
-        ? Math.round(completedLessons.reduce((sum, l) => sum + (l.score ?? 0), 0) / completedLessons.length)
-        : 0;
-
+        ? Math.round(completedLessons.reduce((sum, l) => sum + (l.score ?? 0), 0) / completedLessons.length) : 0;
       const { data: existingProgress } = await supabase.from('user_course_progress').select('*').eq('user_id', userId).eq('course_id', courseLesson.course_id).maybeSingle();
       if (existingProgress) {
         await supabase.from('user_course_progress').update({ lessons_completed: lessonsCompleted, progress_percentage: pPct, updated_at: new Date().toISOString() }).eq('id', existingProgress.id);
       } else {
         await supabase.from('user_course_progress').insert({ user_id: userId, course_id: courseLesson.course_id, lessons_completed: lessonsCompleted, lessons_required: lessonsRequired, progress_percentage: pPct });
       }
-
       if (pPct >= 100) {
         await supabase.from('user_course_completions').upsert({ user_id: userId, course_id: courseLesson.course_id, final_score: averageScore, capability_unlocked: courseData.unlocks_capability, completed_at: new Date().toISOString() }, { onConflict: 'user_id,course_id' });
         if (courseData.unlocks_capability === 'ai_rijbewijs') {
@@ -355,9 +279,8 @@ export default function LessonPlayer() {
     navigate('/dashboard');
   };
 
-  // Handle tab click — navigate to any block freely
   const handleTabClick = (index: number) => {
-    goToBlock(index);
+    goToTopic(index);
   };
 
   // Loading states
@@ -386,7 +309,7 @@ export default function LessonPlayer() {
     );
   }
 
-  if (blocks.length === 0) {
+  if (topics.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md">
@@ -415,28 +338,17 @@ export default function LessonPlayer() {
     };
 
     switch (block.type) {
-      case 'paragraph':
-        return <ParagraphBlockPlayer key={block.id} block={block} />;
-      case 'video':
-        return <VideoBlockPlayer key={block.id} block={block} onCanProceed={handleCanProceed} />;
-      case 'quiz_mc':
-        return <QuizBlockPlayer block={block} {...commonQuizProps} />;
-      case 'quiz_ms':
-        return <QuizMultipleSelectPlayer block={block} {...commonQuizProps} />;
-      case 'quiz_tf':
-        return <QuizTrueFalsePlayer block={block} {...commonQuizProps} />;
-      case 'quiz_fill':
-        return <QuizFillInPlayer block={block} {...commonQuizProps} />;
-      case 'quiz_essay':
-        return <QuizEssayPlayer block={block} {...commonQuizProps} />;
-      case 'hero':
-        return <HeroBlockPlayer key={block.id} block={block} />;
-      case 'callout':
-        return <CalloutBlockPlayer key={block.id} block={block} />;
-      case 'key_takeaways':
-        return <KeyTakeawaysBlockPlayer key={block.id} block={block} />;
-      case 'section_header':
-        return <SectionHeaderBlockPlayer key={block.id} block={block} />;
+      case 'paragraph': return <ParagraphBlockPlayer key={block.id} block={block} />;
+      case 'video': return <VideoBlockPlayer key={block.id} block={block} onCanProceed={handleCanProceed} />;
+      case 'quiz_mc': return <QuizBlockPlayer block={block} {...commonQuizProps} />;
+      case 'quiz_ms': return <QuizMultipleSelectPlayer block={block} {...commonQuizProps} />;
+      case 'quiz_tf': return <QuizTrueFalsePlayer block={block} {...commonQuizProps} />;
+      case 'quiz_fill': return <QuizFillInPlayer block={block} {...commonQuizProps} />;
+      case 'quiz_essay': return <QuizEssayPlayer block={block} {...commonQuizProps} />;
+      case 'hero': return <HeroBlockPlayer key={block.id} block={block} />;
+      case 'callout': return <CalloutBlockPlayer key={block.id} block={block} />;
+      case 'key_takeaways': return <KeyTakeawaysBlockPlayer key={block.id} block={block} />;
+      case 'section_header': return <SectionHeaderBlockPlayer key={block.id} block={block} />;
       default: {
         const unknownBlock = block as { type: string };
         return (
@@ -455,7 +367,7 @@ export default function LessonPlayer() {
         courseId={courseId}
         currentLessonId={lessonId || ''}
         userId={userId}
-        currentBlockIndex={currentBlockIndex}
+        currentBlockIndex={currentTopicIndex}
       />
 
       {/* Right: Content area */}
@@ -465,21 +377,22 @@ export default function LessonPlayer() {
           lessonTitle={lesson.title}
           estimatedDuration={lesson.estimated_duration}
           progressPercentage={tabProgressPercentage}
-          currentBlock={currentBlockIndex}
-          totalBlocks={blocks.length}
+          currentBlock={currentTopicIndex}
+          totalBlocks={topics.length}
         />
 
-        {/* Tabs row */}
+        {/* Topic tabs row */}
         <div className="border-b bg-muted/30 shrink-0">
           <div className="overflow-x-auto">
             <div className="flex gap-1 px-4 py-2 min-w-max">
-              {blocks.map((block, index) => {
-                const isActive = index === currentBlockIndex;
-                const isCompleted = blocksCompleted.includes(block.id);
+              {topics.map((topic, index) => {
+                const isActive = index === currentTopicIndex;
+                // A topic is completed if ALL its blocks are completed
+                const isCompleted = topic.blocks.length > 0 && topic.blocks.every(b => blocksCompleted.includes(b.id));
 
                 return (
                   <button
-                    key={block.id}
+                    key={topic.id}
                     onClick={() => handleTabClick(index)}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors cursor-pointer',
@@ -493,7 +406,7 @@ export default function LessonPlayer() {
                     {isCompleted && !isActive && (
                       <CheckCircle className="h-3 w-3 text-primary shrink-0" />
                     )}
-                    <span className="truncate max-w-[120px]">{getBlockTabTitle(block)}</span>
+                    <span className="truncate max-w-[120px]">{topic.title}</span>
                   </button>
                 );
               })}
@@ -501,24 +414,25 @@ export default function LessonPlayer() {
           </div>
         </div>
 
-        {/* Single active block */}
+        {/* Render ALL blocks of the active topic vertically */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-8">
-            {currentBlock && renderBlock(currentBlock)}
+          <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+            {currentTopic && currentTopic.blocks
+              .sort((a, b) => a.order - b.order)
+              .map(block => renderBlock(block))}
           </div>
         </main>
 
         {/* Footer navigation */}
         <LessonPlayerFooter
-          currentBlock={currentBlockIndex}
-          totalBlocks={blocks.length}
+          currentBlock={currentTopicIndex}
+          totalBlocks={topics.length}
           canGoNext={true}
-          canGoPrevious={canGoPrevious || currentBlockIndex > 0 || !!courseId}
-          isLastBlock={isLastBlock}
+          canGoPrevious={canGoPrevious || currentTopicIndex > 0 || !!courseId}
+          isLastBlock={isLastTopic}
           onNext={handleNext}
           onPrevious={handlePrevious}
           onComplete={handleComplete}
-          
         />
       </div>
 
