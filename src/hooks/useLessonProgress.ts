@@ -361,12 +361,27 @@ export function useLessonProgress({ lessonId, blocks }: UseLessonProgressProps):
     console.log('Going to block:', index);
     
     setProgressData(prev => {
-      if (!prev) return prev;
-      const updated = { ...prev, current_block_index: index };
+      if (!prev) {
+        // No progress row yet — create minimal local state and trigger save
+        const newProgress: LessonProgressData = {
+          id: '',
+          user_id: '',
+          lesson_id: lessonId,
+          current_block_index: index,
+          blocks_completed: [],
+          progress_percentage: 0,
+          quiz_attempts: {},
+          quiz_results: {},
+          started_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        saveProgress({ current_block_index: index });
+        return newProgress;
+      }
       saveProgress({ current_block_index: index });
-      return updated;
+      return { ...prev, current_block_index: index };
     });
-  }, [totalBlocks, saveProgress]);
+  }, [totalBlocks, lessonId, saveProgress]);
 
   const markBlockCompleted = useCallback((blockId: string) => {
     setProgressData(prev => {
