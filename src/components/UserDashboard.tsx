@@ -8,7 +8,6 @@ import {
   Shield,
   GraduationCap,
   Award,
-  LogOut,
   FileText,
   Lightbulb,
   BarChart3,
@@ -30,12 +29,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const { profile, hasAiRijbewijs, aiRijbewijsObtainedAt, isLoading: profileLoading } = useUserProfile();
   const { onboardingCourse, progressPercentage, isCompleted, isLoading: courseLoading } = useOnboardingCourse();
@@ -72,13 +70,6 @@ export default function UserDashboard() {
       </div>
     );
   }
-
-  const handleLogout = async () => {
-    await signOut();
-    toast.success('Uitgelogd');
-    navigate('/auth', { replace: true });
-  };
-
 
   // Capability icon mapping met emoji fallback
   const getCapabilityDisplay = (capabilityId: string) => {
@@ -122,26 +113,7 @@ export default function UserDashboard() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b bg-card">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">RouteAI</h1>
-              <Badge variant="outline">Gebruiker</Badge>
-              {hasAiRijbewijs && <AiRijbewijsBadge obtainedAt={aiRijbewijsObtainedAt} compact />}
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{displayName}</span>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Uitloggen
-              </Button>
-            </div>
-          </div>
-        </header>
-
+      <AppLayout>
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8 space-y-8">
           {/* Welcome Section */}
@@ -413,12 +385,12 @@ export default function UserDashboard() {
         </main>
 
         {/* Welcome Modal */}
-        <WelcomeModal 
-          open={showWelcomeModal} 
-          onOpenChange={setShowWelcomeModal}
-          courseId={onboardingCourse?.id ?? null}
-        />
-      </div>
-    </TooltipProvider>
-  );
-}
+          <WelcomeModal 
+            open={showWelcomeModal} 
+            onOpenChange={setShowWelcomeModal}
+            courseId={onboardingCourse?.id ?? null}
+          />
+        </AppLayout>
+      </TooltipProvider>
+    );
+  }
