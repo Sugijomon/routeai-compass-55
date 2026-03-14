@@ -356,12 +356,7 @@ export default function LessonPlayer() {
 
   // Handle tab click — navigate to any block freely
   const handleTabClick = (index: number) => {
-    // Jump to the target block
-    if (index < currentBlockIndex) {
-      for (let i = 0; i < currentBlockIndex - index; i++) goPrevious();
-    } else if (index > currentBlockIndex) {
-      for (let i = 0; i < index - currentBlockIndex; i++) goNext();
-    }
+    goToBlock(index);
   };
 
   // Loading states
