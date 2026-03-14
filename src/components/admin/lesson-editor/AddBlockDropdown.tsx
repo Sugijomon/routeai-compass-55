@@ -9,6 +9,7 @@ interface AddBlockDropdownProps {
 const BLOCK_TYPES: { type: BlockType; label: string; icon: React.ElementType }[] = [
   { type: 'paragraph',      label: 'Tekst',           icon: FileText },
   { type: 'video',          label: 'Video',           icon: Video },
+  { type: 'download',       label: 'Download',        icon: Download },
   { type: 'hero',           label: 'Hero',            icon: Sparkles },
   { type: 'section_header', label: 'Sectietitel',     icon: Heading },
   { type: 'callout',        label: 'Callout',         icon: AlertCircle },

@@ -364,5 +364,7 @@ export function getBlockPreview(block: LessonBlock, maxLength = 50): string {
       return `Kernpunten: ${block.items.length} item(s)`;
     case 'section_header':
       return `Sectietitel: ${block.title || '(Geen titel)'}`;
+    case 'download':
+      return `Download: ${block.file_name || '(Geen bestand)'}`;
   }
 }

@@ -349,6 +349,7 @@ export default function LessonPlayer() {
       case 'callout': return <CalloutBlockPlayer key={block.id} block={block} />;
       case 'key_takeaways': return <KeyTakeawaysBlockPlayer key={block.id} block={block} />;
       case 'section_header': return <SectionHeaderBlockPlayer key={block.id} block={block} />;
+      case 'download': return <DownloadBlockPlayer key={block.id} block={block} />;
       default: {
         const unknownBlock = block as { type: string };
         return (
