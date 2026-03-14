@@ -290,6 +290,8 @@ export function createBlock(type: BlockType, order: number): LessonBlock {
       return { id, type, order, items: [''] };
     case 'section_header':
       return { id, type, order, title: '', subtitle: '' };
+    case 'download':
+      return { id, type, order, file_url: '', file_name: '', label: 'Download' };
   }
 }
 
