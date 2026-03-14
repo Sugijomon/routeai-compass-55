@@ -34,6 +34,24 @@ export function DownloadBlockPlayer({ block }: { block: DownloadBlock }) {
 
   if (!block.file_url) return null;
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(block.file_url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = block.file_name || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in new tab if fetch fails
+      window.open(block.file_url, '_blank');
+    }
+  };
+
   return (
     <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm my-4">
       {/* File type icon */}
@@ -57,11 +75,14 @@ export function DownloadBlockPlayer({ block }: { block: DownloadBlock }) {
       </div>
 
       {/* Download button */}
-      <Button asChild variant="outline" size="sm" className="shrink-0">
-        <a href={block.file_url} target="_blank" rel="noopener noreferrer" download={block.file_name}>
-          <Download className="h-4 w-4 mr-2" />
-          {block.label || 'Download'}
-        </a>
+      <Button
+        variant="outline"
+        size="sm"
+        className="shrink-0 gap-2 group-hover:border-primary group-hover:text-primary transition-colors"
+        onClick={handleDownload}
+      >
+        <Download className="h-4 w-4" />
+        {block.label || 'Download'}
       </Button>
     </div>
   );
