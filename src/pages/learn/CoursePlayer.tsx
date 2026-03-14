@@ -138,27 +138,14 @@ export default function CoursePlayer() {
     enabled: !!courseId && !!userId,
   });
 
-  // Determine which lessons are unlocked
-  const getLessonStatus = (index: number, lessonId: string | null) => {
-    if (!lessonId) return 'locked';
+  const getLessonStatus = (_index: number, lessonId: string | null) => {
+    if (!lessonId) return 'available';
     
-    // Already completed
     if (completedLessonIds?.includes(lessonId)) {
       return 'completed';
     }
     
-    // First lesson is always unlocked
-    if (index === 0) {
-      return 'current';
-    }
-    
-    // Check if previous lesson is completed
-    const previousLessonId = courseLessons?.[index - 1]?.lesson_id;
-    if (previousLessonId && completedLessonIds?.includes(previousLessonId)) {
-      return 'current';
-    }
-    
-    return 'locked';
+    return 'available';
   };
 
   // Calculate progress
