@@ -35,7 +35,7 @@ export function DownloadBlockPlayer({ block }: { block: DownloadBlock }) {
   if (!block.file_url) return null;
 
   return (
-    <div className="flex items-center gap-4 rounded-lg border-l-4 border-primary bg-card p-4 shadow-sm my-4">
+    <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm my-4">
       {/* File type icon */}
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
         <Icon className="h-6 w-6" />
