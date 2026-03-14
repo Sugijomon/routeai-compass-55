@@ -248,8 +248,7 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                       className={cn(
                         'w-full flex items-center gap-2 px-4 py-2.5 text-left transition-colors text-sm',
                         isActive && 'bg-sky-500/15 border-l-2 border-sky-400',
-                        !isActive && status !== 'locked' && 'hover:bg-white/5 border-l-2 border-transparent',
-                        status === 'locked' && 'opacity-40 cursor-not-allowed border-l-2 border-transparent',
+                        !isActive && 'hover:bg-white/5 border-l-2 border-transparent',
                       )}
                     >
                       {/* Chevron toggle */}
