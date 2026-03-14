@@ -531,7 +531,7 @@ export default function LessonPlayer() {
           onNext={handleNext}
           onPrevious={handlePrevious}
           onComplete={handleComplete}
-          nextEnabled={canProceedFromBlock}
+          nextEnabled={true}
         />
       </div>
 

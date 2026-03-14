@@ -9,7 +9,6 @@ import {
   ChevronRight, 
   CheckCircle, 
   Circle, 
-  Lock,
   GraduationCap,
   ArrowLeft,
 } from 'lucide-react';
