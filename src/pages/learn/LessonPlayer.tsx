@@ -171,20 +171,10 @@ export default function LessonPlayer() {
 
   const currentBlock = blocks[currentBlockIndex];
 
-  // Set canProceedFromBlock based on current block type
+  // All blocks are always navigable — no gating
   useEffect(() => {
-    if (!currentBlock) return;
-    const blockCompleted = blocksCompleted.includes(currentBlock.id);
-    if (blockCompleted) {
-      setCanProceedFromBlock(true);
-    } else if (isQuizBlockType(currentBlock.type)) {
-      setCanProceedFromBlock(false);
-    } else if (isVideoMustWatch(currentBlock)) {
-      setCanProceedFromBlock(false);
-    } else {
-      setCanProceedFromBlock(true);
-    }
-  }, [currentBlockIndex, currentBlock, blocksCompleted]);
+    setCanProceedFromBlock(true);
+  }, [currentBlockIndex]);
 
   // Handle block proceed state
   const handleCanProceed = useCallback((canProceed: boolean) => {
