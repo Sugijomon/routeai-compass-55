@@ -56,13 +56,8 @@ function getBlockTabTitle(block: LessonBlock): string {
   }
 }
 
-function isQuizBlockType(type: string): boolean {
-  return type.startsWith('quiz_');
-}
 
-function isVideoMustWatch(block: LessonBlock): boolean {
-  return block.type === 'video' && block.must_watch_full;
-}
+
 
 export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
