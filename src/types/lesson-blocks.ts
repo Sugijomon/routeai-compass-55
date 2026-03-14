@@ -309,6 +309,7 @@ export function getBlockTypeLabel(type: BlockType): string {
     case 'callout': return 'Callout';
     case 'key_takeaways': return 'Kernpunten';
     case 'section_header': return 'Sectietitel';
+    case 'download': return 'Download';
   }
 }
 
