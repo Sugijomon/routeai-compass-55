@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
+  Shield,
   GraduationCap,
   Award,
   FileText,
@@ -30,6 +32,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const { profile, hasAiRijbewijs, aiRijbewijsObtainedAt, isLoading: profileLoading } = useUserProfile();
