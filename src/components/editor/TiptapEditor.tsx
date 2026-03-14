@@ -97,7 +97,7 @@ export function TiptapEditor({ content, onChange, placeholder }: TiptapEditorPro
 
   const exitHtmlMode = () => {
     if (!editor) return;
-    editor.commands.setContent(htmlContent, true);
+    editor.commands.setContent(htmlContent, { emitUpdate: true });
     onChange(JSON.stringify(editor.getJSON()));
     setHtmlMode(false);
   };
