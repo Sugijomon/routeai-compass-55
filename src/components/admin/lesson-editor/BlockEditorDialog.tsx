@@ -35,6 +35,7 @@ import type {
   DownloadBlock,
 } from '@/types/lesson-blocks';
 import { getBlockTypeLabel } from '@/types/lesson-blocks';
+import { TiptapEditor } from '@/components/editor/TiptapEditor';
 
 interface BlockEditorDialogProps {
   block: LessonBlock | null;
