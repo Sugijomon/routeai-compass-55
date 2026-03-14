@@ -29,6 +29,7 @@ interface CourseSidebarProps {
   currentLessonId: string;
   userId: string | null;
   currentBlockIndex: number; // now represents currentTopicIndex
+  topics?: LessonTopic[];  // topics of the current lesson, passed from LessonPlayer
 }
 
 export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockIndex }: CourseSidebarProps) {
