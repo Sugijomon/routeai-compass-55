@@ -11,7 +11,8 @@ export type BlockType =
   | 'hero'
   | 'callout'
   | 'key_takeaways'
-  | 'section_header';
+  | 'section_header'
+  | 'download';
 
 export interface BaseBlock {
   id: string;
@@ -122,6 +123,17 @@ export interface SectionHeaderBlock extends BaseBlock {
   subtitle?: string;
 }
 
+// Download Block - attachable file
+export interface DownloadBlock extends BaseBlock {
+  type: 'download';
+  file_url: string;
+  file_name: string;
+  file_size?: number;
+  file_type?: string;
+  label?: string;
+  description?: string;
+}
+
 // Legacy alias for backward compatibility
 export type QuizBlock = QuizMCBlock;
 
@@ -136,7 +148,8 @@ export type LessonBlock =
   | HeroBlock
   | CalloutBlock
   | KeyTakeawaysBlock
-  | SectionHeaderBlock;
+  | SectionHeaderBlock
+  | DownloadBlock;
 
 // ── Topic-based lesson structure (v2) ──
 
@@ -277,6 +290,8 @@ export function createBlock(type: BlockType, order: number): LessonBlock {
       return { id, type, order, items: [''] };
     case 'section_header':
       return { id, type, order, title: '', subtitle: '' };
+    case 'download':
+      return { id, type, order, file_url: '', file_name: '', label: 'Download' };
   }
 }
 
@@ -294,6 +309,7 @@ export function getBlockTypeLabel(type: BlockType): string {
     case 'callout': return 'Callout';
     case 'key_takeaways': return 'Kernpunten';
     case 'section_header': return 'Sectietitel';
+    case 'download': return 'Download';
   }
 }
 
@@ -311,6 +327,7 @@ export function getBlockTypeIcon(type: BlockType): string {
     case 'callout': return '💡';
     case 'key_takeaways': return '📌';
     case 'section_header': return '📋';
+    case 'download': return '📥';
   }
 }
 
@@ -347,5 +364,7 @@ export function getBlockPreview(block: LessonBlock, maxLength = 50): string {
       return `Kernpunten: ${block.items.length} item(s)`;
     case 'section_header':
       return `Sectietitel: ${block.title || '(Geen titel)'}`;
+    case 'download':
+      return `Download: ${block.file_name || '(Geen bestand)'}`;
   }
 }
