@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Shield,
   GraduationCap,
   Award,
-  LogOut,
   FileText,
   Lightbulb,
   BarChart3,
@@ -30,12 +27,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function UserDashboard() {
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const { profile, hasAiRijbewijs, aiRijbewijsObtainedAt, isLoading: profileLoading } = useUserProfile();
   const { onboardingCourse, progressPercentage, isCompleted, isLoading: courseLoading } = useOnboardingCourse();
@@ -72,13 +67,6 @@ export default function UserDashboard() {
       </div>
     );
   }
-
-  const handleLogout = async () => {
-    await signOut();
-    toast.success('Uitgelogd');
-    navigate('/auth', { replace: true });
-  };
-
 
   // Capability icon mapping met emoji fallback
   const getCapabilityDisplay = (capabilityId: string) => {
