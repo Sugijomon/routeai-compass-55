@@ -32,6 +32,7 @@ interface CourseLessonWithDetails extends CourseLesson {
 export default function AdminCourseEdit() {
   const { courseId } = useParams<{ courseId: string }>();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
   const [isAddLessonsOpen, setIsAddLessonsOpen] = useState(false);
