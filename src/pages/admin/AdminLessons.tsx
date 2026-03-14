@@ -29,26 +29,39 @@ import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 import { useDashboardRedirect } from '@/hooks/useDashboardRedirect';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Lesson = Tables<'lessons'>;
+type LessonWithCourses = Tables<'lessons'> & {
+  course_lessons: Array<{
+    course_id: string;
+    sequence_order: number;
+    courses: { id: string; title: string } | null;
+  }>;
+};
 
 export default function AdminLessons() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const dashboardUrl = useDashboardRedirect();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [deleteLesson, setDeleteLesson] = useState<Lesson | null>(null);
+  const [deleteLesson, setDeleteLesson] = useState<LessonWithCourses | null>(null);
 
-  // Fetch all lessons (admin sees all, including unpublished)
+  // Fetch all lessons with course linkages
   const { data: lessons, isLoading, error } = useQuery({
     queryKey: ['admin-lessons'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lessons')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select(`
+          *,
+          course_lessons (
+            course_id,
+            sequence_order,
+            courses ( id, title )
+          )
+        `)
+        .order('title');
 
       if (error) throw error;
-      return data as Lesson[];
+      return data as LessonWithCourses[];
     },
   });
 
