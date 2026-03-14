@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useUserRole } from '@/hooks/useUserRole';
-import { LessonBlock } from '@/types/lesson-blocks';
+import { LessonBlock, parseLessonContent, flattenTopicBlocks } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
 import { LessonContentTopBar } from '@/components/lesson-player/LessonContentTopBar';
@@ -75,9 +75,8 @@ export default function ExamenPage() {
   });
 
   const lessonId = lesson?.id ?? '';
-  const blocks: LessonBlock[] = Array.isArray(lesson?.blocks)
-    ? (lesson.blocks as unknown as LessonBlock[]).sort((a, b) => a.order - b.order)
-    : [];
+  const topics = lesson ? parseLessonContent(lesson.blocks) : [];
+  const blocks: LessonBlock[] = flattenTopicBlocks(topics);
 
   const {
     currentBlockIndex,
@@ -91,7 +90,7 @@ export default function ExamenPage() {
     recordQuizResult,
     calculateFinalScore,
     blocksCompleted,
-  } = useLessonProgress({ lessonId, blocks });
+  } = useLessonProgress({ lessonId, topics });
 
   const {
     currentAttemptNumber,
