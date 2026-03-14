@@ -8,7 +8,8 @@ import {
   ChevronRight,
   Shield,
   Building2,
-  HelpCircle
+  HelpCircle,
+  BookOpen
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
@@ -20,82 +21,95 @@ interface NavItem {
   badge?: string;
 }
 
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
 export function Sidebar() {
   const location = useLocation();
   const { isSuperAdmin, isContentEditor, canManageOrg } = useUserRole();
 
-  // Base navigation items for all users
-  const navItems: NavItem[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Training', href: '/learn', icon: GraduationCap },
-    { label: 'Mijn Licentie', href: '/license', icon: Award },
-  ];
+  let sections: NavSection[] = [];
 
-  // Content Editor navigation
-  const editorItems: NavItem[] = [
-    { label: 'Cursussen', href: '/editor/cursussen', icon: GraduationCap },
-    { label: 'Vragenbank', href: '/editor/vragen', icon: HelpCircle },
-  ];
-
-  // Admin navigation
-  const adminItems: NavItem[] = [];
-  
   if (isSuperAdmin) {
-    adminItems.push(
-      { label: 'Super Admin', href: '/super-admin', icon: Shield },
-      { label: 'Organisaties', href: '/super-admin', icon: Building2 }
-    );
+    sections = [
+      {
+        title: 'Platform',
+        items: [
+          { label: 'Super Admin Dashboard', href: '/super-admin', icon: Shield },
+          { label: 'Organisaties', href: '/super-admin', icon: Building2 },
+          { label: 'Gebruikers', href: '/super-admin', icon: Users },
+        ],
+      },
+      {
+        title: 'Content',
+        items: [
+          { label: 'Cursussen bekijken', href: '/editor/cursussen', icon: GraduationCap },
+        ],
+      },
+    ];
+  } else if (isContentEditor) {
+    sections = [
+      {
+        title: 'Content',
+        items: [
+          { label: 'Dashboard', href: '/editor/dashboard', icon: LayoutDashboard },
+          { label: 'Cursussen', href: '/editor/cursussen', icon: GraduationCap },
+          { label: 'Lessen', href: '/admin/lessons', icon: BookOpen },
+          { label: 'Vragenbank', href: '/editor/vragen', icon: HelpCircle },
+        ],
+      },
+    ];
+  } else if (canManageOrg) {
+    sections = [
+      {
+        title: 'Menu',
+        items: [
+          { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+          { label: 'Training', href: '/learn', icon: GraduationCap },
+          { label: 'Mijn Licentie', href: '/license', icon: Award },
+        ],
+      },
+      {
+        title: 'Beheer',
+        items: [
+          { label: 'Overzicht', href: '/admin', icon: Users },
+          { label: 'Gebruikersrollen', href: '/admin/users/roles', icon: Shield },
+          { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 },
+        ],
+      },
+    ];
+  } else {
+    sections = [
+      {
+        title: 'Menu',
+        items: [
+          { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+          { label: 'Training', href: '/learn', icon: GraduationCap },
+          { label: 'Mijn Licentie', href: '/license', icon: Award },
+        ],
+      },
+    ];
   }
-  
-  if (canManageOrg) {
-    adminItems.push(
-      { label: 'AI Verantwoordelijke', href: '/admin', icon: Users },
-      { label: 'Gebruikersrollen', href: '/admin/users/roles', icon: Shield },
-      { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 }
-    );
-  }
-
-  // Show editor section if user has content editor or super admin role
-  const showEditorSection = isSuperAdmin || isContentEditor;
-  // Show admin section if user has any admin role
-  const showAdminSection = adminItems.length > 0;
 
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r bg-card lg:block">
       <nav className="flex h-full flex-col gap-2 p-4">
-        {/* Main Navigation */}
-        <div className="space-y-1">
-          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Menu
-          </p>
-          {navItems.map((item) => (
-            <NavLink key={item.href} item={item} isActive={location.pathname === item.href} />
-          ))}
-        </div>
-
-        {/* Content Editor Navigation */}
-        {showEditorSection && (
-          <div className="mt-6 space-y-1">
+        {sections.map((section, idx) => (
+          <div key={section.title} className={cn(idx > 0 && 'mt-6', 'space-y-1')}>
             <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Content
+              {section.title}
             </p>
-            {editorItems.map((item) => (
-              <NavLink key={item.href} item={item} isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')} />
+            {section.items.map((item) => (
+              <NavLink
+                key={item.href + item.label}
+                item={item}
+                isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')}
+              />
             ))}
           </div>
-        )}
-
-        {/* Admin Navigation */}
-        {showAdminSection && (
-          <div className="mt-6 space-y-1">
-            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Beheer
-            </p>
-            {adminItems.map((item) => (
-              <NavLink key={item.href + item.label} item={item} isActive={location.pathname === item.href} />
-            ))}
-          </div>
-        )}
+        ))}
 
         {/* Help Section */}
         <div className="mt-auto rounded-lg bg-accent p-4">
