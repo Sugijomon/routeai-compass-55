@@ -9,7 +9,6 @@ import {
   ChevronRight, 
   CheckCircle, 
   Circle, 
-  Lock,
   GraduationCap,
   ArrowLeft,
 } from 'lucide-react';
@@ -139,14 +138,11 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
   const completedCount = completedLessonIds.length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  const getLessonStatus = (index: number, lessonId: string | null): 'completed' | 'active' | 'locked' => {
+  const getLessonStatus = (_index: number, lessonId: string | null): 'completed' | 'active' | 'locked' => {
     if (!lessonId) return 'locked';
     if (lessonId === currentLessonId) return 'active';
     if (completedLessonIds.includes(lessonId)) return 'completed';
-    if (index === 0) return 'active';
-    const prevId = courseLessons[index - 1]?.lesson_id;
-    if (prevId && completedLessonIds.includes(prevId)) return 'active';
-    return 'locked';
+    return 'active';
   };
 
   const toggleUnit = (unitId: string) => {
@@ -167,8 +163,8 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
     });
   };
 
-  const handleLessonClick = (lessonId: string | null, status: string) => {
-    if (!lessonId || status === 'locked') return;
+  const handleLessonClick = (lessonId: string | null) => {
+    if (!lessonId) return;
     navigate(`/learn/${lessonId}${courseId ? `?courseId=${courseId}` : ''}`);
   };
 
@@ -251,12 +247,11 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                       className={cn(
                         'w-full flex items-center gap-2 px-4 py-2.5 text-left transition-colors text-sm',
                         isActive && 'bg-sky-500/15 border-l-2 border-sky-400',
-                        !isActive && status !== 'locked' && 'hover:bg-white/5 border-l-2 border-transparent',
-                        status === 'locked' && 'opacity-40 cursor-not-allowed border-l-2 border-transparent',
+                        !isActive && 'hover:bg-white/5 border-l-2 border-transparent',
                       )}
                     >
                       {/* Chevron toggle */}
-                      {lessonBlocks.length > 0 && status !== 'locked' ? (
+                      {lessonBlocks.length > 0 ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -292,21 +287,14 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
 
                       {/* Lesson title — clickable to navigate */}
                       <button
-                        onClick={() => handleLessonClick(cl.lesson_id, status)}
-                        disabled={status === 'locked'}
+                        onClick={() => handleLessonClick(cl.lesson_id)}
                         className={cn(
-                          'truncate leading-snug text-left flex-1 min-w-0',
+                          'truncate leading-snug text-left flex-1 min-w-0 hover:text-white',
                           isActive ? 'text-white font-medium' : 'text-slate-300',
-                          status === 'locked' && 'text-slate-500',
-                          status !== 'locked' && 'hover:text-white',
                         )}
                       >
                         {cl.lesson?.title || `Les ${index + 1}`}
                       </button>
-
-                      {status === 'locked' && (
-                        <Lock className="h-3 w-3 text-slate-600 ml-auto shrink-0" />
-                      )}
                     </div>
 
                     {/* Expanded blocks */}

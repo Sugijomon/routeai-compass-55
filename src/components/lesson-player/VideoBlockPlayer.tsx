@@ -101,19 +101,10 @@ export function VideoBlockPlayer({ block, onCanProceed }: VideoBlockPlayerProps)
     }
   }, []);
 
-  // Update proceed permission based on must_watch_full setting
+  // Always allow proceeding — no gating on video completion
   useEffect(() => {
-    console.log(`${debugPrefix} proceedCheck`, {
-      must_watch_full: (block as any).must_watch_full,
-      isCompleted,
-      willAllowProceed: !(block as any).must_watch_full ? true : isCompleted,
-    });
-    if (!block.must_watch_full) {
-      onCanProceed(true);
-    } else {
-      onCanProceed(isCompleted);
-    }
-  }, [block.must_watch_full, isCompleted, onCanProceed]);
+    onCanProceed(true);
+  }, [onCanProceed]);
 
   // Load YouTube API
   useEffect(() => {

@@ -56,13 +56,8 @@ function getBlockTabTitle(block: LessonBlock): string {
   }
 }
 
-function isQuizBlockType(type: string): boolean {
-  return type.startsWith('quiz_');
-}
 
-function isVideoMustWatch(block: LessonBlock): boolean {
-  return block.type === 'video' && block.must_watch_full;
-}
+
 
 export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -71,7 +66,7 @@ export default function LessonPlayer() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
-  const [canProceedFromBlock, setCanProceedFromBlock] = useState(true);
+  
 
   // Get authenticated user from Supabase
   useEffect(() => {
@@ -171,24 +166,9 @@ export default function LessonPlayer() {
 
   const currentBlock = blocks[currentBlockIndex];
 
-  // Set canProceedFromBlock based on current block type
-  useEffect(() => {
-    if (!currentBlock) return;
-    const blockCompleted = blocksCompleted.includes(currentBlock.id);
-    if (blockCompleted) {
-      setCanProceedFromBlock(true);
-    } else if (isQuizBlockType(currentBlock.type)) {
-      setCanProceedFromBlock(false);
-    } else if (isVideoMustWatch(currentBlock)) {
-      setCanProceedFromBlock(false);
-    } else {
-      setCanProceedFromBlock(true);
-    }
-  }, [currentBlockIndex, currentBlock, blocksCompleted]);
-
-  // Handle block proceed state
-  const handleCanProceed = useCallback((canProceed: boolean) => {
-    setCanProceedFromBlock(canProceed);
+  // Handle block proceed state (no-op, kept for VideoBlockPlayer callback)
+  const handleCanProceed = useCallback((_canProceed: boolean) => {
+    // No gating — all blocks always allow proceeding
   }, []);
 
   // Tab progress percentage
@@ -374,20 +354,13 @@ export default function LessonPlayer() {
     navigate('/dashboard');
   };
 
-  // Handle tab click — only allow clicking completed blocks
+  // Handle tab click — navigate to any block freely
   const handleTabClick = (index: number) => {
-    if (index <= currentBlockIndex) {
-      // Navigate to that block by calling goNext/goPrevious repeatedly is not ideal
-      // Instead we need a direct set — but prompt says don't change hooks
-      // We can use goPrevious/goNext but that's awkward. Let's just navigate to the index
-      // by using the progress hook. Since we can't change the hook, we'll work around it.
-      // Actually canGoPrevious and goNext are available. For clicking completed tabs,
-      // let's just set the block index by repeated calls... that's bad.
-      // We'll need to check if there's a way. Let me just allow it for now by navigating.
-      // Actually the simplest: just call goNext/goPrevious isn't feasible for jumps.
-      // The prompt says "do not change hooks" so we must work within constraints.
-      // For completed blocks, clicking navigates back — we can't do arbitrary jumps without
-      // changing the hook. Let's skip tab click navigation for now and just show visual state.
+    // Jump to the target block
+    if (index < currentBlockIndex) {
+      for (let i = 0; i < currentBlockIndex - index; i++) goPrevious();
+    } else if (index > currentBlockIndex) {
+      for (let i = 0; i < index - currentBlockIndex; i++) goNext();
     }
   };
 
@@ -507,19 +480,17 @@ export default function LessonPlayer() {
               {blocks.map((block, index) => {
                 const isActive = index === currentBlockIndex;
                 const isCompleted = index < currentBlockIndex || blocksCompleted.includes(block.id);
-                const isReachable = index <= currentBlockIndex;
 
                 return (
                   <button
                     key={block.id}
-                    onClick={() => isReachable && handleTabClick(index)}
-                    disabled={!isReachable}
+                    onClick={() => handleTabClick(index)}
+                    disabled={false}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors',
                       isActive && 'bg-primary text-primary-foreground shadow-sm',
                       !isActive && isCompleted && 'bg-muted text-muted-foreground hover:bg-muted/80',
-                      !isActive && !isCompleted && !isReachable && 'text-muted-foreground/40 cursor-not-allowed',
-                      !isActive && !isCompleted && isReachable && 'text-muted-foreground hover:bg-muted/50',
+                      !isActive && !isCompleted && 'text-muted-foreground hover:bg-muted/50',
                     )}
                   >
                     {isCompleted && !isActive && (
@@ -550,7 +521,7 @@ export default function LessonPlayer() {
           onNext={handleNext}
           onPrevious={handlePrevious}
           onComplete={handleComplete}
-          nextEnabled={canProceedFromBlock}
+          
         />
       </div>
 
