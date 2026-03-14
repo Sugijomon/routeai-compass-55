@@ -205,14 +205,16 @@ export default function AdminLessonEdit() {
         <Tabs defaultValue="content" className="space-y-4">
           <TabsList>
             <TabsTrigger value="content">Lesinhoud</TabsTrigger>
-            <TabsTrigger value="questions">
-              Vragen
-              {questions && questions.length > 0 && (
-                <Badge variant="secondary" className="ml-2 text-xs px-1.5 py-0">
-                  {questions.length}
-                </Badge>
-              )}
-            </TabsTrigger>
+            {editor.lessonType === 'ai_literacy_exam' && (
+              <TabsTrigger value="questions">
+                Vragen
+                {questions && questions.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 text-xs px-1.5 py-0">
+                    {questions.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Topics + Block Editor Tab */}
