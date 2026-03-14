@@ -163,13 +163,17 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
       if (data.inviteError) {
         toast({
           title: "Organisatie aangemaakt",
-          description: `Organisatie "${data.name}" is aangemaakt, maar de uitnodiging naar ${data.email} is mislukt: ${data.inviteError}. Verstuur de uitnodiging handmatig.`,
+          description: `Organisatie "${data.name}" is succesvol aangemaakt.`,
+        });
+        toast({
+          title: "Uitnodiging mislukt",
+          description: `De organisatie is aangemaakt maar de uitnodiging kon niet worden verstuurd. Nodig ${data.email} handmatig uit via het gebruikersbeheer.`,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Organisatie aangemaakt en uitnodiging verstuurd",
-          description: `Organisatie "${data.name}" is succesvol aangemaakt en een uitnodiging is verstuurd naar ${data.email}.`,
+          title: "Organisatie aangemaakt",
+          description: `Uitnodiging verstuurd naar ${data.email}.`,
         });
       }
     },
