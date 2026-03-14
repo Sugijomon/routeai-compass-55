@@ -253,7 +253,7 @@ export function CourseSidebar({ courseId, currentLessonId, userId, currentBlockI
                       )}
                     >
                       {/* Chevron toggle */}
-                      {lessonBlocks.length > 0 && status !== 'locked' ? (
+                      {lessonBlocks.length > 0 ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
