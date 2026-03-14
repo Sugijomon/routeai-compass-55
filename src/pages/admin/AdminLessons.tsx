@@ -45,7 +45,9 @@ export default function AdminLessons() {
   const dashboardUrl = useDashboardRedirect();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deleteLesson, setDeleteLesson] = useState<LessonWithCourses | null>(null);
-
+  const [search, setSearch] = useState('');
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   // Fetch all lessons with course linkages
   const { data: lessons, isLoading, error } = useQuery({
     queryKey: ['admin-lessons'],
