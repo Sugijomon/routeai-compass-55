@@ -189,7 +189,6 @@ export default function AdminLessons() {
                     ) : (
                       <span className="text-muted-foreground text-sm">— Niet gekoppeld</span>
                     )}
-                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
