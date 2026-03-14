@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   CheckCircle, 
   ArrowRight, 
-  Lock, 
   BookOpen, 
   ArrowLeft,
   GraduationCap,
@@ -139,27 +138,14 @@ export default function CoursePlayer() {
     enabled: !!courseId && !!userId,
   });
 
-  // Determine which lessons are unlocked
-  const getLessonStatus = (index: number, lessonId: string | null) => {
-    if (!lessonId) return 'locked';
+  const getLessonStatus = (_index: number, lessonId: string | null) => {
+    if (!lessonId) return 'available';
     
-    // Already completed
     if (completedLessonIds?.includes(lessonId)) {
       return 'completed';
     }
     
-    // First lesson is always unlocked
-    if (index === 0) {
-      return 'current';
-    }
-    
-    // Check if previous lesson is completed
-    const previousLessonId = courseLessons?.[index - 1]?.lesson_id;
-    if (previousLessonId && completedLessonIds?.includes(previousLessonId)) {
-      return 'current';
-    }
-    
-    return 'locked';
+    return 'available';
   };
 
   // Calculate progress
@@ -172,7 +158,7 @@ export default function CoursePlayer() {
     if (!courseLessons) return null;
     for (let i = 0; i < courseLessons.length; i++) {
       const status = getLessonStatus(i, courseLessons[i].lesson_id);
-      if (status === 'current') {
+      if (status === 'available') {
         return courseLessons[i];
       }
     }
@@ -318,8 +304,6 @@ export default function CoursePlayer() {
               {courseLessons?.map((cl, index) => {
                 const status = getLessonStatus(index, cl.lesson_id);
                 const isCompleted = status === 'completed';
-                const isCurrent = status === 'current';
-                const isLocked = status === 'locked';
 
                 return (
                   <div
@@ -327,8 +311,7 @@ export default function CoursePlayer() {
                     className={cn(
                       'flex items-center gap-4 p-4 rounded-lg border transition-colors',
                       isCompleted && 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800',
-                      isCurrent && 'bg-primary/5 border-primary/30 hover:border-primary/50',
-                      isLocked && 'bg-muted/50 opacity-60'
+                      !isCompleted && 'bg-primary/5 border-primary/30 hover:border-primary/50',
                     )}
                   >
                     {/* Status Icon */}
@@ -336,14 +319,11 @@ export default function CoursePlayer() {
                       className={cn(
                         'h-8 w-8 rounded-full flex items-center justify-center shrink-0',
                         isCompleted && 'bg-green-500 text-white',
-                        isCurrent && 'bg-primary text-primary-foreground',
-                        isLocked && 'bg-muted text-muted-foreground'
+                        !isCompleted && 'bg-primary text-primary-foreground',
                       )}
                     >
                       {isCompleted ? (
                         <CheckCircle className="h-5 w-5" />
-                      ) : isLocked ? (
-                        <Lock className="h-4 w-4" />
                       ) : (
                         <span className="text-sm font-medium">{index + 1}</span>
                       )}
@@ -351,10 +331,7 @@ export default function CoursePlayer() {
 
                     {/* Lesson Info */}
                     <div className="flex-1 min-w-0">
-                      <p className={cn(
-                        'font-medium truncate',
-                        isLocked && 'text-muted-foreground'
-                      )}>
+                      <p className="font-medium truncate">
                         {cl.lesson?.title}
                       </p>
                       {cl.lesson?.description && (
@@ -372,25 +349,19 @@ export default function CoursePlayer() {
 
                     {/* Action */}
                     <div className="shrink-0">
-                      {isCompleted && (
+                      {isCompleted ? (
                         <Button variant="ghost" size="sm" asChild>
                           <Link to={`/learn/${cl.lesson_id}?courseId=${courseId}`}>
                             Bekijk opnieuw
                           </Link>
                         </Button>
-                      )}
-                      {isCurrent && (
+                      ) : (
                         <Button size="sm" asChild>
                           <Link to={`/learn/${cl.lesson_id}?courseId=${courseId}`}>
                             Start
                             <ArrowRight className="ml-1 h-4 w-4" />
                           </Link>
                         </Button>
-                      )}
-                      {isLocked && (
-                        <span className="text-sm text-muted-foreground">
-                          Vergrendeld
-                        </span>
                       )}
                     </div>
                   </div>
