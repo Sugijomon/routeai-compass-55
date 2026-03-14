@@ -21,7 +21,7 @@ import { KeyTakeawaysBlockPlayer } from '@/components/lesson-player/KeyTakeaways
 import { SectionHeaderBlockPlayer } from '@/components/lesson-player/SectionHeaderBlockPlayer';
 import { LessonCompletionModal } from '@/components/lesson-player/LessonCompletionModal';
 import { CourseCompletionModal } from '@/components/lesson-player/CourseCompletionModal';
-import { Button } from '@/components/ui/button';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
