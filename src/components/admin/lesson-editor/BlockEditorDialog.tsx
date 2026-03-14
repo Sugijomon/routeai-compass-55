@@ -343,19 +343,14 @@ function ParagraphEditor({
         <Label htmlFor="content">
           Inhoud <span className="text-destructive">*</span>
         </Label>
-        <Textarea
-          id="content"
-          placeholder="Write your content here. Markdown is supported."
-          value={block.content}
-          onChange={(e) => onChange({ content: e.target.value })}
-          className="font-mono text-sm min-h-[300px]"
+        <TiptapEditor
+          content={block.content || ''}
+          onChange={(json) => onChange({ content: json })}
+          placeholder="Schrijf hier de inhoud van dit blok..."
         />
         {errors.content && (
           <p className="text-sm text-destructive">{errors.content}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Je kunt Markdown gebruiken voor opmaak (bold, italic, lijsten, etc.)
-        </p>
       </div>
 
       {/* Image Panel */}
