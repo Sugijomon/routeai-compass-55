@@ -348,10 +348,6 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
         setCurrentToolIndex((i) => i + 1);
       } else {
         // Alle tools verwerkt
-        await supabase
-          .from('shadow_survey_runs')
-          .update({ survey_completed_at: new Date().toISOString() })
-          .eq('id', surveyRunId);
         toast.success('Tool-inventarisatie opgeslagen!');
         onComplete(allSelectedTools);
       }

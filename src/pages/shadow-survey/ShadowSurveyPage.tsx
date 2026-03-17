@@ -6,6 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
+import ShadowSurveyResults from '@/components/shadow-survey/ShadowSurveyResults';
 import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -13,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
 
-type SurveyStep = 'amnesty' | 'tools' | 'risk';
+type SurveyStep = 'amnesty' | 'tools' | 'results' | 'risk';
 
 export default function ShadowSurveyPage() {
   const { user } = useAuth();
@@ -78,7 +79,6 @@ export default function ShadowSurveyPage() {
     if (existingRun?.id && !surveyRunId) {
       setSurveyRunId(existingRun.id);
       localStorage.setItem(SURVEY_RUN_KEY, existingRun.id);
-      // Als survey al voltooid is, spring naar risicoprofiel-stap
       if (existingRun.survey_completed_at) {
         setStep('risk');
       } else {
@@ -102,13 +102,21 @@ export default function ShadowSurveyPage() {
 
   const handleToolsComplete = (toolNames: string[]) => {
     setSelectedToolNames(toolNames);
+    // Als er geen tools zijn, sla resultaten-scherm over
+    if (toolNames.length === 0) {
+      setStep('risk');
+    } else {
+      setStep('results');
+    }
+  };
+
+  const handleResultsComplete = () => {
     setStep('risk');
   };
 
   const handleRiskComplete = () => {
     toast.success('Survey afgerond!');
     localStorage.removeItem(SURVEY_RUN_KEY);
-    // Standard/advanced: naar training. Custom: naar dashboard (DPO stelt leerpad samen).
     navigate('/learn/training');
   };
 
@@ -148,6 +156,15 @@ export default function ShadowSurveyPage() {
             surveyRunId={surveyRunId}
             orgId={orgId!}
             onComplete={handleToolsComplete}
+          />
+        )}
+
+        {/* Stap 2b: Tool match resultaten */}
+        {surveyRunId && step === 'results' && (
+          <ShadowSurveyResults
+            surveyRunId={surveyRunId}
+            orgId={orgId!}
+            onComplete={handleResultsComplete}
           />
         )}
 
