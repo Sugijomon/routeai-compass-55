@@ -10,6 +10,7 @@ interface InviteUserRequest {
   role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user'
   orgId: string
   name?: string
+  redirect_to?: string
 }
 
 Deno.serve(async (req) => {
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     }
 
     const body: InviteUserRequest = await req.json()
-    const { email, role, orgId, name } = body
+    const { email, role, orgId, name, redirect_to } = body
 
     if (!email || !role || !orgId) {
       return new Response(JSON.stringify({ error: 'email, role, and orgId are required' }), {
@@ -74,13 +75,19 @@ Deno.serve(async (req) => {
     }
 
     // Invite user via admin API
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    const inviteOptions: Record<string, unknown> = {
       data: {
         org_id: orgId,
         role: role,
         full_name: name || email,
       },
-    })
+    }
+
+    if (redirect_to) {
+      inviteOptions.redirectTo = redirect_to
+    }
+
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, inviteOptions)
 
     if (inviteError) {
       return new Response(JSON.stringify({ success: false, error: inviteError.message }), {

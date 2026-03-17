@@ -1,20 +1,32 @@
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOrgPlanType } from '@/hooks/useOrgPlanType';
 
 /**
- * Returns the appropriate dashboard URL based on user role.
- * Routes based on highest privilege role (priority order):
- * - super_admin → /super-admin
- * - org_admin → /admin
- * - content_editor → /editor
- * - manager → /admin
- * - user → /dashboard
+ * Returns the appropriate dashboard URL based on user role and org plan_type.
+ * shadow_only orgs route users differently:
+ * - user → /shadow-survey
+ * - org_admin → /admin/shadow
  */
 export function useDashboardRedirect() {
-  const { isSuperAdmin, isOrgAdmin, isContentEditor, isManager, isLoading } = useUserRole();
+  const { isSuperAdmin, isOrgAdmin, isContentEditor, isManager, isLoading: roleLoading } = useUserRole();
+  const { planType, isLoading: planLoading } = useOrgPlanType();
   
-  // Route based on highest privilege role (priority order)
+  const isLoading = roleLoading || planLoading;
+
+  // Super admins altijd naar super-admin dashboard
   if (isSuperAdmin) {
     return { path: '/super-admin', isLoading };
+  }
+
+  // shadow_only orgs: afwijkende routing
+  if (planType === 'shadow_only') {
+    if (isOrgAdmin) {
+      return { path: '/admin/shadow', isLoading };
+    }
+    if (!isContentEditor && !isManager) {
+      // Reguliere user → shadow survey
+      return { path: '/shadow-survey', isLoading };
+    }
   }
   
   if (isContentEditor) {
@@ -32,11 +44,22 @@ export function useDashboardRedirect() {
 /**
  * Get dashboard path synchronously from roles array.
  * Used in Auth.tsx where we can't use hooks.
+ * planType parameter optioneel voor shadow_only routing.
  */
-export function getDashboardPathFromRoles(roles: string[]): string {
+export function getDashboardPathFromRoles(roles: string[], planType?: string): string {
   if (roles.includes('super_admin')) {
     return '/super-admin';
   }
+  
+  if (planType === 'shadow_only') {
+    if (roles.includes('org_admin')) {
+      return '/admin/shadow';
+    }
+    if (!roles.includes('content_editor') && !roles.includes('manager')) {
+      return '/shadow-survey';
+    }
+  }
+  
   if (roles.includes('content_editor')) {
     return '/editor/cursussen';
   }

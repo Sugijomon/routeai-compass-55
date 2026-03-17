@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useOrgPlanType } from '@/hooks/useOrgPlanType';
 import { Loader2 } from 'lucide-react';
 
 interface AuthRouteProps {
@@ -14,7 +15,7 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
   const { user, isLoading, isAdmin, isSigningOut } = useAuth();
   const location = useLocation();
   const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isContentEditor } = useUserProfile();
-
+  const { isShadowOnly, isLoading: planLoading } = useOrgPlanType();
   // CRITICAL: Don't redirect while signing out - this prevents the loop
   if (isSigningOut) {
     return (
@@ -26,7 +27,7 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
   }
 
   // Show loading state while checking auth
-  if (isLoading || profileLoading) {
+  if (isLoading || profileLoading || planLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -46,6 +47,11 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
 
   // Admins always pass through (no rijbewijs check needed)
   if (isAdminLevel || skipRijbewijsCheck) {
+    return <>{children}</>;
+  }
+
+  // shadow_only orgs: geen rijbewijs nodig
+  if (isShadowOnly) {
     return <>{children}</>;
   }
 
