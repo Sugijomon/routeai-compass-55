@@ -587,6 +587,7 @@ export type Database = {
           id: string
           import_batch_id: string | null
           org_id: string
+          routeai_invited_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -599,6 +600,7 @@ export type Database = {
           id: string
           import_batch_id?: string | null
           org_id?: string
+          routeai_invited_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -611,6 +613,7 @@ export type Database = {
           id?: string
           import_batch_id?: string | null
           org_id?: string
+          routeai_invited_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -713,6 +716,7 @@ export type Database = {
         Row: {
           ai_maturity_score: number | null
           amnesty_acknowledged: boolean | null
+          assigned_tier: string | null
           department: string | null
           id: string
           org_id: string
@@ -724,6 +728,7 @@ export type Database = {
         Insert: {
           ai_maturity_score?: number | null
           amnesty_acknowledged?: boolean | null
+          assigned_tier?: string | null
           department?: string | null
           id?: string
           org_id: string
@@ -735,6 +740,7 @@ export type Database = {
         Update: {
           ai_maturity_score?: number | null
           amnesty_acknowledged?: boolean | null
+          assigned_tier?: string | null
           department?: string | null
           id?: string
           org_id?: string
