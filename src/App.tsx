@@ -339,6 +339,7 @@ export default function App() {
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
         <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
+        <Route path="/admin/shadow" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowAdminDashboard /></AuthRoute>} />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
