@@ -240,7 +240,7 @@ function ToolFollowUpForm({
 interface Props {
   surveyRunId: string;
   orgId: string;
-  onComplete: () => void;
+  onComplete: (selectedToolNames: string[]) => void;
 }
 
 export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: Props) {
