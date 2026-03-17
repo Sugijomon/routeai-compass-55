@@ -80,7 +80,7 @@ interface Props {
 
 export default function RiskProfileStep({
   surveyRunId,
-  orgId,
+  _orgId,
   selectedToolNames,
   onComplete,
 }: Props) {
