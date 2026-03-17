@@ -27,7 +27,7 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
   }
 
   // Show loading state while checking auth
-  if (isLoading || profileLoading) {
+  if (isLoading || profileLoading || planLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
