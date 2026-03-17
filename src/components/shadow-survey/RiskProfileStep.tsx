@@ -14,8 +14,9 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, GraduationCap,
+  AlertTriangle, GraduationCap, Clock,
 } from 'lucide-react';
+import SurveyJourneyProgress from '@/components/shadow-survey/SurveyJourneyProgress';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
 
@@ -140,13 +141,12 @@ export default function RiskProfileStep({
   if (result) {
     const tier = TIER_CONFIG[result.assigned_tier];
     const TierIcon = tier.icon;
+    const isCustom = result.assigned_tier === 'custom';
 
     return (
       <div className="space-y-6">
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Stap 3 van 4 — Resultaat</p>
-          <Progress value={75} className="h-2" />
-        </div>
+        {/* Visuele journey-voortgang */}
+        <SurveyJourneyProgress currentStep="training" />
 
         <Card>
           <CardHeader className="text-center pb-2">
@@ -172,15 +172,33 @@ export default function RiskProfileStep({
                 </p>
               </div>
             )}
+
+            {/* Custom tier: wacht op DPO */}
+            {isCustom && (
+              <div className="flex items-start gap-3 rounded-lg border border-blue-300 bg-blue-50 p-4 text-left dark:border-blue-700 dark:bg-blue-950/30">
+                <Clock className="h-5 w-5 mt-0.5 text-blue-600 shrink-0" />
+                <div className="text-sm text-blue-800 dark:text-blue-200">
+                  <p className="font-medium mb-1">Je leerpad wordt samengesteld door de DPO.</p>
+                  <p>Je ontvangt een notificatie zodra het klaar is.</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg">
-            <GraduationCap className="mr-2 h-4 w-4" />
-            Naar je training
-            <ArrowRight className="ml-1 h-4 w-4" />
-          </Button>
+          {isCustom ? (
+            <Button onClick={onComplete} size="lg" variant="outline">
+              Terug naar dashboard
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button onClick={onComplete} size="lg">
+              <GraduationCap className="mr-2 h-4 w-4" />
+              Naar je training
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     );

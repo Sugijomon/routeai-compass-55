@@ -108,7 +108,8 @@ export default function ShadowSurveyPage() {
   const handleRiskComplete = () => {
     toast.success('Survey afgerond!');
     localStorage.removeItem(SURVEY_RUN_KEY);
-    navigate('/training');
+    // Standard/advanced: naar training. Custom: naar dashboard (DPO stelt leerpad samen).
+    navigate('/learn/training');
   };
 
   const isLoading = orgLoading || runLoading;
