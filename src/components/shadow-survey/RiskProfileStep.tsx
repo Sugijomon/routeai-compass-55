@@ -72,7 +72,7 @@ const TIER_CONFIG: Record<AssignedTier, {
 
 interface Props {
   surveyRunId: string;
-  orgId: string;
+  _orgId: string;
   /** Tool-namen geselecteerd in stap 2 */
   selectedToolNames: string[];
   onComplete: () => void;
