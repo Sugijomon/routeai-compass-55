@@ -2,7 +2,6 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import RouteAITransferSection from '@/components/admin/RouteAITransferSection';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 
 export default function ShadowAdminDashboard() {
   return (
