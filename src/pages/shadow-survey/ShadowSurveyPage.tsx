@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
+import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
@@ -110,7 +112,7 @@ export default function ShadowSurveyPage() {
     );
   }
 
-  // Stap 2+: tool-picker (later)
+  // Stap 2: Tool-picker
   return (
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
@@ -118,9 +120,13 @@ export default function ShadowSurveyPage() {
           title="Shadow AI Survey"
           subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
         />
-        <p className="text-muted-foreground">
-          Stap 2 — Tool-picker wordt binnenkort beschikbaar.
-        </p>
+        <ShadowToolInventory
+          surveyRunId={surveyRunId}
+          orgId={orgId!}
+          onComplete={() => {
+            toast.success('Tool-inventarisatie afgerond!');
+          }}
+        />
       </div>
     </AppLayout>
   );
