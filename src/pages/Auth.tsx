@@ -27,7 +27,25 @@ async function fetchRolesAndGetPath(userId: string): Promise<string> {
     }
 
     const roles = (data || []).map(r => r.role as string);
-    return getDashboardPathFromRoles(roles);
+
+    // Haal plan_type op van de org
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    let planType: string | undefined;
+    if (profile?.org_id) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('plan_type')
+        .eq('id', profile.org_id)
+        .maybeSingle();
+      planType = org?.plan_type ?? undefined;
+    }
+
+    return getDashboardPathFromRoles(roles, planType);
   } catch {
     return '/user-dashboard';
   }

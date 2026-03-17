@@ -5,35 +5,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, LogIn, UserPlus, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
-import { getDashboardPathFromRoles } from "@/hooks/useDashboardRedirect";
+import { useDashboardRedirect } from "@/hooks/useDashboardRedirect";
 
 export default function RoleSelector() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const { role, isLoading: roleLoading, isSuperAdmin, isOrgAdmin, isContentEditor, isManager } = useUserRole();
+  const { path, isLoading: redirectLoading } = useDashboardRedirect();
 
   // Combined loading state
-  const isLoading = authLoading || (user && roleLoading);
+  const isLoading = authLoading || (user && redirectLoading);
 
   // Redirect logged in users to their appropriate dashboard
   useEffect(() => {
-    if (authLoading) return; // Wait for auth
-    if (!user) return; // Not logged in
-    if (roleLoading) return; // Still fetching roles
-
-    // Determine redirect path based on roles
-    let path = '/dashboard'; // Default
-    if (isSuperAdmin) {
-      path = '/super-admin';
-    } else if (isContentEditor) {
-      path = '/editor/cursussen';
-    } else if (isOrgAdmin || isManager) {
-      path = '/admin';
-    }
+    if (authLoading) return;
+    if (!user) return;
+    if (redirectLoading) return;
 
     navigate(path, { replace: true });
-  }, [user, authLoading, roleLoading, isSuperAdmin, isOrgAdmin, isContentEditor, isManager, navigate]);
+  }, [user, authLoading, redirectLoading, path, navigate]);
 
   if (isLoading) {
     return (
