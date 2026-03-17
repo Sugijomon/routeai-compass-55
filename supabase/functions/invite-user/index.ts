@@ -75,13 +75,19 @@ Deno.serve(async (req) => {
     }
 
     // Invite user via admin API
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    const inviteOptions: Record<string, unknown> = {
       data: {
         org_id: orgId,
         role: role,
         full_name: name || email,
       },
-    })
+    }
+
+    if (redirect_to) {
+      inviteOptions.redirectTo = redirect_to
+    }
+
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, inviteOptions)
 
     if (inviteError) {
       return new Response(JSON.stringify({ success: false, error: inviteError.message }), {
