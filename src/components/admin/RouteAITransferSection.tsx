@@ -38,9 +38,6 @@ export default function RouteAITransferSection() {
   const [isSending, setIsSending] = useState(false);
   const [sendProgress, setSendProgress] = useState({ sent: 0, total: 0 });
 
-  // Niet tonen als plan_type routeai is (alleen shadow_only of both)
-  if (planType !== 'shadow_only' && planType !== 'both') return null;
-
   // Haal org_id op
   const { data: profile } = useQuery({
     queryKey: ['own-profile', user?.id],
