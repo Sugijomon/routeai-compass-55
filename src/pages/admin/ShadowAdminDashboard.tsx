@@ -9,7 +9,7 @@ export default function ShadowAdminDashboard() {
       <div className="container mx-auto py-6 space-y-6 max-w-5xl">
         <PageHeader
           title="Shadow AI Survey — Beheer"
-          description="Beheer de Shadow AI Survey voor je organisatie."
+          subtitle="Beheer de Shadow AI Survey voor je organisatie."
         />
 
         <Card>

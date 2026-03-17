@@ -167,7 +167,7 @@ export default function RouteAITransferSection() {
 
     for (const emp of selectedEmployees) {
       try {
-        const { data, error } = await supabase.functions.invoke('invite-user', {
+        const { error } = await supabase.functions.invoke('invite-user', {
           body: {
             email: emp.email,
             role: 'user',
