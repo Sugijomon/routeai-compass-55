@@ -14,8 +14,9 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, GraduationCap,
+  AlertTriangle, GraduationCap, Clock,
 } from 'lucide-react';
+import SurveyJourneyProgress from '@/components/shadow-survey/SurveyJourneyProgress';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
 
