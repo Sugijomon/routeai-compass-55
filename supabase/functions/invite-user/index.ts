@@ -10,6 +10,7 @@ interface InviteUserRequest {
   role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user'
   orgId: string
   name?: string
+  redirect_to?: string
 }
 
 Deno.serve(async (req) => {
