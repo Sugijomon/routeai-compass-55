@@ -114,6 +114,9 @@ export default function RouteAITransferSection() {
   });
 
   // Dynamische afdelingen
+  // Niet tonen als plan_type routeai is (alleen shadow_only of both)
+  if (planType !== 'shadow_only' && planType !== 'both') return null;
+
   const departments = useMemo(() => {
     const depts = new Set(employees.map(e => e.department).filter(Boolean) as string[]);
     return Array.from(depts).sort();
