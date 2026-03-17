@@ -717,11 +717,18 @@ export type Database = {
           ai_maturity_score: number | null
           amnesty_acknowledged: boolean | null
           assigned_tier: string | null
+          data_classification: string | null
           department: string | null
+          dpo_review_required: boolean | null
           id: string
           org_id: string
+          primary_concern: string | null
+          primary_use_case: string | null
+          review_notes: string | null
+          risk_score: number | null
           role_description: string | null
           submitted_at: string | null
+          survey_completed_at: string | null
           survey_version: string
           user_id: string | null
         }
@@ -729,11 +736,18 @@ export type Database = {
           ai_maturity_score?: number | null
           amnesty_acknowledged?: boolean | null
           assigned_tier?: string | null
+          data_classification?: string | null
           department?: string | null
+          dpo_review_required?: boolean | null
           id?: string
           org_id: string
+          primary_concern?: string | null
+          primary_use_case?: string | null
+          review_notes?: string | null
+          risk_score?: number | null
           role_description?: string | null
           submitted_at?: string | null
+          survey_completed_at?: string | null
           survey_version?: string
           user_id?: string | null
         }
@@ -741,11 +755,18 @@ export type Database = {
           ai_maturity_score?: number | null
           amnesty_acknowledged?: boolean | null
           assigned_tier?: string | null
+          data_classification?: string | null
           department?: string | null
+          dpo_review_required?: boolean | null
           id?: string
           org_id?: string
+          primary_concern?: string | null
+          primary_use_case?: string | null
+          review_notes?: string | null
+          risk_score?: number | null
           role_description?: string | null
           submitted_at?: string | null
+          survey_completed_at?: string | null
           survey_version?: string
           user_id?: string | null
         }
