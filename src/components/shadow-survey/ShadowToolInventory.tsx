@@ -353,7 +353,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
           .update({ survey_completed_at: new Date().toISOString() })
           .eq('id', surveyRunId);
         toast.success('Tool-inventarisatie opgeslagen!');
-        onComplete();
+        onComplete(allSelectedTools);
       }
     } catch {
       toast.error('Fout bij het opslaan van de tool.');
