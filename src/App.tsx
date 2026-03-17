@@ -28,6 +28,7 @@ import OrganisatieOnboarding from "./pages/onboarding/OrganisatieOnboarding";
 import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
 import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
+import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
