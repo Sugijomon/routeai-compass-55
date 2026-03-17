@@ -309,7 +309,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
         .from('shadow_survey_runs')
         .update({ survey_completed_at: new Date().toISOString() })
         .eq('id', surveyRunId);
-      onComplete();
+      onComplete(allSelectedTools);
     } catch {
       toast.error('Er ging iets mis bij het opslaan.');
     } finally {
