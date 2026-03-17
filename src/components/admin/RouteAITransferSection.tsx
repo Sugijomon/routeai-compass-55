@@ -132,6 +132,9 @@ export default function RouteAITransferSection() {
     });
   }, [employees, filterDepartment, filterSurveyStatus, filterTier]);
 
+  // Niet tonen als plan_type routeai is (alleen shadow_only of both)
+  if (planType !== 'shadow_only' && planType !== 'both') return null;
+
   const allFilteredSelected = filtered.length > 0 && filtered.every(e => selected.has(e.id));
 
   const toggleSelectAll = () => {
