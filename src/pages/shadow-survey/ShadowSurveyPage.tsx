@@ -6,18 +6,24 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
+import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
 
+type SurveyStep = 'amnesty' | 'tools' | 'risk';
+
 export default function ShadowSurveyPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // Herstel survey_run_id uit localStorage bij refresh
   const [surveyRunId, setSurveyRunId] = useState<string | null>(() => {
     return localStorage.getItem(SURVEY_RUN_KEY);
   });
+  const [step, setStep] = useState<SurveyStep>('amnesty');
+  const [selectedToolNames, setSelectedToolNames] = useState<string[]>([]);
 
   // Haal org_id op
   const { data: profile } = useQuery({
@@ -55,7 +61,7 @@ export default function ShadowSurveyPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from('shadow_survey_runs')
-        .select('id, amnesty_acknowledged')
+        .select('id, amnesty_acknowledged, survey_completed_at')
         .eq('user_id', user!.id)
         .eq('org_id', orgId!)
         .eq('amnesty_acknowledged', true)
@@ -67,17 +73,42 @@ export default function ShadowSurveyPage() {
     enabled: !!user?.id && !!orgId,
   });
 
-  // Als er al een bestaande run is, stel die in
+  // Herstel stap op basis van bestaande run
   useEffect(() => {
     if (existingRun?.id && !surveyRunId) {
       setSurveyRunId(existingRun.id);
       localStorage.setItem(SURVEY_RUN_KEY, existingRun.id);
+      // Als survey al voltooid is, spring naar risicoprofiel-stap
+      if (existingRun.survey_completed_at) {
+        setStep('risk');
+      } else {
+        setStep('tools');
+      }
     }
   }, [existingRun, surveyRunId]);
+
+  // Als surveyRunId gezet wordt via amnesty, ga naar stap tools
+  useEffect(() => {
+    if (surveyRunId && step === 'amnesty') {
+      setStep('tools');
+    }
+  }, [surveyRunId, step]);
 
   const handleAmnestyAccepted = (runId: string) => {
     setSurveyRunId(runId);
     localStorage.setItem(SURVEY_RUN_KEY, runId);
+    setStep('tools');
+  };
+
+  const handleToolsComplete = (toolNames: string[]) => {
+    setSelectedToolNames(toolNames);
+    setStep('risk');
+  };
+
+  const handleRiskComplete = () => {
+    toast.success('Survey afgerond!');
+    localStorage.removeItem(SURVEY_RUN_KEY);
+    navigate('/training');
   };
 
   const isLoading = orgLoading || runLoading;
@@ -92,27 +123,6 @@ export default function ShadowSurveyPage() {
     );
   }
 
-  // Stap 1: Amnesty-scherm (als nog geen run)
-  if (!surveyRunId) {
-    return (
-      <AppLayout>
-        <div className="container mx-auto py-6 max-w-3xl">
-          <PageHeader
-            title="Shadow AI Survey"
-            subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
-          />
-          <AmnestyScreen
-            orgId={orgId!}
-            userId={user!.id}
-            settings={orgSettings ?? {}}
-            onAccepted={handleAmnestyAccepted}
-          />
-        </div>
-      </AppLayout>
-    );
-  }
-
-  // Stap 2: Tool-picker
   return (
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
@@ -120,13 +130,35 @@ export default function ShadowSurveyPage() {
           title="Shadow AI Survey"
           subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
         />
-        <ShadowToolInventory
-          surveyRunId={surveyRunId}
-          orgId={orgId!}
-          onComplete={() => {
-            toast.success('Tool-inventarisatie afgerond!');
-          }}
-        />
+
+        {/* Stap 1: Amnesty */}
+        {(!surveyRunId || step === 'amnesty') && !surveyRunId && (
+          <AmnestyScreen
+            orgId={orgId!}
+            userId={user!.id}
+            settings={orgSettings ?? {}}
+            onAccepted={handleAmnestyAccepted}
+          />
+        )}
+
+        {/* Stap 2: Tool-picker */}
+        {surveyRunId && step === 'tools' && (
+          <ShadowToolInventory
+            surveyRunId={surveyRunId}
+            orgId={orgId!}
+            onComplete={handleToolsComplete}
+          />
+        )}
+
+        {/* Stap 3: Risicoprofiel */}
+        {surveyRunId && step === 'risk' && (
+          <RiskProfileStep
+            surveyRunId={surveyRunId}
+            orgId={orgId!}
+            selectedToolNames={selectedToolNames}
+            onComplete={handleRiskComplete}
+          />
+        )}
       </div>
     </AppLayout>
   );

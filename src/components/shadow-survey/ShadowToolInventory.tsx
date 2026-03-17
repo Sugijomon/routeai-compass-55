@@ -240,7 +240,7 @@ function ToolFollowUpForm({
 interface Props {
   surveyRunId: string;
   orgId: string;
-  onComplete: () => void;
+  onComplete: (selectedToolNames: string[]) => void;
 }
 
 export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: Props) {
@@ -309,7 +309,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
         .from('shadow_survey_runs')
         .update({ survey_completed_at: new Date().toISOString() })
         .eq('id', surveyRunId);
-      onComplete();
+      onComplete(allSelectedTools);
     } catch {
       toast.error('Er ging iets mis bij het opslaan.');
     } finally {
@@ -353,7 +353,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
           .update({ survey_completed_at: new Date().toISOString() })
           .eq('id', surveyRunId);
         toast.success('Tool-inventarisatie opgeslagen!');
-        onComplete();
+        onComplete(allSelectedTools);
       }
     } catch {
       toast.error('Fout bij het opslaan van de tool.');
