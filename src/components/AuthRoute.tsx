@@ -50,6 +50,11 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
     return <>{children}</>;
   }
 
+  // shadow_only orgs: geen rijbewijs nodig
+  if (isShadowOnly) {
+    return <>{children}</>;
+  }
+
   // Admin/editor roles bypass the rijbewijs exam requirement entirely
   const isAdminOrEditor = isSuperAdmin || isOrgAdmin || isContentEditor;
 
