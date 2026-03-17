@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     }
 
     const body: InviteUserRequest = await req.json()
-    const { email, role, orgId, name } = body
+    const { email, role, orgId, name, redirect_to } = body
 
     if (!email || !role || !orgId) {
       return new Response(JSON.stringify({ error: 'email, role, and orgId are required' }), {
