@@ -110,7 +110,7 @@ export default function ShadowSurveyPage() {
     );
   }
 
-  // Stap 2+: tool-picker (later)
+  // Stap 2: Tool-picker
   return (
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
@@ -118,9 +118,13 @@ export default function ShadowSurveyPage() {
           title="Shadow AI Survey"
           subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
         />
-        <p className="text-muted-foreground">
-          Stap 2 — Tool-picker wordt binnenkort beschikbaar.
-        </p>
+        <ShadowToolInventory
+          surveyRunId={surveyRunId}
+          orgId={orgId!}
+          onComplete={() => {
+            toast.success('Tool-inventarisatie afgerond!');
+          }}
+        />
       </div>
     </AppLayout>
   );
