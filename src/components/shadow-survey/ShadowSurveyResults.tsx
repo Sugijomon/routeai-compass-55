@@ -304,7 +304,7 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
 
       <div className="flex justify-end">
         <Button onClick={onComplete} size="lg">
-          Naar mijn risicoprofiel
+          Begrepen, volgende stap
           <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </div>

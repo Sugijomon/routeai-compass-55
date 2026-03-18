@@ -136,68 +136,56 @@ export default function RiskProfileStep({
     }
   };
 
-  // --- Resultaat-scherm ---
+  // --- Afsluitscherm ---
   if (result) {
     const tier = TIER_CONFIG[result.assigned_tier];
     const TierIcon = tier.icon;
-    const isCustom = result.assigned_tier === 'custom';
 
     return (
       <div className="space-y-6">
-        {/* Visuele journey-voortgang */}
-        <SurveyJourneyProgress currentStep="training" />
-
         <Card>
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <TierIcon className="h-8 w-8" />
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
-            <CardTitle className="text-xl">Je risicoprofiel</CardTitle>
+            <CardTitle className="text-xl">Survey afgerond</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-center">
-            <Badge className={tier.colorClass + ' text-sm px-4 py-1.5'}>
-              {tier.label}
-            </Badge>
-            <p className="text-muted-foreground">{tier.description}</p>
-            <p className="text-sm text-muted-foreground">
-              Risicoscore: <span className="font-semibold text-foreground">{result.risk_score}/100</span>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-center">
+              Bedankt voor je deelname. Je antwoorden zijn opgeslagen.
+              De DPO heeft nu een overzicht van de AI-tools die binnen
+              de organisatie worden gebruikt.
+            </p>
+            <p className="text-muted-foreground text-center">
+              Als de organisatie besluit door te gaan met RouteAI,
+              ontvang je een uitnodiging per e-mail.
             </p>
 
+            {/* Tier-naam en beschrijving (zonder score) */}
+            <div className="flex items-start gap-3 rounded-lg border p-4 mt-4">
+              <TierIcon className="h-5 w-5 mt-0.5 shrink-0 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{tier.label}</p>
+                <p className="text-sm text-muted-foreground">{tier.description}</p>
+              </div>
+            </div>
+
             {result.dpo_review_required && (
-              <div className="flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-left dark:border-yellow-700 dark:bg-yellow-950/30">
+              <div className="flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-950/30">
                 <AlertTriangle className="h-5 w-5 mt-0.5 text-yellow-600 shrink-0" />
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
                   Je profiel wordt extra beoordeeld door de DPO (1-2 werkdagen).
                 </p>
               </div>
             )}
-
-            {/* Custom tier: wacht op DPO */}
-            {isCustom && (
-              <div className="flex items-start gap-3 rounded-lg border border-blue-300 bg-blue-50 p-4 text-left dark:border-blue-700 dark:bg-blue-950/30">
-                <Clock className="h-5 w-5 mt-0.5 text-blue-600 shrink-0" />
-                <div className="text-sm text-blue-800 dark:text-blue-200">
-                  <p className="font-medium mb-1">Je leerpad wordt samengesteld door de DPO.</p>
-                  <p>Je ontvangt een notificatie zodra het klaar is.</p>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
-          {isCustom ? (
-            <Button onClick={onComplete} size="lg" variant="outline">
-              Terug naar dashboard
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button onClick={onComplete} size="lg">
-              <GraduationCap className="mr-2 h-4 w-4" />
-              Naar je training
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          )}
+          <Button onClick={() => navigate('/dashboard')} size="lg">
+            <Home className="mr-2 h-4 w-4" />
+            Terug naar dashboard
+          </Button>
         </div>
       </div>
     );

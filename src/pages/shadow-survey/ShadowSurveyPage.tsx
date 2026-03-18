@@ -117,7 +117,7 @@ export default function ShadowSurveyPage() {
   const handleRiskComplete = () => {
     toast.success('Survey afgerond!');
     localStorage.removeItem(SURVEY_RUN_KEY);
-    navigate('/learn/training');
+    navigate('/dashboard');
   };
 
   const isLoading = orgLoading || runLoading;
