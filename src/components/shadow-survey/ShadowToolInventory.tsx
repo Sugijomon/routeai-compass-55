@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { classifyApplication } from '@/lib/riskEngine';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
