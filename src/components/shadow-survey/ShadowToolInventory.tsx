@@ -116,6 +116,8 @@ const USE_CASE_OPTIONS = [
   { value: 'brainstorm', label: 'Brainstormen' },
   { value: 'meeting_summary', label: 'Meetings samenvatten' },
   { value: 'image_creation', label: 'Afbeeldingen maken' },
+  { value: 'hr_decision', label: 'HR-besluitvorming (selectie, beoordeling, promotie)' },
+  { value: 'personal_data', label: 'Verwerking van persoonsgegevens' },
   { value: 'other', label: 'Anders' },
 ];
 
