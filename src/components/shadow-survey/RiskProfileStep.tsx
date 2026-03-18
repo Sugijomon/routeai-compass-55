@@ -82,8 +82,8 @@ export default function RiskProfileStep({
   surveyRunId,
   orgId: _orgId,
   selectedToolNames,
-  onComplete,
 }: Props) {
+  const navigate = useNavigate();
   const [dataClassification, setDataClassification] = useState('');
   const [primaryUseCase, setPrimaryUseCase] = useState('');
   const [primaryConcern, setPrimaryConcern] = useState('');
