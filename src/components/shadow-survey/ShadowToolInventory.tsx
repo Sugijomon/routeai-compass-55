@@ -335,7 +335,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
     setSaving(true);
     try {
       const fu = followUps[currentTool];
-      const { error } = await supabase.from('tool_discoveries').insert({
+      const { data: inserted, error } = await supabase.from('tool_discoveries').insert({
         survey_run_id: surveyRunId,
         org_id: orgId,
         submitted_by: user!.id,
@@ -344,8 +344,15 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
         use_frequency: fu.frequency,
         data_types_used: [fu.dataType],
         department: profile?.department ?? null,
-      });
+      }).select('id').single();
       if (error) throw error;
+
+      // Classificeer op achtergrond — geen visuele feedback
+      const classification = classifyApplication(fu.useCases, fu.dataType, currentTool);
+      await supabase.from('tool_discoveries').update({
+        application_risk_class: classification.risk_class,
+        eu_ai_act_context: classification.eu_ai_act_context,
+      }).eq('id', inserted.id);
 
       if (currentToolIndex < allSelectedTools.length - 1) {
         setCurrentToolIndex((i) => i + 1);
