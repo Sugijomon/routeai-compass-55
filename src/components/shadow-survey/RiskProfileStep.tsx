@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   calculateRiskScore,
@@ -14,9 +14,8 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, GraduationCap, Clock,
+  AlertTriangle, Clock, CheckCircle2, Home,
 } from 'lucide-react';
-import SurveyJourneyProgress from '@/components/shadow-survey/SurveyJourneyProgress';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
 
