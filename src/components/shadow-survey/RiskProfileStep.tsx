@@ -14,7 +14,7 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, Clock, CheckCircle2, Home,
+  AlertTriangle, CheckCircle2, Home,
 } from 'lucide-react';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
