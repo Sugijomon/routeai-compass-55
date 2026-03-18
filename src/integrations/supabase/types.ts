@@ -782,8 +782,10 @@ export type Database = {
       }
       tool_discoveries: {
         Row: {
+          application_risk_class: string | null
           data_types_used: string[] | null
           department: string | null
+          eu_ai_act_context: string | null
           id: string
           org_id: string
           resulting_tool_id: string | null
@@ -800,8 +802,10 @@ export type Database = {
           vendor: string | null
         }
         Insert: {
+          application_risk_class?: string | null
           data_types_used?: string[] | null
           department?: string | null
+          eu_ai_act_context?: string | null
           id?: string
           org_id: string
           resulting_tool_id?: string | null
@@ -818,8 +822,10 @@ export type Database = {
           vendor?: string | null
         }
         Update: {
+          application_risk_class?: string | null
           data_types_used?: string[] | null
           department?: string | null
+          eu_ai_act_context?: string | null
           id?: string
           org_id?: string
           resulting_tool_id?: string | null
