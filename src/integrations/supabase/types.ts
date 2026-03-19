@@ -215,6 +215,67 @@ export type Database = {
           },
         ]
       }
+      dpo_notifications: {
+        Row: {
+          actioned_at: string | null
+          actioned_by: string | null
+          assessment_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          org_id: string
+          seen_at: string | null
+          status: Database["public"]["Enums"]["dpo_notification_status"]
+          type: Database["public"]["Enums"]["dpo_notification_type"]
+        }
+        Insert: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          assessment_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          seen_at?: string | null
+          status?: Database["public"]["Enums"]["dpo_notification_status"]
+          type: Database["public"]["Enums"]["dpo_notification_type"]
+        }
+        Update: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          assessment_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          seen_at?: string | null
+          status?: Database["public"]["Enums"]["dpo_notification_status"]
+          type?: Database["public"]["Enums"]["dpo_notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpo_notifications_actioned_by_fkey"
+            columns: ["actioned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpo_notifications_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpo_notifications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_answers: {
         Row: {
           answered_at: string | null
@@ -1410,6 +1471,13 @@ export type Database = {
         | "manager"
       assessment_route: "green" | "yellow" | "orange" | "red"
       assessment_status: "active" | "paused" | "stopped" | "superseded"
+      dpo_notification_status: "pending" | "seen" | "actioned" | "dismissed"
+      dpo_notification_type:
+        | "orange_route_new"
+        | "red_route_blocked"
+        | "incident_high"
+        | "reexam_required"
+        | "tool_discovery_pending"
       learning_content_type: "course" | "module" | "assessment" | "document"
       learning_difficulty_level: "basic" | "intermediate" | "advanced"
       learning_status: "draft" | "published" | "deprecated"
@@ -1557,6 +1625,14 @@ export const Constants = {
       ],
       assessment_route: ["green", "yellow", "orange", "red"],
       assessment_status: ["active", "paused", "stopped", "superseded"],
+      dpo_notification_status: ["pending", "seen", "actioned", "dismissed"],
+      dpo_notification_type: [
+        "orange_route_new",
+        "red_route_blocked",
+        "incident_high",
+        "reexam_required",
+        "tool_discovery_pending",
+      ],
       learning_content_type: ["course", "module", "assessment", "document"],
       learning_difficulty_level: ["basic", "intermediate", "advanced"],
       learning_status: ["draft", "published", "deprecated"],
