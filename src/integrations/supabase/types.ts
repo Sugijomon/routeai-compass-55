@@ -14,6 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          archetype_refs: string[]
+          claude_input_hash: string | null
+          created_at: string
+          created_by: string
+          decision_version: string
+          dpia_required: boolean
+          dpo_instructions: string[] | null
+          dpo_oversight_required: boolean
+          escalation_refs: string[] | null
+          fria_required: boolean
+          id: string
+          org_id: string
+          plain_language: string
+          primary_archetype: string
+          reason_filtered: string | null
+          reviewed_at: string | null
+          reviewer_admin_id: string | null
+          route: Database["public"]["Enums"]["assessment_route"]
+          routing_method: Database["public"]["Enums"]["routing_method"]
+          secondary_archetypes: string[] | null
+          status: Database["public"]["Enums"]["assessment_status"]
+          survey_answers: Json
+          tool_id: string | null
+          tool_name_raw: string
+          transparency_required: boolean
+          transparency_template: string | null
+          updated_at: string
+          user_instructions: string[] | null
+        }
+        Insert: {
+          archetype_refs: string[]
+          claude_input_hash?: string | null
+          created_at?: string
+          created_by: string
+          decision_version: string
+          dpia_required?: boolean
+          dpo_instructions?: string[] | null
+          dpo_oversight_required?: boolean
+          escalation_refs?: string[] | null
+          fria_required?: boolean
+          id?: string
+          org_id: string
+          plain_language: string
+          primary_archetype: string
+          reason_filtered?: string | null
+          reviewed_at?: string | null
+          reviewer_admin_id?: string | null
+          route: Database["public"]["Enums"]["assessment_route"]
+          routing_method?: Database["public"]["Enums"]["routing_method"]
+          secondary_archetypes?: string[] | null
+          status?: Database["public"]["Enums"]["assessment_status"]
+          survey_answers: Json
+          tool_id?: string | null
+          tool_name_raw: string
+          transparency_required?: boolean
+          transparency_template?: string | null
+          updated_at?: string
+          user_instructions?: string[] | null
+        }
+        Update: {
+          archetype_refs?: string[]
+          claude_input_hash?: string | null
+          created_at?: string
+          created_by?: string
+          decision_version?: string
+          dpia_required?: boolean
+          dpo_instructions?: string[] | null
+          dpo_oversight_required?: boolean
+          escalation_refs?: string[] | null
+          fria_required?: boolean
+          id?: string
+          org_id?: string
+          plain_language?: string
+          primary_archetype?: string
+          reason_filtered?: string | null
+          reviewed_at?: string | null
+          reviewer_admin_id?: string | null
+          route?: Database["public"]["Enums"]["assessment_route"]
+          routing_method?: Database["public"]["Enums"]["routing_method"]
+          secondary_archetypes?: string[] | null
+          status?: Database["public"]["Enums"]["assessment_status"]
+          survey_answers?: Json
+          tool_id?: string | null
+          tool_name_raw?: string
+          transparency_required?: boolean
+          transparency_template?: string | null
+          updated_at?: string
+          user_instructions?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_reviewer_admin_id_fkey"
+            columns: ["reviewer_admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_lessons: {
         Row: {
           course_id: string | null
@@ -1293,6 +1408,8 @@ export type Database = {
         | "content_editor"
         | "org_admin"
         | "manager"
+      assessment_route: "green" | "yellow" | "orange" | "red"
+      assessment_status: "active" | "paused" | "stopped" | "superseded"
       learning_content_type: "course" | "module" | "assessment" | "document"
       learning_difficulty_level: "basic" | "intermediate" | "advanced"
       learning_status: "draft" | "published" | "deprecated"
@@ -1302,6 +1419,7 @@ export type Database = {
         | "true_false"
         | "fill_in"
         | "essay"
+      routing_method: "deterministic" | "claude_assisted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1437,6 +1555,8 @@ export const Constants = {
         "org_admin",
         "manager",
       ],
+      assessment_route: ["green", "yellow", "orange", "red"],
+      assessment_status: ["active", "paused", "stopped", "superseded"],
       learning_content_type: ["course", "module", "assessment", "document"],
       learning_difficulty_level: ["basic", "intermediate", "advanced"],
       learning_status: ["draft", "published", "deprecated"],
@@ -1447,6 +1567,7 @@ export const Constants = {
         "fill_in",
         "essay",
       ],
+      routing_method: ["deterministic", "claude_assisted"],
     },
   },
 } as const
