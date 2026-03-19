@@ -30,6 +30,7 @@ import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import ShadowAdminDashboard from "./pages/admin/ShadowAdminDashboard";
+import DpoDashboard from "./pages/admin/DpoDashboard";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
