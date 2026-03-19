@@ -10,7 +10,7 @@ import {
   calculateRiskScore,
   type DataClassification,
   type AssignedTier,
-} from '@/lib/riskEngine';
+} from '@/lib/shadowSurveyEngine';
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
