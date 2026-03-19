@@ -30,6 +30,7 @@ import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import ShadowAdminDashboard from "./pages/admin/ShadowAdminDashboard";
+import DpoDashboard from "./pages/admin/DpoDashboard";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
@@ -340,6 +341,7 @@ export default function App() {
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
         <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
         <Route path="/admin/shadow" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowAdminDashboard /></AuthRoute>} />
+        <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
