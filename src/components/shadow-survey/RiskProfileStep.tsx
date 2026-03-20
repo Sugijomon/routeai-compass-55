@@ -111,7 +111,7 @@ export default function RiskProfileStep({
 }: Props) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useUserProfile();
+  const _profile = useUserProfile();
   const [dataClassification, setDataClassification] = useState('');
   const [primaryUseCase, setPrimaryUseCase] = useState('');
   const [primaryConcern, setPrimaryConcern] = useState('');
