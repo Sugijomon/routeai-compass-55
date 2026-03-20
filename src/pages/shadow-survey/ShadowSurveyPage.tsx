@@ -9,13 +9,14 @@ import OrientationStep from '@/components/shadow-survey/OrientationStep';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
 import ShadowSurveyResults from '@/components/shadow-survey/ShadowSurveyResults';
 import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
+import UsageAwarenessStep from '@/components/shadow-survey/UsageAwarenessStep';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
 
-type SurveyStep = 'amnesty' | 'orientation' | 'tools' | 'results' | 'risk';
+type SurveyStep = 'amnesty' | 'orientation' | 'tools' | 'usage' | 'results' | 'risk';
 
 export default function ShadowSurveyPage() {
   const { user } = useAuth();
@@ -121,9 +122,12 @@ export default function ShadowSurveyPage() {
     if (toolNames.length === 0) {
       setStep('risk');
     } else {
-      setStep('results');
+      setStep('usage');
     }
   };
+
+  const handleUsageNext = () => setStep('results');
+  const handleUsageBack = () => setStep('tools');
 
   const handleResultsComplete = () => {
     setStep('risk');
@@ -183,7 +187,16 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 4: Tool match resultaten */}
+        {/* Stap 4: Gebruik & databewustzijn */}
+        {surveyRunId && step === 'usage' && (
+          <UsageAwarenessStep
+            surveyRunId={surveyRunId}
+            onNext={handleUsageNext}
+            onBack={handleUsageBack}
+          />
+        )}
+
+        {/* Stap 5: Tool match resultaten */}
         {surveyRunId && step === 'results' && (
           <ShadowSurveyResults
             surveyRunId={surveyRunId}
@@ -192,7 +205,7 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 5: Risicoprofiel */}
+        {/* Stap 6: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
           <RiskProfileStep
             surveyRunId={surveyRunId}
