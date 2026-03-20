@@ -128,7 +128,7 @@ export default function DpoDashboard() {
       </div>
 
       {/* 2. OPENSTAANDE REVIEWS */}
-      <section className="mb-8">
+      <section id="openstaande-reviews" className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Openstaande reviews</h2>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
