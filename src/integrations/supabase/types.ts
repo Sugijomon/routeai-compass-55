@@ -680,6 +680,47 @@ export type Database = {
           },
         ]
       }
+      org_tools_catalog: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          id: string
+          notes: string | null
+          org_id: string
+          status: string
+          tool_name: string
+          typekaart_id: string | null
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          id?: string
+          notes?: string | null
+          org_id: string
+          status?: string
+          tool_name: string
+          typekaart_id?: string | null
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          id?: string
+          notes?: string | null
+          org_id?: string
+          status?: string
+          tool_name?: string
+          typekaart_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_tools_catalog_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           bank_account: string | null
