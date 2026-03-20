@@ -99,6 +99,9 @@ export default function DpoDashboard() {
         { label: 'DPO Dashboard' },
       ]}
     >
+      {/* 0. NOTIFICATIEBALK */}
+      {orgId && <DpoNotificationBar orgId={orgId} />}
+
       {/* 1. STATS BAR */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard
