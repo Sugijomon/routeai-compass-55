@@ -258,6 +258,7 @@ export default function OrgAdminDashboard() {
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
+      </main>
     </AppLayout>
   );
 }
