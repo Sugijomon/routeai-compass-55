@@ -339,6 +339,9 @@ export default function ScanConfigTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sectie 3 — Bekende tools */}
+      <KnownToolsStep />
     </div>
   );
 }
