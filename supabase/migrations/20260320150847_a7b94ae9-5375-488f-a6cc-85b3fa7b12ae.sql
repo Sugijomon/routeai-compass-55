@@ -1,0 +1,1 @@
+ALTER TABLE public.shadow_survey_runs ADD COLUMN IF NOT EXISTS extra_data JSONB DEFAULT '{}'::jsonb;
