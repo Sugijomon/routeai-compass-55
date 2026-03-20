@@ -9,6 +9,7 @@ import OrientationStep from '@/components/shadow-survey/OrientationStep';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
 import ShadowSurveyResults from '@/components/shadow-survey/ShadowSurveyResults';
 import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
+import UsageAwarenessStep from '@/components/shadow-survey/UsageAwarenessStep';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
