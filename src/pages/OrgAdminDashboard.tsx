@@ -7,6 +7,7 @@ import {
   UserCog,
   FileText,
   Loader2,
+  ScanSearch,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
 import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
 import UsersManager from "@/components/org-admin/UsersManager";
+import ScanConfigTab from "@/components/org-admin/ScanConfigTab";
 import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
 import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 import { useOrgUserStats } from "@/hooks/useOrgUsers";
@@ -131,6 +133,10 @@ export default function OrgAdminDashboard() {
             <TabsTrigger value="tools">Tools Catalogus</TabsTrigger>
             <TabsTrigger value="learning">Learning Catalogus</TabsTrigger>
             <TabsTrigger value="users">Gebruikers</TabsTrigger>
+            <TabsTrigger value="scan-config">
+              <ScanSearch className="h-4 w-4 mr-1.5" />
+              Scan configuratie
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -244,6 +250,11 @@ export default function OrgAdminDashboard() {
           <TabsContent value="users">
             <ErrorBoundary>
               <UsersManager />
+            </ErrorBoundary>
+          </TabsContent>
+          <TabsContent value="scan-config">
+            <ErrorBoundary>
+              <ScanConfigTab />
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
