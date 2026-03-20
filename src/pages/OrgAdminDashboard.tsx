@@ -133,7 +133,10 @@ export default function OrgAdminDashboard() {
             <TabsTrigger value="tools">Tools Catalogus</TabsTrigger>
             <TabsTrigger value="learning">Learning Catalogus</TabsTrigger>
             <TabsTrigger value="users">Gebruikers</TabsTrigger>
-          </TabsList>
+            <TabsTrigger value="scan-config">
+              <ScanSearch className="h-4 w-4 mr-1.5" />
+              Scan configuratie
+            </TabsTrigger>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Organization Sections */}
