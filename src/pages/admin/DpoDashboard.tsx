@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useDpoDashboard } from '@/hooks/useDpoDashboard';
+import { DpoNotificationBar } from '@/components/admin/DpoNotificationBar';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
