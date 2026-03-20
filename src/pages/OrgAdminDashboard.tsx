@@ -25,6 +25,7 @@ import LearningCatalogManager from "@/components/org-admin/LearningCatalogManage
 import UsersManager from "@/components/org-admin/UsersManager";
 import ScanConfigTab from "@/components/org-admin/ScanConfigTab";
 import DpoRiskProfilesTab from "@/components/org-admin/DpoRiskProfilesTab";
+import ShadowScanWidget from "@/components/org-admin/ShadowScanWidget";
 import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
 import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 import { useOrgUserStats } from "@/hooks/useOrgUsers";
