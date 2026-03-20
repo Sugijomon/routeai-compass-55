@@ -251,8 +251,12 @@ export default function OrgAdminDashboard() {
               <UsersManager />
             </ErrorBoundary>
           </TabsContent>
+          <TabsContent value="scan-config">
+            <ErrorBoundary>
+              <ScanConfigTab />
+            </ErrorBoundary>
+          </TabsContent>
         </Tabs>
-      </main>
     </AppLayout>
   );
 }
