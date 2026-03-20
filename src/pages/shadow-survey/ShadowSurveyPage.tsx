@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
 
-type SurveyStep = 'amnesty' | 'orientation' | 'tools' | 'results' | 'risk';
+type SurveyStep = 'amnesty' | 'orientation' | 'tools' | 'usage' | 'results' | 'risk';
 
 export default function ShadowSurveyPage() {
   const { user } = useAuth();
