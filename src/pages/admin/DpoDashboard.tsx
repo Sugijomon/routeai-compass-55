@@ -46,6 +46,8 @@ const BAR_COLORS: Record<string, string> = {
 };
 
 export default function DpoDashboard() {
+  const { profile } = useUserProfile();
+  const orgId = profile?.org_id;
   const {
     pendingReviews,
     reviewProfiles,
