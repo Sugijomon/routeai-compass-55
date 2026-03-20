@@ -263,6 +263,11 @@ export default function OrgAdminDashboard() {
               <ScanConfigTab />
             </ErrorBoundary>
           </TabsContent>
+          <TabsContent value="risk-profiles">
+            <ErrorBoundary>
+              <DpoRiskProfilesTab />
+            </ErrorBoundary>
+          </TabsContent>
         </Tabs>
       </main>
     </AppLayout>
