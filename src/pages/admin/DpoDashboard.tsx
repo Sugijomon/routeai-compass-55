@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ComplianceExports } from '@/components/admin/ComplianceExports';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 import { StatCard } from '@/components/ui/stat-card';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
@@ -245,6 +246,9 @@ export default function DpoDashboard() {
           </div>
         )}
       </section>
+
+      {/* 5. COMPLIANCE EXPORTS */}
+      {orgId && <ComplianceExports orgId={orgId} />}
 
       {/* Review Sheet */}
       <Sheet open={!!selectedRun} onOpenChange={(open) => !open && setSelectedRun(null)}>
