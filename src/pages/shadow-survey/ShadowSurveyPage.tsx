@@ -187,7 +187,16 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 4: Tool match resultaten */}
+        {/* Stap 4: Gebruik & databewustzijn */}
+        {surveyRunId && step === 'usage' && (
+          <UsageAwarenessStep
+            surveyRunId={surveyRunId}
+            onNext={handleUsageNext}
+            onBack={handleUsageBack}
+          />
+        )}
+
+        {/* Stap 5: Tool match resultaten */}
         {surveyRunId && step === 'results' && (
           <ShadowSurveyResults
             surveyRunId={surveyRunId}
@@ -196,7 +205,7 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 5: Risicoprofiel */}
+        {/* Stap 6: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
           <RiskProfileStep
             surveyRunId={surveyRunId}
