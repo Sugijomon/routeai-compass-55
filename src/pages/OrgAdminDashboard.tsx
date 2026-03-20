@@ -139,6 +139,10 @@ export default function OrgAdminDashboard() {
               <ScanSearch className="h-4 w-4 mr-1.5" />
               Scan configuratie
             </TabsTrigger>
+            <TabsTrigger value="risk-profiles">
+              <ShieldCheck className="h-4 w-4 mr-1.5" />
+              Risicoprofielen
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
