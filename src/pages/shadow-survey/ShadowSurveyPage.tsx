@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
+import OrientationStep from '@/components/shadow-survey/OrientationStep';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
 import ShadowSurveyResults from '@/components/shadow-survey/ShadowSurveyResults';
 import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
@@ -14,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SURVEY_RUN_KEY = 'shadow_survey_run_id';
 
-type SurveyStep = 'amnesty' | 'tools' | 'results' | 'risk';
+type SurveyStep = 'amnesty' | 'orientation' | 'tools' | 'results' | 'risk';
 
 export default function ShadowSurveyPage() {
   const { user } = useAuth();
@@ -82,27 +83,41 @@ export default function ShadowSurveyPage() {
       if (existingRun.survey_completed_at) {
         setStep('risk');
       } else {
-        setStep('tools');
+        setStep('orientation');
       }
     }
   }, [existingRun, surveyRunId]);
 
-  // Als surveyRunId gezet wordt via amnesty, ga naar stap tools
+  // Als surveyRunId gezet wordt via amnesty, ga naar oriëntatie
   useEffect(() => {
     if (surveyRunId && step === 'amnesty') {
-      setStep('tools');
+      setStep('orientation');
     }
   }, [surveyRunId, step]);
 
   const handleAmnestyAccepted = (runId: string) => {
     setSurveyRunId(runId);
     localStorage.setItem(SURVEY_RUN_KEY, runId);
-    setStep('tools');
+    setStep('orientation');
+  };
+
+  const handleOrientationNext = (usesAi: string) => {
+    // Bij "nee" → sla tool-picker over, ga direct naar risicoprofiel
+    if (usesAi === 'nee') {
+      setStep('risk');
+    } else {
+      setStep('tools');
+    }
+  };
+
+  const handleOrientationBack = () => {
+    // Terug naar amnesty is conceptueel, maar run is al aangemaakt.
+    // Ga terug naar amnesty-scherm (toont bevestiging dat het al gedaan is).
+    setStep('amnesty');
   };
 
   const handleToolsComplete = (toolNames: string[]) => {
     setSelectedToolNames(toolNames);
-    // Als er geen tools zijn, sla resultaten-scherm over
     if (toolNames.length === 0) {
       setStep('risk');
     } else {
@@ -150,7 +165,16 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 2: Tool-picker */}
+        {/* Stap 2: Oriëntatie */}
+        {surveyRunId && step === 'orientation' && (
+          <OrientationStep
+            surveyRunId={surveyRunId}
+            onNext={handleOrientationNext}
+            onBack={handleOrientationBack}
+          />
+        )}
+
+        {/* Stap 3: Tool-picker */}
         {surveyRunId && step === 'tools' && (
           <ShadowToolInventory
             surveyRunId={surveyRunId}
@@ -159,7 +183,7 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 2b: Tool match resultaten */}
+        {/* Stap 4: Tool match resultaten */}
         {surveyRunId && step === 'results' && (
           <ShadowSurveyResults
             surveyRunId={surveyRunId}
@@ -168,7 +192,7 @@ export default function ShadowSurveyPage() {
           />
         )}
 
-        {/* Stap 3: Risicoprofiel */}
+        {/* Stap 5: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
           <RiskProfileStep
             surveyRunId={surveyRunId}

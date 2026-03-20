@@ -896,6 +896,7 @@ export type Database = {
           data_classification: string | null
           department: string | null
           dpo_review_required: boolean | null
+          extra_data: Json | null
           id: string
           org_id: string
           primary_concern: string | null
@@ -915,6 +916,7 @@ export type Database = {
           data_classification?: string | null
           department?: string | null
           dpo_review_required?: boolean | null
+          extra_data?: Json | null
           id?: string
           org_id: string
           primary_concern?: string | null
@@ -934,6 +936,7 @@ export type Database = {
           data_classification?: string | null
           department?: string | null
           dpo_review_required?: boolean | null
+          extra_data?: Json | null
           id?: string
           org_id?: string
           primary_concern?: string | null
