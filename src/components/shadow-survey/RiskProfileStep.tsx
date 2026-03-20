@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -14,7 +17,7 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, CheckCircle2, Home,
+  AlertTriangle, CheckCircle2, Search, Target, Info,
 } from 'lucide-react';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
@@ -68,22 +71,47 @@ const TIER_CONFIG: Record<AssignedTier, {
   },
 };
 
+// --- Badge types ---
+
+interface BadgeInfo {
+  type: string;
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+}
+
+const BADGE_DEFS: Record<string, BadgeInfo> = {
+  ai_scout: {
+    type: 'ai_scout',
+    icon: Search,
+    title: 'AI Scout',
+    subtitle: 'Je hebt je AI-tools in kaart gebracht',
+  },
+  early_adopter: {
+    type: 'early_adopter',
+    icon: Target,
+    title: 'Early Adopter',
+    subtitle: 'Je was er vroeg bij',
+  },
+};
+
 // --- Component ---
 
 interface Props {
   surveyRunId: string;
   orgId: string;
-  /** Tool-namen geselecteerd in stap 2 */
   selectedToolNames: string[];
   onComplete: () => void;
 }
 
 export default function RiskProfileStep({
   surveyRunId,
-  orgId: _orgId,
+  orgId,
   selectedToolNames,
 }: Props) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
   const [dataClassification, setDataClassification] = useState('');
   const [primaryUseCase, setPrimaryUseCase] = useState('');
   const [primaryConcern, setPrimaryConcern] = useState('');
@@ -94,6 +122,19 @@ export default function RiskProfileStep({
     dpo_review_required: boolean;
   } | null>(null);
 
+  // Haal badges op na submit
+  const { data: earnedBadges } = useQuery({
+    queryKey: ['user-badges', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_badges' as any)
+        .select('badge_type')
+        .eq('user_id', user!.id);
+      return (data as any[] | null)?.map((b: any) => b.badge_type as string) ?? [];
+    },
+    enabled: !!user?.id && !!result,
+  });
+
   // Detecteer lokale agents
   const hasLocalAgent = selectedToolNames.some((name) => {
     const lower = name.toLowerCase();
@@ -101,6 +142,48 @@ export default function RiskProfileStep({
   });
 
   const isFormValid = dataClassification !== '' && primaryUseCase !== '' && primaryConcern !== '';
+
+  const awardBadges = async () => {
+    if (!user?.id || !orgId) return;
+
+    // Badge: ai_scout — minstens 1 tool ontdekt
+    const { count: toolCount } = await supabase
+      .from('tool_discoveries')
+      .select('id', { count: 'exact', head: true })
+      .eq('survey_run_id', surveyRunId);
+
+    if (toolCount && toolCount >= 1) {
+      await supabase
+        .from('user_badges' as any)
+        .upsert(
+          { user_id: user.id, org_id: orgId, badge_type: 'ai_scout' },
+          { onConflict: 'user_id,badge_type' }
+        );
+    }
+
+    // Badge: early_adopter — binnen 7 dagen na amnesty-activatie
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', orgId)
+      .maybeSingle();
+
+    const settings = orgData?.settings as Record<string, any> | null;
+    const amnestyActivatedAt = settings?.amnesty_activated_at;
+
+    if (amnestyActivatedAt) {
+      const activatedDate = new Date(amnestyActivatedAt);
+      const sevenDaysLater = new Date(activatedDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      if (new Date() < sevenDaysLater) {
+        await supabase
+          .from('user_badges' as any)
+          .upsert(
+            { user_id: user.id, org_id: orgId, badge_type: 'early_adopter' },
+            { onConflict: 'user_id,badge_type' }
+          );
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
@@ -128,6 +211,9 @@ export default function RiskProfileStep({
 
       if (error) throw error;
 
+      // Badge-toekenning (fire-and-forget, geen blocker)
+      await awardBadges().catch(() => {});
+
       setResult(riskResult);
     } catch {
       toast.error('Fout bij het opslaan van je risicoprofiel.');
@@ -140,6 +226,7 @@ export default function RiskProfileStep({
   if (result) {
     const tier = TIER_CONFIG[result.assigned_tier];
     const TierIcon = tier.icon;
+    const badges = earnedBadges ?? [];
 
     return (
       <div className="space-y-6">
@@ -148,21 +235,39 @@ export default function RiskProfileStep({
             <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
               <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
-            <CardTitle className="text-xl">Survey afgerond</CardTitle>
+            <CardTitle className="text-xl">Scan afgerond — bedankt voor je deelname.</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-center">
-              Bedankt voor je deelname. Je antwoorden zijn opgeslagen.
-              De DPO heeft nu een overzicht van de AI-tools die binnen
-              de organisatie worden gebruikt.
-            </p>
-            <p className="text-muted-foreground text-center">
-              Als de organisatie besluit door te gaan met RouteAI,
-              ontvang je een uitnodiging per e-mail.
-            </p>
+          <CardContent className="space-y-5">
+            {/* Badges sectie */}
+            {badges.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground text-center">Verdiende badges</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {badges.map((badgeType) => {
+                    const def = BADGE_DEFS[badgeType];
+                    if (!def) return null;
+                    const BadgeIcon = def.icon;
+                    return (
+                      <div
+                        key={badgeType}
+                        className="flex items-center gap-3 rounded-lg border bg-card p-4 shadow-sm"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <BadgeIcon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{def.title}</p>
+                          <p className="text-xs text-muted-foreground">{def.subtitle}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-            {/* Tier-naam en beschrijving (zonder score) */}
-            <div className="flex items-start gap-3 rounded-lg border p-4 mt-4">
+            {/* Tier-naam en beschrijving */}
+            <div className="flex items-start gap-3 rounded-lg border p-4">
               <TierIcon className="h-5 w-5 mt-0.5 shrink-0 text-muted-foreground" />
               <div>
                 <p className="font-medium">{tier.label}</p>
@@ -171,10 +276,11 @@ export default function RiskProfileStep({
             </div>
 
             {result.dpo_review_required && (
-              <div className="flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-950/30">
-                <AlertTriangle className="h-5 w-5 mt-0.5 text-yellow-600 shrink-0" />
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Je profiel wordt extra beoordeeld door de DPO (1-2 werkdagen).
+              <div className="flex items-start gap-3 rounded-lg border p-4">
+                <Info className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
+                <p className="text-sm text-muted-foreground">
+                  De DPO neemt je profiel mee in de beoordeling.
+                  Je hoort hier indien nodig iets over.
                 </p>
               </div>
             )}
@@ -183,8 +289,8 @@ export default function RiskProfileStep({
 
         <div className="flex justify-end">
           <Button onClick={() => navigate('/dashboard')} size="lg">
-            <Home className="mr-2 h-4 w-4" />
-            Terug naar dashboard
+            Naar jouw overzicht
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
