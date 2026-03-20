@@ -129,6 +129,11 @@ export default function OrgAdminDashboard() {
           />
         </div>
 
+        {/* Shadow Scan Widget */}
+        {profile?.org_id && (
+          <ShadowScanWidget orgId={profile.org_id} onActivateTab={setActiveTab} />
+        )}
+
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
