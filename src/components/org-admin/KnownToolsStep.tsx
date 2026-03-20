@@ -148,8 +148,8 @@ export default function KnownToolsStep() {
     return (
       <Card>
         <CardContent className="py-12 text-center space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-            <Check className="h-6 w-6 text-green-600" />
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <Check className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-lg font-semibold">
             {savedCount} tool{savedCount !== 1 ? "s" : ""} opgeslagen
