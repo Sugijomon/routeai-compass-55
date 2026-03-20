@@ -1215,6 +1215,38 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_type: string
+          earned_at: string
+          id: string
+          org_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_type: string
+          earned_at?: string
+          id?: string
+          org_id: string
+          user_id: string
+        }
+        Update: {
+          badge_type?: string
+          earned_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_course_completions: {
         Row: {
           capability_unlocked: string | null
