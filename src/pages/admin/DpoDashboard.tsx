@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useDpoDashboard } from '@/hooks/useDpoDashboard';
+import { DpoNotificationBar } from '@/components/admin/DpoNotificationBar';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -44,6 +46,8 @@ const BAR_COLORS: Record<string, string> = {
 };
 
 export default function DpoDashboard() {
+  const { profile } = useUserProfile();
+  const orgId = profile?.org_id;
   const {
     pendingReviews,
     reviewProfiles,
@@ -95,6 +99,9 @@ export default function DpoDashboard() {
         { label: 'DPO Dashboard' },
       ]}
     >
+      {/* 0. NOTIFICATIEBALK */}
+      {orgId && <DpoNotificationBar orgId={orgId} />}
+
       {/* 1. STATS BAR */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard
@@ -121,7 +128,7 @@ export default function DpoDashboard() {
       </div>
 
       {/* 2. OPENSTAANDE REVIEWS */}
-      <section className="mb-8">
+      <section id="openstaande-reviews" className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Openstaande reviews</h2>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
@@ -168,7 +175,7 @@ export default function DpoDashboard() {
       </section>
 
       {/* 3. TOOL INVENTARIS */}
-      <section className="mb-8">
+      <section id="tool-inventaris" className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Tool Inventaris</h2>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
