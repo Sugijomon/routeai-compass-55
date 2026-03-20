@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ComplianceExports } from '@/components/admin/ComplianceExports';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 import { StatCard } from '@/components/ui/stat-card';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
