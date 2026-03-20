@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
+import KnownToolsStep from "./KnownToolsStep";
 
 interface ScanSettings {
   shadow_survey_sector?: string;
@@ -338,6 +339,9 @@ export default function ScanConfigTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sectie 3 — Bekende tools */}
+      <KnownToolsStep />
     </div>
   );
 }
