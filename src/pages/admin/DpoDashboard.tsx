@@ -247,6 +247,9 @@ export default function DpoDashboard() {
         )}
       </section>
 
+      {/* 5. COMPLIANCE EXPORTS */}
+      {orgId && <ComplianceExports orgId={orgId} />}
+
       {/* Review Sheet */}
       <Sheet open={!!selectedRun} onOpenChange={(open) => !open && setSelectedRun(null)}>
         <SheetContent className="sm:max-w-lg">
