@@ -137,6 +137,7 @@ export default function OrgAdminDashboard() {
               <ScanSearch className="h-4 w-4 mr-1.5" />
               Scan configuratie
             </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Organization Sections */}
