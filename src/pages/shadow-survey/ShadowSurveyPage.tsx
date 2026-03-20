@@ -122,9 +122,12 @@ export default function ShadowSurveyPage() {
     if (toolNames.length === 0) {
       setStep('risk');
     } else {
-      setStep('results');
+      setStep('usage');
     }
   };
+
+  const handleUsageNext = () => setStep('results');
+  const handleUsageBack = () => setStep('tools');
 
   const handleResultsComplete = () => {
     setStep('risk');
