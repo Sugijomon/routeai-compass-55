@@ -8,6 +8,7 @@ import {
   FileText,
   Loader2,
   ScanSearch,
+  ShieldCheck,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import ToolsCatalogManager from "@/components/org-admin/ToolsCatalogManager";
 import LearningCatalogManager from "@/components/org-admin/LearningCatalogManager";
 import UsersManager from "@/components/org-admin/UsersManager";
 import ScanConfigTab from "@/components/org-admin/ScanConfigTab";
+import DpoRiskProfilesTab from "@/components/org-admin/DpoRiskProfilesTab";
 import { useOrgToolsStats } from "@/hooks/useOrgToolsCatalog";
 import { useOrgLearningStats } from "@/hooks/useOrgLearningCatalog";
 import { useOrgUserStats } from "@/hooks/useOrgUsers";
@@ -136,6 +138,10 @@ export default function OrgAdminDashboard() {
             <TabsTrigger value="scan-config">
               <ScanSearch className="h-4 w-4 mr-1.5" />
               Scan configuratie
+            </TabsTrigger>
+            <TabsTrigger value="risk-profiles">
+              <ShieldCheck className="h-4 w-4 mr-1.5" />
+              Risicoprofielen
             </TabsTrigger>
           </TabsList>
 
@@ -255,6 +261,11 @@ export default function OrgAdminDashboard() {
           <TabsContent value="scan-config">
             <ErrorBoundary>
               <ScanConfigTab />
+            </ErrorBoundary>
+          </TabsContent>
+          <TabsContent value="risk-profiles">
+            <ErrorBoundary>
+              <DpoRiskProfilesTab />
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
