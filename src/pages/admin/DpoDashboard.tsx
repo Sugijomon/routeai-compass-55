@@ -175,7 +175,7 @@ export default function DpoDashboard() {
       </section>
 
       {/* 3. TOOL INVENTARIS */}
-      <section className="mb-8">
+      <section id="tool-inventaris" className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Tool Inventaris</h2>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
