@@ -428,7 +428,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
     <div className="space-y-6">
       {/* Voortgang */}
       <div className="space-y-1">
-        <p className="text-sm text-muted-foreground">Stap 2 van 4 — Welke AI-tools gebruik je?</p>
+        <p className="text-sm text-muted-foreground">Stap 3 van 6 — Welke AI-tools gebruik je?</p>
         <Progress value={stepProgress} className="h-2" />
       </div>
 
