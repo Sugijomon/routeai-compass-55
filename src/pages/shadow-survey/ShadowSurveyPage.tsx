@@ -172,11 +172,14 @@ export default function ShadowSurveyPage() {
 
         {/* Stap 2: Oriëntatie */}
         {surveyRunId && step === 'orientation' && (
-          <OrientationStep
-            surveyRunId={surveyRunId}
-            onNext={handleOrientationNext}
-            onBack={handleOrientationBack}
-          />
+          <>
+            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <OrientationStep
+              surveyRunId={surveyRunId}
+              onNext={handleOrientationNext}
+              onBack={handleOrientationBack}
+            />
+          </>
         )}
 
         {/* Stap 3: Tool-picker */}
