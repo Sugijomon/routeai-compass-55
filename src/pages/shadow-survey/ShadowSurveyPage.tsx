@@ -10,6 +10,7 @@ import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory'
 import ShadowSurveyResults from '@/components/shadow-survey/ShadowSurveyResults';
 import RiskProfileStep from '@/components/shadow-survey/RiskProfileStep';
 import UsageAwarenessStep from '@/components/shadow-survey/UsageAwarenessStep';
+import TeamParticipationBadge from '@/components/shadow-survey/TeamParticipationBadge';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -171,11 +172,14 @@ export default function ShadowSurveyPage() {
 
         {/* Stap 2: Oriëntatie */}
         {surveyRunId && step === 'orientation' && (
-          <OrientationStep
-            surveyRunId={surveyRunId}
-            onNext={handleOrientationNext}
-            onBack={handleOrientationBack}
-          />
+          <>
+            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <OrientationStep
+              surveyRunId={surveyRunId}
+              onNext={handleOrientationNext}
+              onBack={handleOrientationBack}
+            />
+          </>
         )}
 
         {/* Stap 3: Tool-picker */}
@@ -207,12 +211,15 @@ export default function ShadowSurveyPage() {
 
         {/* Stap 6: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
-          <RiskProfileStep
-            surveyRunId={surveyRunId}
-            orgId={orgId!}
-            selectedToolNames={selectedToolNames}
-            onComplete={handleRiskComplete}
-          />
+          <>
+            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <RiskProfileStep
+              surveyRunId={surveyRunId}
+              orgId={orgId!}
+              selectedToolNames={selectedToolNames}
+              onComplete={handleRiskComplete}
+            />
+          </>
         )}
       </div>
     </AppLayout>
