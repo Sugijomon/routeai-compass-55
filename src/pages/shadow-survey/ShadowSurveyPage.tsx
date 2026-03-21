@@ -211,12 +211,15 @@ export default function ShadowSurveyPage() {
 
         {/* Stap 6: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
-          <RiskProfileStep
-            surveyRunId={surveyRunId}
-            orgId={orgId!}
-            selectedToolNames={selectedToolNames}
-            onComplete={handleRiskComplete}
-          />
+          <>
+            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <RiskProfileStep
+              surveyRunId={surveyRunId}
+              orgId={orgId!}
+              selectedToolNames={selectedToolNames}
+              onComplete={handleRiskComplete}
+            />
+          </>
         )}
       </div>
     </AppLayout>
