@@ -381,7 +381,7 @@ export default function ShadowToolInventory({ surveyRunId, orgId, onComplete }: 
         {/* Voortgang */}
         <div className="space-y-1">
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Stap 2 van 4 — Tool details</span>
+            <span>Stap 3 van 6 — Tool details</span>
             <span>Tool {currentToolIndex + 1} van {allSelectedTools.length}</span>
           </div>
           <Progress value={stepProgress} className="h-2" />
