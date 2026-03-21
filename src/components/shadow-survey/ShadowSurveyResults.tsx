@@ -196,8 +196,8 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Stap 2 van 4 — Tool resultaten</p>
-          <Progress value={55} className="h-2" />
+          <p className="text-sm text-muted-foreground">Stap 5 van 6 — Tool resultaten</p>
+          <Progress value={75} className="h-2" />
         </div>
         <div className="flex flex-col items-center justify-center py-12 gap-3">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -215,8 +215,8 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <p className="text-sm text-muted-foreground">Stap 2 van 4 — Tool resultaten</p>
-        <Progress value={55} className="h-2" />
+        <p className="text-sm text-muted-foreground">Stap 5 van 6 — Tool resultaten</p>
+        <Progress value={75} className="h-2" />
       </div>
 
       {/* Samenvatting */}

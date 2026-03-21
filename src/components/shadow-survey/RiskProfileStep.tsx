@@ -301,8 +301,8 @@ export default function RiskProfileStep({
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <p className="text-sm text-muted-foreground">Stap 3 van 4 — Risicoprofiel</p>
-        <Progress value={75} className="h-2" />
+        <p className="text-sm text-muted-foreground">Stap 6 van 6 — Risicoprofiel</p>
+        <Progress value={90} className="h-2" />
       </div>
 
       {/* V1 — Data classificatie */}

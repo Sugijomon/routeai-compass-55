@@ -138,7 +138,7 @@ export default function UsageAwarenessStep({ surveyRunId, onNext, onBack }: Usag
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
-        <span>Stap 4 van 5</span>
+        <span>Stap 4 van 6</span>
       </div>
       <Progress value={60} className="h-2" />
 
