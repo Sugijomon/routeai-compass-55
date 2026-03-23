@@ -293,6 +293,77 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
 
             <Separator />
 
+            {/* Module-keuze */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground">Module</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">Welke modules worden gekoppeld aan deze organisatie?</p>
+              </div>
+              <FormField
+                control={form.control}
+                name="planType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                          {
+                            value: 'shadow_only' as const,
+                            icon: Search,
+                            title: 'Shadow AI Scan',
+                            description: 'Inventariseer AI-gebruik en genereer compliance-exports. De contactpersoon wordt DPO.',
+                            badge: 'Meest gekozen voor start',
+                          },
+                          {
+                            value: 'routeai' as const,
+                            icon: Shield,
+                            title: 'RouteAI Platform',
+                            description: 'Volledig AI governance platform met training, licenties en audit. De contactpersoon wordt Org Admin.',
+                          },
+                          {
+                            value: 'both' as const,
+                            icon: Layers,
+                            title: 'Shadow AI Scan + RouteAI',
+                            description: 'Start met de scan en gebruik direct het volledige platform. De contactpersoon wordt Org Admin.',
+                          },
+                        ].map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = field.value === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => field.onChange(option.value)}
+                              className={cn(
+                                "relative flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+                                isSelected
+                                  ? "border-primary bg-primary/5"
+                                  : "border-border hover:border-muted-foreground/50"
+                              )}
+                            >
+                              {option.badge && (
+                                <Badge variant="secondary" className="absolute -top-2.5 right-2 text-[10px] bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  {option.badge}
+                                </Badge>
+                              )}
+                              <Icon className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")} />
+                              <div>
+                                <p className="font-medium text-sm">{option.title}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator />
+
             {/* Contactinformatie */}
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">Contactinformatie</h4>
