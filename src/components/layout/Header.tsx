@@ -19,6 +19,7 @@ import { AppRole } from '@/hooks/useUserRole';
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
   org_admin: 'AI Verantwoordelijke',
+  dpo: 'DPO',
   content_editor: 'Content Editor',
   manager: 'Team Manager',
   user: 'Gebruiker',
