@@ -190,6 +190,7 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
       };
 
       if (isEdit) {
+        (orgData as Record<string, unknown>).plan_type = planType;
         const { error } = await supabase
           .from('organizations')
           .update(orgData as any)
