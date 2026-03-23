@@ -12,7 +12,7 @@ interface AuthRouteProps {
 }
 
 export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck = false }: AuthRouteProps) {
-  const { user, isLoading, isAdmin, isSigningOut } = useAuth();
+  const { user, isLoading, isAdmin, isSigningOut, hasCheckedAdmin } = useAuth();
   const location = useLocation();
   const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isDpo, isContentEditor } = useUserProfile();
   const { isShadowOnly, isLoading: planLoading } = useOrgPlanType();
