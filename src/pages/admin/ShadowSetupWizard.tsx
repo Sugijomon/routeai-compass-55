@@ -375,7 +375,7 @@ export default function ShadowSetupWizard() {
 
   return (
     <AdminPageLayout
-      title="Shadow AI Survey — Setup"
+      title="Shadow AI Scan — Setup"
       breadcrumbs={[
         { label: 'Admin', href: '/admin' },
         { label: 'Shadow AI', href: '/admin/shadow' },
