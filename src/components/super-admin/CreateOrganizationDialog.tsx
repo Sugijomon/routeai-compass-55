@@ -114,6 +114,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         .from("organizations")
         .insert({
           name: data.name,
+          plan_type: data.planType,
           status: data.status,
           subscription_type: data.subscriptionType,
           contact_person: data.contactPerson,
