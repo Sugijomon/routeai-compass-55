@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, addYears } from "date-fns";
 import { nl } from "date-fns/locale";
-import { CalendarIcon, Building2, Loader2 } from "lucide-react";
+import { CalendarIcon, Building2, Loader2, Search, Shield, Layers } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
