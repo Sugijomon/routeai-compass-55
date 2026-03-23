@@ -204,27 +204,8 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
           .select()
           .single();
         if (error) throw error;
-
-        // Uitnodiging versturen als er een e-mail is
-        if (contactEmail) {
-          const contactRole = planType === 'shadow_only' ? 'dpo' : 'org_admin';
-          const { error: inviteError } = await supabase.functions.invoke('invite-user', {
-            body: {
-              email: contactEmail,
-              role: contactRole,
-              orgId: result.id,
-              name: contactPerson || undefined,
-            },
-          });
-          if (inviteError) {
-            console.error('Uitnodiging mislukt:', inviteError);
-          }
-          const roleLabel = planType === 'shadow_only' ? 'DPO' : 'Org Admin';
-          toast.success('Organisatie aangemaakt', {
-            description: `Uitnodiging verstuurd naar ${contactEmail} als ${roleLabel}.`,
-          });
-          return;
-        }
+        // Geef het resultaat terug zodat onSuccess kan navigeren
+        return result;
       }
     },
     onSuccess: () => {
