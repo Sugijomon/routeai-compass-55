@@ -53,7 +53,7 @@ interface Organization {
 interface OrgFormDialogProps {
   trigger: React.ReactNode;
   org?: Organization;
-  onSuccess?: () => void;
+  onSuccess?: (createdOrg?: { id: string; name: string }) => void;
 }
 
 const MODULE_OPTIONS = [
