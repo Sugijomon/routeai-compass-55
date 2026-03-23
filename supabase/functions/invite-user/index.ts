@@ -57,7 +57,8 @@ Deno.serve(async (req) => {
 
     const isSuperAdmin = callerRoles?.some(r => r.role === 'super_admin')
     const isOrgAdmin = callerRoles?.some(r => r.role === 'org_admin')
-    if (!isSuperAdmin && !isOrgAdmin) {
+    const isDpo = callerRoles?.some(r => r.role === 'dpo')
+    if (!isSuperAdmin && !isOrgAdmin && !isDpo) {
       return new Response(JSON.stringify({ error: 'Only admins can invite users' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 403,
