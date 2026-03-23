@@ -227,14 +227,24 @@ export default function OrganizationsManagement() {
                         }
                       </TableCell>
                       <TableCell className="text-right">
-                        <OrgFormDialog
-                          trigger={
-                            <Button size="icon" variant="ghost">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          }
-                          org={org}
-                        />
+                        <div className="flex items-center justify-end gap-1">
+                          <OrgFormDialog
+                            trigger={
+                              <Button size="icon" variant="ghost" title="Bewerken">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            }
+                            org={org}
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Uitnodiging versturen"
+                            onClick={() => navigate(`/super-admin/organizations/${org.id}/uitnodigen`)}
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

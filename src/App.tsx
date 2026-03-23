@@ -77,6 +77,14 @@ export default function App() {
           } 
         />
         <Route 
+          path="/super-admin/organizations/:orgId/uitnodigen" 
+          element={
+            <AuthRoute requireAdmin>
+              <OrgInvitePage />
+            </AuthRoute>
+          } 
+        />
+        <Route 
           path="/super-admin/tools" 
           element={
             <AuthRoute requireAdmin>
