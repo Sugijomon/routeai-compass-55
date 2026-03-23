@@ -14,7 +14,7 @@ interface AuthRouteProps {
 export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck = false }: AuthRouteProps) {
   const { user, isLoading, isAdmin, isSigningOut } = useAuth();
   const location = useLocation();
-  const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isContentEditor } = useUserProfile();
+  const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isDpo, isContentEditor } = useUserProfile();
   const { isShadowOnly, isLoading: planLoading } = useOrgPlanType();
   // CRITICAL: Don't redirect while signing out - this prevents the loop
   if (isSigningOut) {
