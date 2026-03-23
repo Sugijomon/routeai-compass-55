@@ -18,6 +18,7 @@ export function useAuth() {
     isLoading: true,
     isAdmin: false,
     isSigningOut: false,
+    hasCheckedAdmin: false,
   });
 
   const signOut = useCallback(async () => {
