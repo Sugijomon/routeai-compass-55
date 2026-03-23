@@ -393,7 +393,7 @@ export default function ShadowSetupWizard() {
               Organisatie-context
             </CardTitle>
             <CardDescription>
-              Geef basisinformatie over je organisatie voor de Shadow AI Survey.
+              Geef basisinformatie over je organisatie voor de Shadow AI Scan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
