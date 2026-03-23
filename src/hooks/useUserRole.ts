@@ -66,6 +66,7 @@ export function useUserRole(): UserRoleData {
   const canViewTeam = isSuperAdmin || isOrgAdmin || isManager;
   const canManageLessons = isSuperAdmin || isOrgAdmin;
   const canViewShadowData = isSuperAdmin || isOrgAdmin || isDpo;
+  const canManageScan = isSuperAdmin || isOrgAdmin || isDpo;
   
   // Backwards compatibility: any admin-level role
   const isAdminLevel = isSuperAdmin || isContentEditor || isOrgAdmin || isDpo;
