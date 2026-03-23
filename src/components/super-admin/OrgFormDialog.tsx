@@ -53,7 +53,7 @@ interface Organization {
 interface OrgFormDialogProps {
   trigger: React.ReactNode;
   org?: Organization;
-  onSuccess?: () => void;
+  onSuccess?: (createdOrg?: { id: string; name: string }) => void;
 }
 
 const MODULE_OPTIONS = [
@@ -204,39 +204,20 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
           .select()
           .single();
         if (error) throw error;
-
-        // Uitnodiging versturen als er een e-mail is
-        if (contactEmail) {
-          const contactRole = planType === 'shadow_only' ? 'dpo' : 'org_admin';
-          const { error: inviteError } = await supabase.functions.invoke('invite-user', {
-            body: {
-              email: contactEmail,
-              role: contactRole,
-              orgId: result.id,
-              name: contactPerson || undefined,
-            },
-          });
-          if (inviteError) {
-            console.error('Uitnodiging mislukt:', inviteError);
-          }
-          const roleLabel = planType === 'shadow_only' ? 'DPO' : 'Org Admin';
-          toast.success('Organisatie aangemaakt', {
-            description: `Uitnodiging verstuurd naar ${contactEmail} als ${roleLabel}.`,
-          });
-          return;
-        }
+        // Geef het resultaat terug zodat onSuccess kan navigeren
+        return result;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['super-admin-organizations'] });
       queryClient.invalidateQueries({ queryKey: ['platform-kpis'] });
       if (isEdit) {
         toast.success('Organisatie bijgewerkt');
-      } else if (!contactEmail) {
-        toast.success('Organisatie aangemaakt');
+      } else {
+        toast.success(`Organisatie "${name}" aangemaakt.`);
       }
       setOpen(false);
-      onSuccess?.();
+      onSuccess?.(result ? { id: result.id, name } : undefined);
     },
     onError: (error: Error) => {
       toast.error(isEdit ? 'Kon organisatie niet bijwerken' : 'Kon organisatie niet aanmaken', {

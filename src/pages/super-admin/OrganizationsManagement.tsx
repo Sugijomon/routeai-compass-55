@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Plus, Edit, Search, ArrowLeft, Loader2 } from 'lucide-react';
+import { Building2, Plus, Edit, Search, ArrowLeft, Loader2, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OrgFormDialog } from '@/components/super-admin/OrgFormDialog';
@@ -119,6 +119,11 @@ export default function OrganizationsManagement() {
                 Nieuwe Organisatie
               </Button>
             }
+            onSuccess={(createdOrg) => {
+              if (createdOrg) {
+                navigate(`/super-admin/organizations/${createdOrg.id}/uitnodigen`);
+              }
+            }}
           />
         </div>
 
@@ -222,14 +227,24 @@ export default function OrganizationsManagement() {
                         }
                       </TableCell>
                       <TableCell className="text-right">
-                        <OrgFormDialog
-                          trigger={
-                            <Button size="icon" variant="ghost">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          }
-                          org={org}
-                        />
+                        <div className="flex items-center justify-end gap-1">
+                          <OrgFormDialog
+                            trigger={
+                              <Button size="icon" variant="ghost" title="Bewerken">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            }
+                            org={org}
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Uitnodiging versturen"
+                            onClick={() => navigate(`/super-admin/organizations/${org.id}/uitnodigen`)}
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
