@@ -125,8 +125,11 @@ Deno.serve(async (req) => {
       { user_id: userId, role, org_id: orgId },
     ]
 
-    // If org_admin, also add 'user' role for additive roles
+    // Additive rollen
     if (role === 'org_admin') {
+      rolesToInsert.push({ user_id: userId, role: 'user', org_id: orgId })
+    }
+    if (role === 'dpo') {
       rolesToInsert.push({ user_id: userId, role: 'user', org_id: orgId })
     }
 
