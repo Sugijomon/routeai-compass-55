@@ -95,7 +95,6 @@ export function useAuth() {
           setTimeout(() => {
             checkAdminRole(session.user.id).then((isAdmin) => {
               setAuthState(prev => {
-                // Don't update if we're signing out
                 if (prev.isSigningOut) return prev;
                 return {
                   ...prev,
@@ -103,6 +102,7 @@ export function useAuth() {
                   session,
                   isLoading: false,
                   isAdmin,
+                  hasCheckedAdmin: true,
                 };
               });
             });
