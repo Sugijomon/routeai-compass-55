@@ -134,13 +134,14 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
 
       if (error) throw error;
 
-      // Invite the contact person as org_admin
+      // Rol bepalen op basis van module-keuze
+      const contactRole = data.planType === 'shadow_only' ? 'dpo' : 'org_admin';
       let inviteError: string | null = null;
       try {
         const response = await supabase.functions.invoke('invite-user', {
           body: {
             email: data.email,
-            role: 'org_admin',
+            role: contactRole,
             orgId: result.id,
             name: data.contactPerson,
           },
