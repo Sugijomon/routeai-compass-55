@@ -29,7 +29,7 @@ interface NavSection {
 
 export function Sidebar() {
   const location = useLocation();
-  const { isSuperAdmin, isContentEditor, canManageOrg } = useUserRole();
+  const { isSuperAdmin, isContentEditor, canManageOrg, isDpo } = useUserRole();
 
   let sections: NavSection[] = [];
 
@@ -38,15 +38,25 @@ export function Sidebar() {
       {
         title: 'Platform',
         items: [
-          { label: 'Super Admin Dashboard', href: '/super-admin', icon: Shield },
-          { label: 'Organisaties', href: '/super-admin', icon: Building2 },
-          { label: 'Gebruikers', href: '/super-admin', icon: Users },
+          { label: 'Dashboard', href: '/super-admin', icon: Shield },
+          { label: 'Organisaties', href: '/super-admin/organizations', icon: Building2 },
+          { label: 'Gebruikers', href: '/super-admin/users', icon: Users },
         ],
       },
       {
-        title: 'Content',
+        title: 'Beheer',
         items: [
-          { label: 'Cursussen bekijken', href: '/editor/cursussen', icon: GraduationCap },
+          { label: 'Tools Library', href: '/super-admin/tools', icon: Wrench },
+          { label: 'Learning Library', href: '/super-admin/content', icon: BookOpen },
+        ],
+      },
+    ];
+  } else if (isDpo) {
+    sections = [
+      {
+        title: 'Shadow AI Scan',
+        items: [
+          { label: 'Scan beheer', href: '/admin/shadow', icon: Shield },
         ],
       },
     ];
