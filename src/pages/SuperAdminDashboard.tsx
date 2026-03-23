@@ -18,6 +18,48 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
 
+function ShadowScanStats() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['shadow-scan-platform-stats'],
+    queryFn: async () => {
+      const [completedRes, orgsRes] = await Promise.all([
+        supabase
+          .from('shadow_survey_runs')
+          .select('id', { count: 'exact', head: true })
+          .not('survey_completed_at', 'is', null),
+        supabase
+          .from('shadow_survey_runs')
+          .select('org_id')
+          .not('survey_completed_at', 'is', null),
+      ]);
+      const uniqueOrgs = new Set(orgsRes.data?.map(r => r.org_id)).size;
+      return {
+        completed: completedRes.count ?? 0,
+        activeOrgs: uniqueOrgs,
+      };
+    },
+  });
+
+  return (
+    <CardContent>
+      <div className="flex items-center gap-4 text-sm">
+        <div>
+          <span className="text-muted-foreground">Scans voltooid</span>
+          {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+            <p className="font-semibold">{data?.completed ?? 0}</p>
+          )}
+        </div>
+        <div>
+          <span className="text-muted-foreground">Organisaties actief</span>
+          {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+            <p className="font-semibold">{data?.activeOrgs ?? 0}</p>
+          )}
+        </div>
+      </div>
+    </CardContent>
+  );
+}
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
