@@ -190,6 +190,7 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
       };
 
       if (isEdit) {
+        (orgData as Record<string, unknown>).plan_type = planType;
         const { error } = await supabase
           .from('organizations')
           .update(orgData as any)
@@ -252,40 +253,48 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Module selectie — alleen bij aanmaken */}
-          {!isEdit && (
-            <div className="space-y-3">
-              <div>
-                <Label className="text-sm font-semibold">Module</Label>
-                <p className="text-xs text-muted-foreground">
-                  Welke modules worden gekoppeld aan deze organisatie?
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {MODULE_OPTIONS.map((opt) => {
-                  const Icon = opt.icon;
-                  const selected = planType === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setPlanType(opt.value)}
-                      className={cn(
-                        'flex flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors',
-                        selected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-muted-foreground/30'
-                      )}
-                    >
-                      <Icon className={cn('h-5 w-5', selected ? 'text-primary' : 'text-muted-foreground')} />
-                      <span className="text-sm font-medium">{opt.title}</span>
-                      <span className="text-xs text-muted-foreground">{opt.description}</span>
-                    </button>
-                  );
-                })}
-              </div>
+          {/* Module — zichtbaar bij aanmaken én bewerken */}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-sm font-semibold">Module</Label>
+              <p className="text-xs text-muted-foreground">
+                {isEdit
+                  ? 'Wijzig de module om een organisatie te upgraden.'
+                  : 'Welke modules worden gekoppeld aan deze organisatie?'}
+              </p>
             </div>
-          )}
+            {isEdit && planType === 'shadow_only' && (
+              <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                <span>⚠️</span>
+                <span>
+                  Bij upgrade naar RouteAI of Scan + RouteAI ontvangt de contactpersoon een nieuwe uitnodiging via de uitnodigingspagina.
+                </span>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {MODULE_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const selected = planType === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setPlanType(opt.value)}
+                    className={cn(
+                      'flex flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors',
+                      selected
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-muted-foreground/30'
+                    )}
+                  >
+                    <Icon className={cn('h-5 w-5', selected ? 'text-primary' : 'text-muted-foreground')} />
+                    <span className="text-sm font-medium">{opt.title}</span>
+                    <span className="text-xs text-muted-foreground">{opt.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Organisatiegegevens */}
           <div className="space-y-3">
