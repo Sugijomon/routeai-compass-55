@@ -277,12 +277,22 @@ export default function OrganizationsManagement() {
                 <TableBody>
                   {filteredOrgs.map((org) => (
                     <TableRow key={org.id}>
-                      <TableCell className="font-medium">{org.name}</TableCell>
-                      <TableCell>
-                        <Badge className={STATUS_COLORS[org.status || 'inactive']}>
-                          {STATUS_LABELS[org.status || 'inactive'] || org.status}
-                        </Badge>
-                      </TableCell>
+                       <TableCell className="font-medium">{org.name}</TableCell>
+                       <TableCell>
+                         {(() => {
+                           const config = PLAN_TYPE_CONFIG[org.plan_type || 'routeai'];
+                           return config ? (
+                             <Badge className={config.className}>{config.label}</Badge>
+                           ) : (
+                             <Badge variant="outline">{org.plan_type || '—'}</Badge>
+                           );
+                         })()}
+                       </TableCell>
+                       <TableCell>
+                         <Badge className={STATUS_COLORS[org.status || 'inactive']}>
+                           {STATUS_LABELS[org.status || 'inactive'] || org.status}
+                         </Badge>
+                       </TableCell>
                       <TableCell className="capitalize">{org.subscription_type || 'Basic'}</TableCell>
                       <TableCell>{org.sector || '—'}</TableCell>
                       <TableCell>
