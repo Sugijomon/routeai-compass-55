@@ -91,6 +91,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
       name: "",
+      planType: "shadow_only" as const,
       status: "active",
       subscriptionType: "basic",
       contactPerson: "",
