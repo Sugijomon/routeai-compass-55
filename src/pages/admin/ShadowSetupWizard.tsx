@@ -557,7 +557,7 @@ export default function ShadowSetupWizard() {
             </CardTitle>
             <CardDescription>
               Upload een Excel-bestand met medewerkers. Ze ontvangen een
-              uitnodiging om de Shadow AI Survey in te vullen.
+              uitnodiging om de Shadow AI Scan in te vullen.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">

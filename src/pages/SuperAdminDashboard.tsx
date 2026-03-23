@@ -269,30 +269,25 @@ export default function SuperAdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Future Module: Shadow AI Survey */}
-          <Card className="hover:shadow-lg transition-shadow opacity-60">
+          {/* Shadow AI Scan */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/shadow')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Shadow AI Survey</CardTitle>
+                    <CardTitle className="text-lg">Shadow AI Scan</CardTitle>
                     <CardDescription>Discovery en monitoring van Shadow AI gebruik</CardDescription>
                   </div>
                 </div>
-                <Badge variant="outline">Binnenkort</Badge>
+                <Button variant="ghost" size="sm">
+                  Beheer →
+                </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Module status</span>
-                  <p className="font-semibold text-muted-foreground">In ontwikkeling</p>
-                </div>
-              </div>
-            </CardContent>
+            <ShadowScanStats />
           </Card>
 
           {/* Future Module: Risk Assessment Engine */}

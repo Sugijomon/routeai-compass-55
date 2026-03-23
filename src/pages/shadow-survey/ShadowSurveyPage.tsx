@@ -156,7 +156,7 @@ export default function ShadowSurveyPage() {
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
         <PageHeader
-          title="Shadow AI Survey"
+          title="Shadow AI Scan"
           subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
         />
 

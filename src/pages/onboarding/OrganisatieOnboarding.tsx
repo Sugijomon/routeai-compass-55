@@ -117,13 +117,13 @@ export default function OrganisatieOnboarding() {
                 </p>
               </button>
 
-              {/* Option 2: Shadow AI Survey (disabled) */}
-              <div className="relative rounded-lg border-2 border-muted p-5 text-left opacity-50 cursor-not-allowed">
-                <Badge variant="secondary" className="absolute top-3 right-3">
-                  Binnenkort beschikbaar
-                </Badge>
-                <Search className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="font-semibold text-muted-foreground mb-1">Start met Shadow AI Survey</h3>
+               {/* Option 2: Shadow AI Scan (disabled) */}
+               <div className="relative rounded-lg border-2 border-muted p-5 text-left opacity-50 cursor-not-allowed">
+                 <Badge variant="secondary" className="absolute top-3 right-3">
+                   Binnenkort beschikbaar
+                 </Badge>
+                 <Search className="h-8 w-8 text-muted-foreground mb-3" />
+                 <h3 className="font-semibold text-muted-foreground mb-1">Start met Shadow AI Scan</h3>
                 <p className="text-sm text-muted-foreground">
                   Ontdek eerst welke AI tools al in gebruik zijn binnen uw organisatie.
                 </p>

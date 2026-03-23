@@ -34,7 +34,9 @@ import { useOrgUserStats } from "@/hooks/useOrgUsers";
 export default function OrgAdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { profile } = useUserProfile();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') ?? 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // Fetch organization info
   const { data: organization } = useQuery({

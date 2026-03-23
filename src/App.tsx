@@ -335,7 +335,7 @@ export default function App() {
           }
         />
         
-        {/* Shadow AI Survey */}
+        {/* Shadow AI Scan */}
         <Route path="/shadow-survey" element={<AuthRoute><ShadowSurveyPage /></AuthRoute>} />
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
