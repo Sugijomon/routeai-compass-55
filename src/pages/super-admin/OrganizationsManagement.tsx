@@ -35,6 +35,7 @@ interface Organization {
   id: string;
   name: string;
   status: OrganizationStatus | null;
+  plan_type?: string | null;
   subscription_type?: string | null;
   contact_email?: string | null;
   contact_person?: string | null;
@@ -42,6 +43,12 @@ interface Organization {
   country?: string | null;
   created_at: string | null;
 }
+
+const PLAN_TYPE_CONFIG: Record<string, { label: string; className: string }> = {
+  shadow_only: { label: 'Shadow AI Scan', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+  routeai: { label: 'RouteAI', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  both: { label: 'Scan + RouteAI', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
+};
 
 const STATUS_COLORS: Record<string, string> = {
   active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
