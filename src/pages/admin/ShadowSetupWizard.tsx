@@ -375,7 +375,7 @@ export default function ShadowSetupWizard() {
 
   return (
     <AdminPageLayout
-      title="Shadow AI Survey — Setup"
+      title="Shadow AI Scan — Setup"
       breadcrumbs={[
         { label: 'Admin', href: '/admin' },
         { label: 'Shadow AI', href: '/admin/shadow' },
@@ -393,7 +393,7 @@ export default function ShadowSetupWizard() {
               Organisatie-context
             </CardTitle>
             <CardDescription>
-              Geef basisinformatie over je organisatie voor de Shadow AI Survey.
+              Geef basisinformatie over je organisatie voor de Shadow AI Scan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -557,7 +557,7 @@ export default function ShadowSetupWizard() {
             </CardTitle>
             <CardDescription>
               Upload een Excel-bestand met medewerkers. Ze ontvangen een
-              uitnodiging om de Shadow AI Survey in te vullen.
+              uitnodiging om de Shadow AI Scan in te vullen.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">

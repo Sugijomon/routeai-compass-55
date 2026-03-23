@@ -71,7 +71,7 @@ export default function AmnestyScreen({ orgId, userId, settings, onAccepted }: A
         <AlertTitle>Amnesty nog niet geactiveerd</AlertTitle>
         <AlertDescription>
           Je organisatie heeft de amnesty-periode nog niet geconfigureerd. 
-          Neem contact op met je beheerder om de Shadow AI Survey te activeren.
+          Neem contact op met je beheerder om de Shadow AI Scan te activeren.
         </AlertDescription>
       </Alert>
     );

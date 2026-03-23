@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Building2, 
   Users, 
@@ -17,6 +18,48 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
+
+function ShadowScanStats() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['shadow-scan-platform-stats'],
+    queryFn: async () => {
+      const [completedRes, orgsRes] = await Promise.all([
+        supabase
+          .from('shadow_survey_runs')
+          .select('id', { count: 'exact', head: true })
+          .not('survey_completed_at', 'is', null),
+        supabase
+          .from('shadow_survey_runs')
+          .select('org_id')
+          .not('survey_completed_at', 'is', null),
+      ]);
+      const uniqueOrgs = new Set(orgsRes.data?.map(r => r.org_id)).size;
+      return {
+        completed: completedRes.count ?? 0,
+        activeOrgs: uniqueOrgs,
+      };
+    },
+  });
+
+  return (
+    <CardContent>
+      <div className="flex items-center gap-4 text-sm">
+        <div>
+          <span className="text-muted-foreground">Scans voltooid</span>
+          {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+            <p className="font-semibold">{data?.completed ?? 0}</p>
+          )}
+        </div>
+        <div>
+          <span className="text-muted-foreground">Organisaties actief</span>
+          {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+            <p className="font-semibold">{data?.activeOrgs ?? 0}</p>
+          )}
+        </div>
+      </div>
+    </CardContent>
+  );
+}
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -269,30 +312,25 @@ export default function SuperAdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Future Module: Shadow AI Survey */}
-          <Card className="hover:shadow-lg transition-shadow opacity-60">
+          {/* Shadow AI Scan */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/shadow')}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Shadow AI Survey</CardTitle>
+                    <CardTitle className="text-lg">Shadow AI Scan</CardTitle>
                     <CardDescription>Discovery en monitoring van Shadow AI gebruik</CardDescription>
                   </div>
                 </div>
-                <Badge variant="outline">Binnenkort</Badge>
+                <Button variant="ghost" size="sm">
+                  Beheer →
+                </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Module status</span>
-                  <p className="font-semibold text-muted-foreground">In ontwikkeling</p>
-                </div>
-              </div>
-            </CardContent>
+            <ShadowScanStats />
           </Card>
 
           {/* Future Module: Risk Assessment Engine */}
