@@ -86,6 +86,15 @@ Deno.serve(async (req) => {
 
     if (redirect_to) {
       inviteOptions.redirectTo = redirect_to
+    } else {
+      const baseUrl = Deno.env.get('SITE_URL') ?? 'https://routeai.nl'
+      if (role === 'dpo') {
+        inviteOptions.redirectTo = `${baseUrl}/admin/shadow`
+      } else if (role === 'org_admin') {
+        inviteOptions.redirectTo = `${baseUrl}/admin`
+      } else {
+        inviteOptions.redirectTo = `${baseUrl}/shadow-survey`
+      }
     }
 
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, inviteOptions)
