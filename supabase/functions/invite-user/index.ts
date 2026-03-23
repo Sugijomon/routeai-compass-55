@@ -7,7 +7,7 @@ const corsHeaders = {
 
 interface InviteUserRequest {
   email: string
-  role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user'
+  role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user' | 'dpo'
   orgId: string
   name?: string
   redirect_to?: string
@@ -57,7 +57,8 @@ Deno.serve(async (req) => {
 
     const isSuperAdmin = callerRoles?.some(r => r.role === 'super_admin')
     const isOrgAdmin = callerRoles?.some(r => r.role === 'org_admin')
-    if (!isSuperAdmin && !isOrgAdmin) {
+    const isDpo = callerRoles?.some(r => r.role === 'dpo')
+    if (!isSuperAdmin && !isOrgAdmin && !isDpo) {
       return new Response(JSON.stringify({ error: 'Only admins can invite users' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 403,
@@ -85,6 +86,15 @@ Deno.serve(async (req) => {
 
     if (redirect_to) {
       inviteOptions.redirectTo = redirect_to
+    } else {
+      const baseUrl = Deno.env.get('SITE_URL') ?? 'https://routeai.nl'
+      if (role === 'dpo') {
+        inviteOptions.redirectTo = `${baseUrl}/admin/shadow`
+      } else if (role === 'org_admin') {
+        inviteOptions.redirectTo = `${baseUrl}/admin`
+      } else {
+        inviteOptions.redirectTo = `${baseUrl}/shadow-survey`
+      }
     }
 
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, inviteOptions)
@@ -115,8 +125,11 @@ Deno.serve(async (req) => {
       { user_id: userId, role, org_id: orgId },
     ]
 
-    // If org_admin, also add 'user' role for additive roles
+    // Additive rollen
     if (role === 'org_admin') {
+      rolesToInsert.push({ user_id: userId, role: 'user', org_id: orgId })
+    }
+    if (role === 'dpo') {
       rolesToInsert.push({ user_id: userId, role: 'user', org_id: orgId })
     }
 
