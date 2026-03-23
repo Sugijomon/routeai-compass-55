@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'user';
+export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'dpo' | 'manager' | 'user';
 
 export interface UserRoleData {
   role: AppRole | null;
@@ -13,6 +13,7 @@ export interface UserRoleData {
   isSuperAdmin: boolean;
   isContentEditor: boolean;
   isOrgAdmin: boolean;
+  isDpo: boolean;
   isManager: boolean;
   isUser: boolean;
   
@@ -21,6 +22,7 @@ export interface UserRoleData {
   canManageContent: boolean;   // super_admin OR content_editor
   canViewTeam: boolean;        // super_admin OR org_admin OR manager
   canManageLessons: boolean;   // super_admin OR org_admin
+  canViewShadowData: boolean;  // super_admin OR org_admin OR dpo
   isAdminLevel: boolean;       // Any admin-level role (backwards compat)
 }
 
