@@ -45,6 +45,8 @@ export function useUserRole(): UserRoleData {
       return (data || []).map(r => r.role as AppRole);
     },
     enabled: !!userId,
+    staleTime: 5 * 60 * 1000,   // 5 minuten — rollen veranderen niet tijdens een sessie
+    gcTime: 10 * 60 * 1000,     // cache 10 minuten bewaren
   });
 
   const roles = rolesData ?? [];
