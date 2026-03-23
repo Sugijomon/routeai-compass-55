@@ -31,9 +31,9 @@ export function useDashboardRedirect() {
     return { path: '/editor/cursussen', isLoading };
   }
   
-  // DPO gaat naar het DPO-dashboard tab
-  if (isDpo) {
-    return { path: '/admin?tab=risk-profiles', isLoading };
+  // DPO bij 'both' of 'routeai' org → naar shadow beheer
+  if (isDpo && !isOrgAdmin) {
+    return { path: '/admin/shadow', isLoading };
   }
   
   if (isOrgAdmin || isManager) {

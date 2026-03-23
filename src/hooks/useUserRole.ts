@@ -23,6 +23,7 @@ export interface UserRoleData {
   canViewTeam: boolean;        // super_admin OR org_admin OR manager
   canManageLessons: boolean;   // super_admin OR org_admin
   canViewShadowData: boolean;  // super_admin OR org_admin OR dpo
+  canManageScan: boolean;      // super_admin OR org_admin OR dpo
   isAdminLevel: boolean;       // Any admin-level role (backwards compat)
 }
 
