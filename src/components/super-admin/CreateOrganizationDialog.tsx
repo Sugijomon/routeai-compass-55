@@ -47,6 +47,7 @@ import { Separator } from "@/components/ui/separator";
 // Validation schema
 const createOrganizationSchema = z.object({
   name: z.string().min(2, "Organisatienaam moet minimaal 2 karakters zijn").max(100, "Naam mag maximaal 100 karakters zijn"),
+  planType: z.enum(["shadow_only", "routeai", "both"]).default("shadow_only"),
   status: z.enum(["active", "expired", "test", "suspended"], {
     required_error: "Selecteer een status",
   }),
