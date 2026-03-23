@@ -7,7 +7,8 @@ interface AuthState {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isSigningOut: boolean; // Track logout state to prevent redirect loops
+  isSigningOut: boolean;
+  hasCheckedAdmin: boolean;
 }
 
 export function useAuth() {
