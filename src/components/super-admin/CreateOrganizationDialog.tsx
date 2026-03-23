@@ -156,7 +156,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         inviteError = err instanceof Error ? err.message : 'Uitnodiging mislukt';
       }
 
-      return { ...result, inviteError, email: data.email };
+      return { ...result, inviteError, email: data.email, planType: data.planType };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["organizations-all"] });
