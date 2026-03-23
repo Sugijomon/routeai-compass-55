@@ -66,7 +66,6 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function OrganizationsManagement() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 

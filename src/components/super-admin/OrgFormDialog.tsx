@@ -192,7 +192,7 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
       if (isEdit) {
         const { error } = await supabase
           .from('organizations')
-          .update(orgData)
+          .update(orgData as any)
           .eq('id', org!.id);
         if (error) throw error;
       } else {
@@ -200,7 +200,7 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
         (orgData as Record<string, unknown>).plan_type = planType;
         const { data: result, error } = await supabase
           .from('organizations')
-          .insert(orgData)
+          .insert(orgData as any)
           .select()
           .single();
         if (error) throw error;
