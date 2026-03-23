@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,34 +13,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building2, Plus, Edit, Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
-
-type OrganizationStatus = 'active' | 'inactive' | 'trial' | 'expired' | 'test' | 'suspended';
+import { OrgFormDialog } from '@/components/super-admin/OrgFormDialog';
 
 interface Organization {
   id: string;
   name: string;
-  status: OrganizationStatus | null;
+  status: string | null;
   plan_type?: string | null;
   subscription_type?: string | null;
   contact_email?: string | null;
   contact_person?: string | null;
+  contact_phone?: string | null;
   sector?: string | null;
   country?: string | null;
+  street_address?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  bank_account?: string | null;
+  bank_name?: string | null;
+  subscription_start_date?: string | null;
+  subscription_end_date?: string | null;
   created_at: string | null;
 }
 
@@ -73,11 +69,7 @@ export default function OrganizationsManagement() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newOrgName, setNewOrgName] = useState('');
-  const [newOrgEmail, setNewOrgEmail] = useState('');
 
-  // Fetch organizations
   const { data: organizations, isLoading } = useQuery({
     queryKey: ['super-admin-organizations'],
     queryFn: async () => {
@@ -85,45 +77,11 @@ export default function OrganizationsManagement() {
         .from('organizations')
         .select('*')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       return data as Organization[];
     }
   });
 
-  // Create organization mutation
-  const createOrg = useMutation({
-    mutationFn: async (orgData: { name: string; contact_email: string }) => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .insert({
-          name: orgData.name,
-          contact_email: orgData.contact_email,
-          status: 'trial',
-          subscription_type: 'basic'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['super-admin-organizations'] });
-      queryClient.invalidateQueries({ queryKey: ['platform-kpis'] });
-      toast.success('Organisatie aangemaakt');
-      setIsCreateDialogOpen(false);
-      setNewOrgName('');
-      setNewOrgEmail('');
-    },
-    onError: (error: Error) => {
-      toast.error('Kon organisatie niet aanmaken', {
-        description: error.message
-      });
-    }
-  });
-
-  // Filter organizations
   const filteredOrgs = organizations?.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          org.contact_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,14 +89,6 @@ export default function OrganizationsManagement() {
     const matchesStatus = filterStatus === 'all' || org.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
-
-  const handleCreateOrg = () => {
-    if (!newOrgName.trim()) {
-      toast.error('Vul een organisatienaam in');
-      return;
-    }
-    createOrg.mutate({ name: newOrgName, contact_email: newOrgEmail });
-  };
 
   return (
     <AppLayout>
@@ -163,52 +113,14 @@ export default function OrganizationsManagement() {
             </div>
           </div>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
+          <OrgFormDialog
+            trigger={
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Nieuwe Organisatie
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Nieuwe Organisatie Aanmaken</DialogTitle>
-                <DialogDescription>
-                  Maak een nieuwe organisatie aan op het platform
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="org-name">Organisatie Naam</Label>
-                  <Input
-                    id="org-name"
-                    placeholder="Bedrijfsnaam B.V."
-                    value={newOrgName}
-                    onChange={(e) => setNewOrgName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="org-email">Contact Email</Label>
-                  <Input
-                    id="org-email"
-                    type="email"
-                    placeholder="contact@bedrijf.nl"
-                    value={newOrgEmail}
-                    onChange={(e) => setNewOrgEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Annuleren
-                </Button>
-                <Button onClick={handleCreateOrg} disabled={createOrg.isPending}>
-                  {createOrg.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {createOrg.isPending ? 'Bezig...' : 'Aanmaken'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            }
+          />
         </div>
 
         {/* Filters */}
@@ -264,9 +176,9 @@ export default function OrganizationsManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                     <TableHead>Naam</TableHead>
-                     <TableHead>Module</TableHead>
-                     <TableHead>Status</TableHead>
+                    <TableHead>Naam</TableHead>
+                    <TableHead>Module</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Abonnement</TableHead>
                     <TableHead>Sector</TableHead>
                     <TableHead>Contact</TableHead>
@@ -277,22 +189,22 @@ export default function OrganizationsManagement() {
                 <TableBody>
                   {filteredOrgs.map((org) => (
                     <TableRow key={org.id}>
-                       <TableCell className="font-medium">{org.name}</TableCell>
-                       <TableCell>
-                         {(() => {
-                           const config = PLAN_TYPE_CONFIG[org.plan_type || 'routeai'];
-                           return config ? (
-                             <Badge className={config.className}>{config.label}</Badge>
-                           ) : (
-                             <Badge variant="outline">{org.plan_type || '—'}</Badge>
-                           );
-                         })()}
-                       </TableCell>
-                       <TableCell>
-                         <Badge className={STATUS_COLORS[org.status || 'inactive']}>
-                           {STATUS_LABELS[org.status || 'inactive'] || org.status}
-                         </Badge>
-                       </TableCell>
+                      <TableCell className="font-medium">{org.name}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const config = PLAN_TYPE_CONFIG[org.plan_type || 'routeai'];
+                          return config ? (
+                            <Badge className={config.className}>{config.label}</Badge>
+                          ) : (
+                            <Badge variant="outline">—</Badge>
+                          );
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={STATUS_COLORS[org.status || 'inactive']}>
+                          {STATUS_LABELS[org.status || 'inactive'] || org.status}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="capitalize">{org.subscription_type || 'Basic'}</TableCell>
                       <TableCell>{org.sector || '—'}</TableCell>
                       <TableCell>
@@ -311,13 +223,14 @@ export default function OrganizationsManagement() {
                         }
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => navigate(`/super-admin/organizations/${org.id}`)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <OrgFormDialog
+                          trigger={
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                          org={org}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
