@@ -53,6 +53,7 @@ export function useAuth() {
       isLoading: false,
       isAdmin: false,
       isSigningOut: false,
+      hasCheckedAdmin: true,
     });
 
     return true; // Signal logout complete
