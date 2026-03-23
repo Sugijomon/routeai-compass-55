@@ -23,6 +23,7 @@ export interface UserRoleData {
   canViewTeam: boolean;        // super_admin OR org_admin OR manager
   canManageLessons: boolean;   // super_admin OR org_admin
   canViewShadowData: boolean;  // super_admin OR org_admin OR dpo
+  canManageScan: boolean;      // super_admin OR org_admin OR dpo
   isAdminLevel: boolean;       // Any admin-level role (backwards compat)
 }
 
@@ -66,6 +67,7 @@ export function useUserRole(): UserRoleData {
   const canViewTeam = isSuperAdmin || isOrgAdmin || isManager;
   const canManageLessons = isSuperAdmin || isOrgAdmin;
   const canViewShadowData = isSuperAdmin || isOrgAdmin || isDpo;
+  const canManageScan = isSuperAdmin || isOrgAdmin || isDpo;
   
   // Backwards compatibility: any admin-level role
   const isAdminLevel = isSuperAdmin || isContentEditor || isOrgAdmin || isDpo;
@@ -87,6 +89,7 @@ export function useUserRole(): UserRoleData {
     canViewTeam,
     canManageLessons,
     canViewShadowData,
+    canManageScan,
     isAdminLevel,
   };
 }
