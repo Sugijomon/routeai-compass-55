@@ -208,16 +208,16 @@ export function OrgFormDialog({ trigger, org, onSuccess }: OrgFormDialogProps) {
         return result;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['super-admin-organizations'] });
       queryClient.invalidateQueries({ queryKey: ['platform-kpis'] });
       if (isEdit) {
         toast.success('Organisatie bijgewerkt');
-      } else if (!contactEmail) {
-        toast.success('Organisatie aangemaakt');
+      } else {
+        toast.success(`Organisatie "${name}" aangemaakt.`);
       }
       setOpen(false);
-      onSuccess?.();
+      onSuccess?.(result ? { id: result.id, name } : undefined);
     },
     onError: (error: Error) => {
       toast.error(isEdit ? 'Kon organisatie niet bijwerken' : 'Kon organisatie niet aanmaken', {
