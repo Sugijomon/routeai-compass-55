@@ -34,6 +34,7 @@ import DpoDashboard from "./pages/admin/DpoDashboard";
 
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
+import OrgInvitePage from "./pages/super-admin/OrgInvitePage";
 import ToolsLibraryManagement from "./pages/super-admin/ToolsLibraryManagement";
 import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManagement";
 import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
