@@ -7,7 +7,8 @@ interface AuthState {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isSigningOut: boolean; // Track logout state to prevent redirect loops
+  isSigningOut: boolean;
+  hasCheckedAdmin: boolean;
 }
 
 export function useAuth() {
@@ -17,6 +18,7 @@ export function useAuth() {
     isLoading: true,
     isAdmin: false,
     isSigningOut: false,
+    hasCheckedAdmin: false,
   });
 
   const signOut = useCallback(async () => {
@@ -51,6 +53,7 @@ export function useAuth() {
       isLoading: false,
       isAdmin: false,
       isSigningOut: false,
+      hasCheckedAdmin: true,
     });
 
     return true; // Signal logout complete
@@ -73,6 +76,7 @@ export function useAuth() {
             isLoading: false,
             isAdmin: false,
             isSigningOut: false,
+            hasCheckedAdmin: true,
           });
           return;
         }
@@ -91,7 +95,6 @@ export function useAuth() {
           setTimeout(() => {
             checkAdminRole(session.user.id).then((isAdmin) => {
               setAuthState(prev => {
-                // Don't update if we're signing out
                 if (prev.isSigningOut) return prev;
                 return {
                   ...prev,
@@ -99,6 +102,7 @@ export function useAuth() {
                   session,
                   isLoading: false,
                   isAdmin,
+                  hasCheckedAdmin: true,
                 };
               });
             });
@@ -119,6 +123,7 @@ export function useAuth() {
               session,
               isLoading: false,
               isAdmin,
+              hasCheckedAdmin: true,
             };
           });
         });

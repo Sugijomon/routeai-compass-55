@@ -12,7 +12,7 @@ interface AuthRouteProps {
 }
 
 export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck = false }: AuthRouteProps) {
-  const { user, isLoading, isAdmin, isSigningOut } = useAuth();
+  const { user, isLoading, isAdmin, isSigningOut, hasCheckedAdmin } = useAuth();
   const location = useLocation();
   const { hasAiRijbewijs, isLoading: profileLoading, isAdminLevel, isSuperAdmin, isOrgAdmin, isDpo, isContentEditor } = useUserProfile();
   const { isShadowOnly, isLoading: planLoading } = useOrgPlanType();
@@ -26,8 +26,9 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
     );
   }
 
-  // Show loading state while checking auth
-  if (isLoading || profileLoading || planLoading) {
+  // Wacht ook tot de admin-check klaar is voor requireAdmin-routes
+  const adminCheckPending = requireAdmin && !hasCheckedAdmin;
+  if (isLoading || profileLoading || planLoading || adminCheckPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
