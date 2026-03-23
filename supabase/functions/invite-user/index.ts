@@ -7,7 +7,7 @@ const corsHeaders = {
 
 interface InviteUserRequest {
   email: string
-  role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user'
+  role: 'org_admin' | 'super_admin' | 'content_editor' | 'manager' | 'user' | 'dpo'
   orgId: string
   name?: string
   redirect_to?: string
