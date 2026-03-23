@@ -9,7 +9,8 @@ import {
   Shield,
   Building2,
   HelpCircle,
-  BookOpen
+  BookOpen,
+  Wrench
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
