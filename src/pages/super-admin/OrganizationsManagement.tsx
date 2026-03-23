@@ -264,8 +264,9 @@ export default function OrganizationsManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Naam</TableHead>
-                    <TableHead>Status</TableHead>
+                     <TableHead>Naam</TableHead>
+                     <TableHead>Module</TableHead>
+                     <TableHead>Status</TableHead>
                     <TableHead>Abonnement</TableHead>
                     <TableHead>Sector</TableHead>
                     <TableHead>Contact</TableHead>
