@@ -54,7 +54,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   }
   
   if (planType === 'shadow_only') {
-    if (roles.includes('org_admin')) {
+    if (roles.includes('org_admin') || roles.includes('dpo')) {
       return '/admin/shadow';
     }
     if (!roles.includes('content_editor') && !roles.includes('manager')) {
@@ -64,6 +64,9 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   
   if (roles.includes('content_editor')) {
     return '/editor/cursussen';
+  }
+  if (roles.includes('dpo')) {
+    return '/admin?tab=risk-profiles';
   }
   if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
     return '/admin';

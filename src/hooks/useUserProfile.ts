@@ -67,6 +67,7 @@ export function useUserProfile() {
     isSuperAdmin,
     isContentEditor,
     isOrgAdmin,
+    isDpo,
     isManager,
     isUser,
     
@@ -75,6 +76,7 @@ export function useUserProfile() {
     canManageContent,
     canViewTeam,
     canManageLessons,
+    canViewShadowData,
     isAdminLevel,
   };
 }

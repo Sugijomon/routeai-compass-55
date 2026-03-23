@@ -34,7 +34,7 @@ export default function EditRolesDialog({ user, open, onOpenChange }: EditRolesD
     if (user) {
       // Filter out super_admin and content_editor as these are platform-level
       setSelectedRoles(user.roles.filter(r => 
-        ['org_admin', 'manager', 'user'].includes(r)
+        ['org_admin', 'dpo', 'manager', 'user'].includes(r)
       ));
     }
   }, [user]);
