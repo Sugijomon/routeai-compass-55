@@ -175,9 +175,10 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
           variant: "destructive",
         });
       } else {
+        const rolLabel = data.planType === 'shadow_only' ? 'DPO' : 'Org Admin';
         toast({
           title: "Organisatie aangemaakt",
-          description: `Uitnodiging verstuurd naar ${data.email}.`,
+          description: `Uitnodiging verstuurd naar ${data.email} als ${rolLabel}.`,
         });
       }
     },
