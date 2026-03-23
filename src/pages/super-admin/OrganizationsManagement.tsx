@@ -35,6 +35,7 @@ interface Organization {
   id: string;
   name: string;
   status: OrganizationStatus | null;
+  plan_type?: string | null;
   subscription_type?: string | null;
   contact_email?: string | null;
   contact_person?: string | null;
@@ -42,6 +43,12 @@ interface Organization {
   country?: string | null;
   created_at: string | null;
 }
+
+const PLAN_TYPE_CONFIG: Record<string, { label: string; className: string }> = {
+  shadow_only: { label: 'Shadow AI Scan', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+  routeai: { label: 'RouteAI', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  both: { label: 'Scan + RouteAI', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
+};
 
 const STATUS_COLORS: Record<string, string> = {
   active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -257,8 +264,9 @@ export default function OrganizationsManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Naam</TableHead>
-                    <TableHead>Status</TableHead>
+                     <TableHead>Naam</TableHead>
+                     <TableHead>Module</TableHead>
+                     <TableHead>Status</TableHead>
                     <TableHead>Abonnement</TableHead>
                     <TableHead>Sector</TableHead>
                     <TableHead>Contact</TableHead>
@@ -269,12 +277,22 @@ export default function OrganizationsManagement() {
                 <TableBody>
                   {filteredOrgs.map((org) => (
                     <TableRow key={org.id}>
-                      <TableCell className="font-medium">{org.name}</TableCell>
-                      <TableCell>
-                        <Badge className={STATUS_COLORS[org.status || 'inactive']}>
-                          {STATUS_LABELS[org.status || 'inactive'] || org.status}
-                        </Badge>
-                      </TableCell>
+                       <TableCell className="font-medium">{org.name}</TableCell>
+                       <TableCell>
+                         {(() => {
+                           const config = PLAN_TYPE_CONFIG[org.plan_type || 'routeai'];
+                           return config ? (
+                             <Badge className={config.className}>{config.label}</Badge>
+                           ) : (
+                             <Badge variant="outline">{org.plan_type || '—'}</Badge>
+                           );
+                         })()}
+                       </TableCell>
+                       <TableCell>
+                         <Badge className={STATUS_COLORS[org.status || 'inactive']}>
+                           {STATUS_LABELS[org.status || 'inactive'] || org.status}
+                         </Badge>
+                       </TableCell>
                       <TableCell className="capitalize">{org.subscription_type || 'Basic'}</TableCell>
                       <TableCell>{org.sector || '—'}</TableCell>
                       <TableCell>

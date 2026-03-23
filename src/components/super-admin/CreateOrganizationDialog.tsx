@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, addYears } from "date-fns";
 import { nl } from "date-fns/locale";
-import { CalendarIcon, Building2, Loader2 } from "lucide-react";
+import { CalendarIcon, Building2, Loader2, Search, Shield, Layers } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -43,10 +43,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 // Validation schema
 const createOrganizationSchema = z.object({
   name: z.string().min(2, "Organisatienaam moet minimaal 2 karakters zijn").max(100, "Naam mag maximaal 100 karakters zijn"),
+  planType: z.enum(["shadow_only", "routeai", "both"]).default("shadow_only"),
   status: z.enum(["active", "expired", "test", "suspended"], {
     required_error: "Selecteer een status",
   }),
@@ -90,6 +92,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
       name: "",
+      planType: "shadow_only" as const,
       status: "active",
       subscriptionType: "basic",
       contactPerson: "",
@@ -112,6 +115,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         .from("organizations")
         .insert({
           name: data.name,
+          plan_type: data.planType,
           status: data.status,
           subscription_type: data.subscriptionType,
           contact_person: data.contactPerson,
@@ -131,13 +135,14 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
 
       if (error) throw error;
 
-      // Invite the contact person as org_admin
+      // Rol bepalen op basis van module-keuze
+      const contactRole = data.planType === 'shadow_only' ? 'dpo' : 'org_admin';
       let inviteError: string | null = null;
       try {
         const response = await supabase.functions.invoke('invite-user', {
           body: {
             email: data.email,
-            role: 'org_admin',
+            role: contactRole,
             orgId: result.id,
             name: data.contactPerson,
           },
@@ -152,7 +157,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         inviteError = err instanceof Error ? err.message : 'Uitnodiging mislukt';
       }
 
-      return { ...result, inviteError, email: data.email };
+      return { ...result, inviteError, email: data.email, planType: data.planType };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["organizations-all"] });
@@ -171,9 +176,10 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
           variant: "destructive",
         });
       } else {
+        const rolLabel = data.planType === 'shadow_only' ? 'DPO' : 'Org Admin';
         toast({
           title: "Organisatie aangemaakt",
-          description: `Uitnodiging verstuurd naar ${data.email}.`,
+          description: `Uitnodiging verstuurd naar ${data.email} als ${rolLabel}.`,
         });
       }
     },
@@ -284,6 +290,77 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
                   )}
                 />
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Module-keuze */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground">Module</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">Welke modules worden gekoppeld aan deze organisatie?</p>
+              </div>
+              <FormField
+                control={form.control}
+                name="planType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                          {
+                            value: 'shadow_only' as const,
+                            icon: Search,
+                            title: 'Shadow AI Scan',
+                            description: 'Inventariseer AI-gebruik en genereer compliance-exports. De contactpersoon wordt DPO.',
+                            badge: 'Meest gekozen voor start',
+                          },
+                          {
+                            value: 'routeai' as const,
+                            icon: Shield,
+                            title: 'RouteAI Platform',
+                            description: 'Volledig AI governance platform met training, licenties en audit. De contactpersoon wordt Org Admin.',
+                          },
+                          {
+                            value: 'both' as const,
+                            icon: Layers,
+                            title: 'Shadow AI Scan + RouteAI',
+                            description: 'Start met de scan en gebruik direct het volledige platform. De contactpersoon wordt Org Admin.',
+                          },
+                        ].map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = field.value === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => field.onChange(option.value)}
+                              className={cn(
+                                "relative flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+                                isSelected
+                                  ? "border-primary bg-primary/5"
+                                  : "border-border hover:border-muted-foreground/50"
+                              )}
+                            >
+                              {option.badge && (
+                                <Badge variant="secondary" className="absolute -top-2.5 right-2 text-[10px] bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  {option.badge}
+                                </Badge>
+                              )}
+                              <Icon className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")} />
+                              <div>
+                                <p className="font-medium text-sm">{option.title}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <Separator />
