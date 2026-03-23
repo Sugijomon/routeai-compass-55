@@ -119,6 +119,11 @@ export default function OrganizationsManagement() {
                 Nieuwe Organisatie
               </Button>
             }
+            onSuccess={(createdOrg) => {
+              if (createdOrg) {
+                navigate(`/super-admin/organizations/${createdOrg.id}/uitnodigen`);
+              }
+            }}
           />
         </div>
 
