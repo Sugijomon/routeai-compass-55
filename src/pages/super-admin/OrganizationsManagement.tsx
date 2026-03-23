@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Plus, Edit, Search, ArrowLeft, Loader2 } from 'lucide-react';
+import { Building2, Plus, Edit, Search, ArrowLeft, Loader2, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OrgFormDialog } from '@/components/super-admin/OrgFormDialog';
