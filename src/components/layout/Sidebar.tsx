@@ -20,6 +20,7 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: string;
+  exact?: boolean;
 }
 
 interface NavSection {
@@ -38,7 +39,7 @@ export function Sidebar() {
       {
         title: 'Platform',
         items: [
-          { label: 'Dashboard', href: '/super-admin', icon: Shield },
+          { label: 'Dashboard', href: '/super-admin', icon: Shield, exact: true },
           { label: 'Organisaties', href: '/super-admin/organizations', icon: Building2 },
           { label: 'Gebruikers', href: '/super-admin/users', icon: Users },
         ],
@@ -116,7 +117,11 @@ export function Sidebar() {
               <NavLink
                 key={item.href + item.label}
                 item={item}
-                isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')}
+                isActive={
+                  item.exact
+                    ? location.pathname === item.href
+                    : location.pathname === item.href || location.pathname.startsWith(item.href + '/')
+                }
               />
             ))}
           </div>
