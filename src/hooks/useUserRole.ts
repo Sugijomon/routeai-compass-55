@@ -88,6 +88,7 @@ export function useUserRole(): UserRoleData {
     canViewTeam,
     canManageLessons,
     canViewShadowData,
+    canManageScan,
     isAdminLevel,
   };
 }
