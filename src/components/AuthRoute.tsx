@@ -56,7 +56,7 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
   }
 
   // Admin/editor roles bypass the rijbewijs exam requirement entirely
-  const isAdminOrEditor = isSuperAdmin || isOrgAdmin || isContentEditor;
+  const isAdminOrEditor = isSuperAdmin || isOrgAdmin || isDpo || isContentEditor;
 
   // Regular user without AI Rijbewijs → redirect to exam
   // But admin/editor roles bypass this check
