@@ -123,6 +123,7 @@ export function useAuth() {
               session,
               isLoading: false,
               isAdmin,
+              hasCheckedAdmin: true,
             };
           });
         });
