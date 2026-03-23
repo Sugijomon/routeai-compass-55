@@ -8,23 +8,21 @@ import { useOrgPlanType } from '@/hooks/useOrgPlanType';
  * - org_admin → /admin/shadow
  */
 export function useDashboardRedirect() {
-  const { isSuperAdmin, isOrgAdmin, isContentEditor, isManager, isLoading: roleLoading } = useUserRole();
+  const { isSuperAdmin, isOrgAdmin, isContentEditor, isManager, isDpo, isLoading: roleLoading } = useUserRole();
   const { planType, isLoading: planLoading } = useOrgPlanType();
   
   const isLoading = roleLoading || planLoading;
 
-  // Super admins altijd naar super-admin dashboard
   if (isSuperAdmin) {
     return { path: '/super-admin', isLoading };
   }
 
   // shadow_only orgs: afwijkende routing
   if (planType === 'shadow_only') {
-    if (isOrgAdmin) {
+    if (isOrgAdmin || isDpo) {
       return { path: '/admin/shadow', isLoading };
     }
     if (!isContentEditor && !isManager) {
-      // Reguliere user → shadow survey
       return { path: '/shadow-survey', isLoading };
     }
   }
@@ -33,11 +31,15 @@ export function useDashboardRedirect() {
     return { path: '/editor/cursussen', isLoading };
   }
   
+  // DPO gaat naar het DPO-dashboard tab
+  if (isDpo) {
+    return { path: '/admin?tab=risk-profiles', isLoading };
+  }
+  
   if (isOrgAdmin || isManager) {
     return { path: '/admin', isLoading };
   }
   
-  // Default: user dashboard
   return { path: '/dashboard', isLoading };
 }
 
@@ -52,7 +54,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   }
   
   if (planType === 'shadow_only') {
-    if (roles.includes('org_admin')) {
+    if (roles.includes('org_admin') || roles.includes('dpo')) {
       return '/admin/shadow';
     }
     if (!roles.includes('content_editor') && !roles.includes('manager')) {
@@ -62,6 +64,9 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   
   if (roles.includes('content_editor')) {
     return '/editor/cursussen';
+  }
+  if (roles.includes('dpo')) {
+    return '/admin?tab=risk-profiles';
   }
   if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
     return '/admin';

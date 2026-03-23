@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'manager' | 'user';
+export type AppRole = 'super_admin' | 'content_editor' | 'org_admin' | 'dpo' | 'manager' | 'user';
 
 export interface UserRoleData {
   role: AppRole | null;
@@ -13,6 +13,7 @@ export interface UserRoleData {
   isSuperAdmin: boolean;
   isContentEditor: boolean;
   isOrgAdmin: boolean;
+  isDpo: boolean;
   isManager: boolean;
   isUser: boolean;
   
@@ -21,6 +22,7 @@ export interface UserRoleData {
   canManageContent: boolean;   // super_admin OR content_editor
   canViewTeam: boolean;        // super_admin OR org_admin OR manager
   canManageLessons: boolean;   // super_admin OR org_admin
+  canViewShadowData: boolean;  // super_admin OR org_admin OR dpo
   isAdminLevel: boolean;       // Any admin-level role (backwards compat)
 }
 
@@ -47,13 +49,14 @@ export function useUserRole(): UserRoleData {
   const roles = rolesData ?? [];
 
   // Determine highest privilege role (priority order)
-  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'content_editor', 'manager', 'user'];
+  const roleHierarchy: AppRole[] = ['super_admin', 'org_admin', 'dpo', 'content_editor', 'manager', 'user'];
   const role = roleHierarchy.find(r => roles.includes(r)) ?? null;
   
   // Individual role checks (based on ALL roles user has)
   const isSuperAdmin = roles.includes('super_admin');
   const isContentEditor = roles.includes('content_editor');
   const isOrgAdmin = roles.includes('org_admin');
+  const isDpo = roles.includes('dpo');
   const isManager = roles.includes('manager');
   const isUser = roles.length === 0 || (roles.length === 1 && roles.includes('user'));
   
@@ -62,9 +65,10 @@ export function useUserRole(): UserRoleData {
   const canManageContent = isSuperAdmin || isContentEditor;
   const canViewTeam = isSuperAdmin || isOrgAdmin || isManager;
   const canManageLessons = isSuperAdmin || isOrgAdmin;
+  const canViewShadowData = isSuperAdmin || isOrgAdmin || isDpo;
   
   // Backwards compatibility: any admin-level role
-  const isAdminLevel = isSuperAdmin || isContentEditor || isOrgAdmin;
+  const isAdminLevel = isSuperAdmin || isContentEditor || isOrgAdmin || isDpo;
 
   return {
     role,
@@ -74,6 +78,7 @@ export function useUserRole(): UserRoleData {
     isSuperAdmin,
     isContentEditor,
     isOrgAdmin,
+    isDpo,
     isManager,
     isUser,
     
@@ -81,6 +86,7 @@ export function useUserRole(): UserRoleData {
     canManageContent,
     canViewTeam,
     canManageLessons,
+    canViewShadowData,
     isAdminLevel,
   };
 }

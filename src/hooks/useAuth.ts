@@ -147,7 +147,7 @@ async function checkAdminRole(userId: string): Promise<boolean> {
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .in('role', ['org_admin', 'super_admin', 'content_editor', 'manager'])
+      .in('role', ['org_admin', 'super_admin', 'content_editor', 'manager', 'dpo'])
       .limit(1);
 
     if (error) {

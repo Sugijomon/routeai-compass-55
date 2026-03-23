@@ -25,12 +25,14 @@ export function useUserProfile() {
     isSuperAdmin,
     isContentEditor,
     isOrgAdmin,
+    isDpo,
     isManager,
     isUser,
     canManageOrg,
     canManageContent,
     canViewTeam,
     canManageLessons,
+    canViewShadowData,
     isAdminLevel,
     isLoading: roleLoading,
   } = useUserRole();
@@ -65,6 +67,7 @@ export function useUserProfile() {
     isSuperAdmin,
     isContentEditor,
     isOrgAdmin,
+    isDpo,
     isManager,
     isUser,
     
@@ -73,6 +76,7 @@ export function useUserProfile() {
     canManageContent,
     canViewTeam,
     canManageLessons,
+    canViewShadowData,
     isAdminLevel,
   };
 }

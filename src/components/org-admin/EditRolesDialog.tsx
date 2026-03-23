@@ -21,6 +21,7 @@ interface EditRolesDialogProps {
 
 const AVAILABLE_ROLES = [
   { id: 'org_admin', label: 'AI Verantwoordelijke', description: 'Beheert de AI tool catalogus, ziet rijbewijsstatus van medewerkers en exporteert compliance rapporten. Maximaal 2 per organisatie.' },
+  { id: 'dpo', label: 'DPO / Functionaris Gegevensbescherming', description: 'Bekijkt risicoprofielen, beoordeelt shadow-scan resultaten en beheert de tool-inventaris.' },
   { id: 'manager', label: 'Team Manager', description: 'Teambeheer en rapportages' },
   { id: 'user', label: 'Gebruiker', description: 'Standaard toegang' },
 ];
@@ -33,7 +34,7 @@ export default function EditRolesDialog({ user, open, onOpenChange }: EditRolesD
     if (user) {
       // Filter out super_admin and content_editor as these are platform-level
       setSelectedRoles(user.roles.filter(r => 
-        ['org_admin', 'manager', 'user'].includes(r)
+        ['org_admin', 'dpo', 'manager', 'user'].includes(r)
       ));
     }
   }, [user]);

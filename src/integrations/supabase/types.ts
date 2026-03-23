@@ -1545,6 +1545,7 @@ export type Database = {
         | "content_editor"
         | "org_admin"
         | "manager"
+        | "dpo"
       assessment_route: "green" | "yellow" | "orange" | "red"
       assessment_status: "active" | "paused" | "stopped" | "superseded"
       dpo_notification_status: "pending" | "seen" | "actioned" | "dismissed"
@@ -1698,6 +1699,7 @@ export const Constants = {
         "content_editor",
         "org_admin",
         "manager",
+        "dpo",
       ],
       assessment_route: ["green", "yellow", "orange", "red"],
       assessment_status: ["active", "paused", "stopped", "superseded"],
