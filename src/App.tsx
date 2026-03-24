@@ -46,6 +46,7 @@ export default function App() {
         {/* Public routes */}
         <Route path="/" element={<RoleSelector />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/scoreboard/:slug" element={<PublicScoreboardPage />} />
         
         {/* User Dashboard - Protected with real auth */}
         <Route 
