@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import {
   calculateRiskScore,
   type DataClassification,
@@ -17,7 +18,7 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, CheckCircle2, Search, Target, Info,
+  AlertTriangle, CheckCircle2, Search, Target, Info, Eye,
 } from 'lucide-react';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
@@ -116,11 +117,29 @@ export default function RiskProfileStep({
   const [primaryUseCase, setPrimaryUseCase] = useState('');
   const [primaryConcern, setPrimaryConcern] = useState('');
   const [saving, setSaving] = useState(false);
+  const [nameVisible, setNameVisible] = useState(false);
   const [result, setResult] = useState<{
     risk_score: number;
     assigned_tier: AssignedTier;
     dpo_review_required: boolean;
   } | null>(null);
+
+  // Haal org scoreboard config op
+  const { data: orgScoreboard } = useQuery({
+    queryKey: ['org-scoreboard-config', orgId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('organizations')
+        .select('scoreboard_enabled, scoreboard_config')
+        .eq('id', orgId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  const showScoreboardOptIn = orgScoreboard?.scoreboard_enabled === true
+    && (orgScoreboard?.scoreboard_config as Record<string, unknown>)?.show_individual === true;
 
   // Haal badges op na submit
   const { data: earnedBadges } = useQuery({
@@ -282,6 +301,33 @@ export default function RiskProfileStep({
                   De DPO neemt je profiel mee in de beoordeling.
                   Je hoort hier indien nodig iets over.
                 </p>
+              </div>
+            )}
+
+            {/* Scoreboard opt-in */}
+            {showScoreboardOptIn && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-muted-foreground" />
+                  <p className="font-medium text-sm">Publiek scoreboard</p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Uw organisatie heeft een publiek AI-scoreboard.
+                  Wilt u uw naam zichtbaar maken als deelnemer?
+                </p>
+                <div className="flex items-center gap-3">
+                  <Switch
+                    checked={nameVisible}
+                    onCheckedChange={async (checked) => {
+                      setNameVisible(checked);
+                      await supabase
+                        .from('shadow_survey_runs')
+                        .update({ scoreboard_name_visible: checked } as any)
+                        .eq('id', surveyRunId);
+                    }}
+                  />
+                  <Label className="text-sm cursor-pointer">Ja, toon mijn naam</Label>
+                </div>
               </div>
             )}
           </CardContent>

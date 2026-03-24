@@ -954,6 +954,7 @@ export type Database = {
           review_notes: string | null
           risk_score: number | null
           role_description: string | null
+          scoreboard_name_visible: boolean | null
           submitted_at: string | null
           survey_completed_at: string | null
           survey_version: string
@@ -974,6 +975,7 @@ export type Database = {
           review_notes?: string | null
           risk_score?: number | null
           role_description?: string | null
+          scoreboard_name_visible?: boolean | null
           submitted_at?: string | null
           survey_completed_at?: string | null
           survey_version?: string
@@ -994,6 +996,7 @@ export type Database = {
           review_notes?: string | null
           risk_score?: number | null
           role_description?: string | null
+          scoreboard_name_visible?: boolean | null
           submitted_at?: string | null
           survey_completed_at?: string | null
           survey_version?: string
