@@ -115,15 +115,13 @@ export default function ShadowAdminDashboard() {
               <BarChart3 className="h-4 w-4" />
               Overzicht
             </TabsTrigger>
-            {showScoreboard && (
-              <TabsTrigger
-                value="scoreboard"
-                className="rounded-xl gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-              >
-                <Trophy className="h-4 w-4" />
-                Scoreboard
-              </TabsTrigger>
-            )}
+            <TabsTrigger
+              value="scoreboard"
+              className="rounded-xl gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <Trophy className="h-4 w-4" />
+              Scoreboard
+            </TabsTrigger>
           </TabsList>
 
           {/* Tab 1: Instellingen */}
