@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Shield, ShieldAlert, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { Shield, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface AmnestyScreenProps {
@@ -144,7 +144,16 @@ export default function AmnestyScreen({ orgId, userId, settings, onAccepted }: A
           </div>
         </div>
 
-        {/* Accepteerknop */}
+        {/* AVG-melding bij publiek scoreboard met individuele namen */}
+        {scoreboardConfig && (
+          <Alert className="border-primary/30 bg-primary/5">
+            <AlertDescription className="text-xs text-muted-foreground">
+              Uw organisatie heeft een publiek teamoverzicht ingeschakeld.
+              Individuele namen zijn alleen zichtbaar als u daar zelf voor kiest.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Button
           size="lg"
           className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
