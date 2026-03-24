@@ -117,11 +117,29 @@ export default function RiskProfileStep({
   const [primaryUseCase, setPrimaryUseCase] = useState('');
   const [primaryConcern, setPrimaryConcern] = useState('');
   const [saving, setSaving] = useState(false);
+  const [nameVisible, setNameVisible] = useState(false);
   const [result, setResult] = useState<{
     risk_score: number;
     assigned_tier: AssignedTier;
     dpo_review_required: boolean;
   } | null>(null);
+
+  // Haal org scoreboard config op
+  const { data: orgScoreboard } = useQuery({
+    queryKey: ['org-scoreboard-config', orgId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('organizations')
+        .select('scoreboard_enabled, scoreboard_config')
+        .eq('id', orgId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  const showScoreboardOptIn = orgScoreboard?.scoreboard_enabled === true
+    && (orgScoreboard?.scoreboard_config as Record<string, unknown>)?.show_individual === true;
 
   // Haal badges op na submit
   const { data: earnedBadges } = useQuery({
