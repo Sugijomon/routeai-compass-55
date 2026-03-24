@@ -23,7 +23,7 @@ const DEFAULT_CONFIG: ScoreboardConfig = {
 export default function PublicScoreboardPage() {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: org, isLoading, error } = useQuery({
+  const { data: org, isLoading } = useQuery({
     queryKey: ['public-scoreboard', slug],
     queryFn: async () => {
       if (!slug) return null;
@@ -64,7 +64,7 @@ export default function PublicScoreboardPage() {
 
   const config: ScoreboardConfig = {
     ...DEFAULT_CONFIG,
-    ...((org.scoreboard_config as ScoreboardConfig) || {}),
+    ...(org.scoreboard_config as unknown as Partial<ScoreboardConfig>),
   };
 
   return (

@@ -80,7 +80,7 @@ export default function ShadowScoreboard() {
     if (org) {
       setEnabled(org.scoreboard_enabled ?? false);
       setSlug(org.scoreboard_slug || generateSlug(org.name));
-      setConfig({ ...DEFAULT_CONFIG, ...((org.scoreboard_config as ScoreboardConfig) || {}) });
+      setConfig({ ...DEFAULT_CONFIG, ...(org.scoreboard_config as unknown as Partial<ScoreboardConfig>) });
     }
   }, [org]);
 
