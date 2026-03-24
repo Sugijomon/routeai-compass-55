@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import {
   calculateRiskScore,
   type DataClassification,
@@ -17,7 +18,7 @@ import {
 import { toast } from 'sonner';
 import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
-  AlertTriangle, CheckCircle2, Search, Target, Info,
+  AlertTriangle, CheckCircle2, Search, Target, Info, Eye,
 } from 'lucide-react';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
