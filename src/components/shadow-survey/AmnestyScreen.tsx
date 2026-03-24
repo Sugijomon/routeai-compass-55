@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Shield, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
+import { Shield, ShieldAlert, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface AmnestyScreenProps {
@@ -24,6 +25,23 @@ export default function AmnestyScreen({ orgId, userId, settings, onAccepted }: A
   const validDays = (settings.amnesty_valid_days as number) || 30;
   const activatedAt = settings.amnesty_activated_at as string | undefined;
   const customText = settings.amnesty_text as string | undefined;
+
+  // Check of scoreboard individuele namen toont
+  const { data: scoreboardConfig } = useQuery({
+    queryKey: ['amnesty-scoreboard-config', orgId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('organizations')
+        .select('scoreboard_enabled, scoreboard_config')
+        .eq('id', orgId)
+        .maybeSingle();
+      if (!data?.scoreboard_enabled) return null;
+      const cfg = data.scoreboard_config as Record<string, unknown> | null;
+      return cfg?.show_individual ? true : false;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Bereken vervaldatum
   const expiryDate = activatedAt
