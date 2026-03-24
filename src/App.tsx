@@ -31,7 +31,7 @@ import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import ShadowAdminDashboard from "./pages/admin/ShadowAdminDashboard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
-
+import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
 import OrgInvitePage from "./pages/super-admin/OrgInvitePage";
