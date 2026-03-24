@@ -303,6 +303,33 @@ export default function RiskProfileStep({
                 </p>
               </div>
             )}
+
+            {/* Scoreboard opt-in */}
+            {showScoreboardOptIn && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-muted-foreground" />
+                  <p className="font-medium text-sm">Publiek scoreboard</p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Uw organisatie heeft een publiek AI-scoreboard.
+                  Wilt u uw naam zichtbaar maken als deelnemer?
+                </p>
+                <div className="flex items-center gap-3">
+                  <Switch
+                    checked={nameVisible}
+                    onCheckedChange={async (checked) => {
+                      setNameVisible(checked);
+                      await supabase
+                        .from('shadow_survey_runs')
+                        .update({ scoreboard_name_visible: checked } as any)
+                        .eq('id', surveyRunId);
+                    }}
+                  />
+                  <Label className="text-sm cursor-pointer">Ja, toon mijn naam</Label>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
