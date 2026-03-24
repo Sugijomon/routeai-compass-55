@@ -31,7 +31,7 @@ import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import ShadowAdminDashboard from "./pages/admin/ShadowAdminDashboard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
-
+import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
 import OrgInvitePage from "./pages/super-admin/OrgInvitePage";
@@ -46,6 +46,7 @@ export default function App() {
         {/* Public routes */}
         <Route path="/" element={<RoleSelector />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/scoreboard/:slug" element={<PublicScoreboardPage />} />
         
         {/* User Dashboard - Protected with real auth */}
         <Route 

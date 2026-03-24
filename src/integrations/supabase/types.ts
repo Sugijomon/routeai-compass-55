@@ -735,6 +735,9 @@ export type Database = {
           name: string
           plan_type: string
           postal_code: string | null
+          scoreboard_config: Json
+          scoreboard_enabled: boolean
+          scoreboard_slug: string | null
           sector: string | null
           settings: Json | null
           slug: string | null
@@ -758,6 +761,9 @@ export type Database = {
           name: string
           plan_type?: string
           postal_code?: string | null
+          scoreboard_config?: Json
+          scoreboard_enabled?: boolean
+          scoreboard_slug?: string | null
           sector?: string | null
           settings?: Json | null
           slug?: string | null
@@ -781,6 +787,9 @@ export type Database = {
           name?: string
           plan_type?: string
           postal_code?: string | null
+          scoreboard_config?: Json
+          scoreboard_enabled?: boolean
+          scoreboard_slug?: string | null
           sector?: string | null
           settings?: Json | null
           slug?: string | null

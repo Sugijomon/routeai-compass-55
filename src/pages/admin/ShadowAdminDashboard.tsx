@@ -137,7 +137,7 @@ export default function ShadowAdminDashboard() {
 
           {/* Tab 3: Scoreboard */}
           <TabsContent value="scoreboard" className="mt-6">
-            <ShadowScoreboard planType={planType} />
+            <ShadowScoreboard />
           </TabsContent>
         </Tabs>
 
