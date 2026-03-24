@@ -79,7 +79,7 @@ export default function ShadowAdminDashboard() {
     window.history.replaceState(null, '', `#${tab}`);
   };
 
-  const showScoreboard = planType === 'business' || planType === 'scale';
+  // Scoreboard tab altijd tonen — component toont upgrade-prompt indien nodig
 
   if (settingsLoading) {
     return (
