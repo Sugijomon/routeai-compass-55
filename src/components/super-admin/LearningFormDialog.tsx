@@ -64,7 +64,7 @@ const DIFFICULTY_LEVELS = [
 const LICENSE_OPTIONS = [
   { value: "ai_rijbewijs", label: "AI Rijbewijs (Green)" },
   { value: "yellow_license", label: "Yellow License" },
-  { value: "blue_license", label: "Blue License" },
+  { value: "orange_license", label: "Orange License" },
 ];
 
 interface LearningFormDialogProps {

@@ -67,7 +67,7 @@ export default {
         route: {
           green: "hsl(var(--route-green))",
           yellow: "hsl(var(--route-yellow))",
-          blue: "hsl(var(--route-blue))",
+          orange: "hsl(var(--route-orange))",
           red: "hsl(var(--route-red))",
         },
         sidebar: {
