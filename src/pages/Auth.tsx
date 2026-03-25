@@ -86,17 +86,17 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleGoogleLogin = async () => {
+  const handleOAuthLogin = async (provider: 'google' | 'apple') => {
     setIsLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth('google', {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error('Google login mislukt');
+        toast.error(`${provider === 'google' ? 'Google' : 'Apple'} login mislukt`);
       }
     } catch {
-      toast.error('Google login mislukt');
+      toast.error(`${provider === 'google' ? 'Google' : 'Apple'} login mislukt`);
     } finally {
       setIsLoading(false);
     }
