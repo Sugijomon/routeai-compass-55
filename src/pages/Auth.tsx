@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Shield, Mail, Loader2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getDashboardPathFromRoles } from '@/hooks/useDashboardRedirect';
 
 // Google icon SVG
@@ -176,7 +177,30 @@ export default function Auth() {
               Inloggen met Apple
             </Button>
 
-            {/* Divider */}
+            {/* Microsoft — placeholder, niet klikbaar */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full py-5 text-base opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                      <path fill="#F25022" d="M1 1h10v10H1z"/>
+                      <path fill="#00A4EF" d="M1 13h10v10H1z"/>
+                      <path fill="#7FBA00" d="M13 1h10v10H13z"/>
+                      <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                    </svg>
+                    Inloggen met Microsoft
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Binnenkort beschikbaar</p>
+              </TooltipContent>
+            </Tooltip>
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
