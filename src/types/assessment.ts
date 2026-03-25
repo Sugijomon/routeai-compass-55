@@ -8,7 +8,7 @@ export type AssessmentStatus = 'active' | 'paused' | 'stopped' | 'superseded';
 export type ArchetypeCode =
   | 'G-01' | 'G-02' | 'G-03' | 'G-04'
   | 'Y-01' | 'Y-02' | 'Y-03'
-  | 'B-01' | 'B-02' | 'B-03' | 'B-04'
+  | 'O-01' | 'O-02' | 'O-03' | 'O-04'
   | 'R-01' | 'R-02' | 'R-03' | 'R-04';
 
 // Survey V1–V6 antwoordtypes
