@@ -125,7 +125,7 @@ export default function AdminTestFlow() {
 
   if (hidden) {
     return (
-      <AdminPageLayout title="Testpagina verborgen" description="De testpagina is verborgen uit navigatie.">
+      <AdminPageLayout title="Testpagina verborgen">
         <Card>
           <CardContent className="pt-6 text-center space-y-4">
             <p className="text-muted-foreground">
@@ -140,7 +140,7 @@ export default function AdminTestFlow() {
   }
 
   return (
-    <AdminPageLayout title="Test Flow Verificatie" description="Tijdelijke testpagina — controleer scan-data, tool-discoveries en transfer-mechanisme.">
+    <AdminPageLayout title="Test Flow Verificatie">
       <div className="space-y-6">
 
         {/* Sectie 1 — Scan-flow data */}
