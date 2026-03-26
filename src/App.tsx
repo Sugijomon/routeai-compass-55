@@ -31,6 +31,7 @@ import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import ScanDashboard from "./pages/admin/ScanDashboard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
+import AdminTestFlow from "./pages/admin/AdminTestFlow";
 import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
 // Super Admin management pages
 import OrganizationsManagement from "./pages/super-admin/OrganizationsManagement";
@@ -123,6 +124,16 @@ export default function App() {
         {/* Legacy URL redirects */}
         <Route path="/admin-dashboard" element={<Navigate to="/super-admin" replace />} />
         <Route path="/org-admin" element={<Navigate to="/admin" replace />} />
+
+        {/* Tijdelijke testpagina */}
+        <Route
+          path="/admin/test-flow"
+          element={
+            <AuthRoute requireAdmin>
+              <AdminTestFlow />
+            </AuthRoute>
+          }
+        />
         
         {/* User Dashboard redirect */}
         <Route 
