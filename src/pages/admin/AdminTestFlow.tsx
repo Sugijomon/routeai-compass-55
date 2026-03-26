@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, Loader2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import AdminPageLayout from '@/components/admin/AdminPageLayout';
+import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 
 interface ScanRun {
   id: string;
@@ -46,8 +46,8 @@ export default function AdminTestFlow() {
     try {
       const { data, error } = await supabase
         .from('shadow_survey_runs')
-        .select('id, user_id, created_at, extra_data, survey_completed_at')
-        .order('created_at', { ascending: false })
+        .select('id, user_id, submitted_at, extra_data, survey_completed_at')
+        .order('submitted_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
@@ -58,7 +58,7 @@ export default function AdminTestFlow() {
         return {
           id: r.id,
           user_id: r.user_id,
-          created_at: r.created_at ?? '',
+          created_at: r.submitted_at ?? '',
           governance: gov,
           completed_at: r.survey_completed_at ?? null,
         };
