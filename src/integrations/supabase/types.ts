@@ -680,6 +680,143 @@ export type Database = {
           },
         ]
       }
+      model_typekaart_updates: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          change_type: string | null
+          confidence: string | null
+          created_at: string | null
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          source: string | null
+          status: string | null
+          typekaart_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_type?: string | null
+          confidence?: string | null
+          created_at?: string | null
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          source?: string | null
+          status?: string | null
+          typekaart_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_type?: string | null
+          confidence?: string | null
+          created_at?: string | null
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          source?: string | null
+          status?: string | null
+          typekaart_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_typekaart_updates_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "model_typekaart_updates_typekaart_id_fkey"
+            columns: ["typekaart_id"]
+            isOneToOne: false
+            referencedRelation: "model_typekaarten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_typekaarten: {
+        Row: {
+          canonical_id: string
+          contractual_restrictions: Json | null
+          created_at: string | null
+          created_by: string | null
+          data_storage_region: string | null
+          display_name: string
+          dpa_available: boolean | null
+          eu_license_status: string | null
+          gpai_designated: boolean | null
+          hosting_region: string | null
+          id: string
+          last_verified_at: string | null
+          model_type: string
+          provider: string
+          status: string | null
+          statutory_prohibitions: Json | null
+          systemic_risk: boolean | null
+          trains_on_input: boolean | null
+          typekaart_version: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_id: string
+          contractual_restrictions?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          data_storage_region?: string | null
+          display_name: string
+          dpa_available?: boolean | null
+          eu_license_status?: string | null
+          gpai_designated?: boolean | null
+          hosting_region?: string | null
+          id?: string
+          last_verified_at?: string | null
+          model_type: string
+          provider: string
+          status?: string | null
+          statutory_prohibitions?: Json | null
+          systemic_risk?: boolean | null
+          trains_on_input?: boolean | null
+          typekaart_version?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_id?: string
+          contractual_restrictions?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          data_storage_region?: string | null
+          display_name?: string
+          dpa_available?: boolean | null
+          eu_license_status?: string | null
+          gpai_designated?: boolean | null
+          hosting_region?: string | null
+          id?: string
+          last_verified_at?: string | null
+          model_type?: string
+          provider?: string
+          status?: string | null
+          statutory_prohibitions?: Json | null
+          systemic_risk?: boolean | null
+          trains_on_input?: boolean | null
+          typekaart_version?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_typekaarten_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_tools_catalog: {
         Row: {
           added_at: string | null
@@ -687,6 +824,10 @@ export type Database = {
           id: string
           notes: string | null
           org_id: string
+          override_acknowledged_at: string | null
+          override_acknowledged_by: string | null
+          override_data_storage: string | null
+          override_trains_on_input: boolean | null
           status: string
           tool_name: string
           typekaart_id: string | null
@@ -697,6 +838,10 @@ export type Database = {
           id?: string
           notes?: string | null
           org_id: string
+          override_acknowledged_at?: string | null
+          override_acknowledged_by?: string | null
+          override_data_storage?: string | null
+          override_trains_on_input?: boolean | null
           status?: string
           tool_name: string
           typekaart_id?: string | null
@@ -707,6 +852,10 @@ export type Database = {
           id?: string
           notes?: string | null
           org_id?: string
+          override_acknowledged_at?: string | null
+          override_acknowledged_by?: string | null
+          override_data_storage?: string | null
+          override_trains_on_input?: boolean | null
           status?: string
           tool_name?: string
           typekaart_id?: string | null
@@ -717,6 +866,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_tools_catalog_override_acknowledged_by_fkey"
+            columns: ["override_acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
