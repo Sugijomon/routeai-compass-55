@@ -155,7 +155,9 @@ export default function App() {
           path="/assessments/new" 
           element={
             <AuthRoute>
-              <NewAssessment />
+              <AssessmentGuard>
+                <NewAssessment />
+              </AssessmentGuard>
             </AuthRoute>
           } 
         />
