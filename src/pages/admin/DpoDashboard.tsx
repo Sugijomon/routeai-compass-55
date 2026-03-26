@@ -41,7 +41,7 @@ function RiskClassBadge({ cls }: { cls: string | null }) {
 // Kleuren voor staafdiagram
 const BAR_COLORS: Record<string, string> = {
   minimal: 'hsl(142, 71%, 45%)',
-  limited: 'hsl(199, 89%, 48%)',
+  limited: 'hsl(38, 92%, 50%)',
   high: 'hsl(38, 92%, 50%)',
   unacceptable: 'hsl(0, 84%, 60%)',
 };
