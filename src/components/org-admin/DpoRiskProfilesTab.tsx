@@ -384,7 +384,7 @@ export default function DpoRiskProfilesTab() {
                       <TableCell>{t.mostCommonSensitivity ?? '—'}</TableCell>
                       <TableCell>
                         {rc ? (
-                          <Badge variant={rc.variant} className="text-xs">
+                          <Badge variant={rc.variant} className={`text-xs ${rc.className ?? ''}`}>
                             {rc.label}
                           </Badge>
                         ) : '—'}
@@ -519,7 +519,7 @@ function DetailPanel({
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-sm">{t.tool_name}</span>
                       {rc && (
-                        <Badge variant={rc.variant} className="text-xs">
+                        <Badge variant={rc.variant} className={`text-xs ${rc.className ?? ''}`}>
                           {rc.label}
                         </Badge>
                       )}
