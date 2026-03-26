@@ -66,6 +66,20 @@ const AWARENESS_OPTIONS = [
   { value: 'unsure', label: 'Weet ik niet' },
 ] as const;
 
+const TOOL_SUPPORT_OPTIONS = [
+  { value: 'prefer_approved_list', label: 'Ik werk liever met een goedgekeurde lijst van tools' },
+  { value: 'prefer_guidance', label: 'Ik wil guidance maar wil zelf kunnen kiezen' },
+  { value: 'prefer_freedom', label: 'Ik wil vrijheid om zelf tools te kiezen zonder restricties' },
+  { value: 'no_preference', label: 'Geen voorkeur' },
+] as const;
+
+const GUIDELINES_READINESS_OPTIONS = [
+  { value: 'already_following', label: 'Ik volg al richtlijnen — die zijn er al in onze organisatie' },
+  { value: 'open_to_guidelines', label: 'Ik sta open voor duidelijke richtlijnen als die er komen' },
+  { value: 'depends_on_workload', label: 'Hangt ervan af — als het me niet vertraagt, prima' },
+  { value: 'prefer_minimal_rules', label: 'Ik werk liever met zo min mogelijk regels' },
+] as const;
+
 export default function UsageAwarenessStep({ surveyRunId, onNext, onBack }: UsageAwarenessStepProps) {
   const [tasks, setTasks] = useState<string[]>([]);
   const [taskOtherText, setTaskOtherText] = useState('');
@@ -74,6 +88,8 @@ export default function UsageAwarenessStep({ surveyRunId, onNext, onBack }: Usag
   const [dataTypes, setDataTypes] = useState<string[]>([]);
   const [dataAwareness, setDataAwareness] = useState('');
   const [automationWish, setAutomationWish] = useState('');
+  const [toolSupportPreference, setToolSupportPreference] = useState('');
+  const [guidelinesReadiness, setGuidelinesReadiness] = useState('');
   const [saving, setSaving] = useState(false);
 
   const toggleTask = (value: string) => {
@@ -118,6 +134,8 @@ export default function UsageAwarenessStep({ surveyRunId, onNext, onBack }: Usag
         governance: {
           ...((existing as Record<string, unknown>).governance as Record<string, unknown> ?? {}),
           automation_wish: automationWish.trim() || null,
+          tool_support_preference: toolSupportPreference || null,
+          guidelines_readiness: guidelinesReadiness || null,
         },
       };
 
@@ -274,6 +292,40 @@ export default function UsageAwarenessStep({ surveyRunId, onNext, onBack }: Usag
           placeholder="Bijv. wekelijkse rapportages samenvatten..."
           rows={3}
         />
+      </div>
+
+      {/* Vraag 5: Voorkeur toolondersteuning */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">
+          Hoe sta je tegenover ondersteuning bij het kiezen van goede AI-tools?
+        </Label>
+        <RadioGroup value={toolSupportPreference} onValueChange={setToolSupportPreference}>
+          {TOOL_SUPPORT_OPTIONS.map(opt => (
+            <div key={opt.value} className="flex items-start gap-2">
+              <RadioGroupItem value={opt.value} id={`toolsupport-${opt.value}`} />
+              <Label htmlFor={`toolsupport-${opt.value}`} className="text-sm font-normal leading-snug cursor-pointer">
+                {opt.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+
+      {/* Vraag 6: Bereidheid richtlijnen */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">
+          Hoe reageer je op AI-richtlijnen in je werk?
+        </Label>
+        <RadioGroup value={guidelinesReadiness} onValueChange={setGuidelinesReadiness}>
+          {GUIDELINES_READINESS_OPTIONS.map(opt => (
+            <div key={opt.value} className="flex items-start gap-2">
+              <RadioGroupItem value={opt.value} id={`guidelines-${opt.value}`} />
+              <Label htmlFor={`guidelines-${opt.value}`} className="text-sm font-normal leading-snug cursor-pointer">
+                {opt.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
       </div>
 
       {/* Navigatie */}
