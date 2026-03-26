@@ -7,6 +7,7 @@ import ToolCatalog from "./components/ToolCatalog";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
+import AssessmentGuard from "./components/guards/AssessmentGuard";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
 import AdminCourses from "./pages/admin/AdminCourses";
