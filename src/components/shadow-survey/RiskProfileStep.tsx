@@ -68,7 +68,7 @@ const TIER_CONFIG: Record<AssignedTier, {
     label: 'Maatwerk',
     description: 'Je situatie vereist specifieke afspraken en goedkeuring. Er wordt een passend traject voor je samengesteld.',
     icon: ShieldAlert,
-    colorClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    colorClass: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
   },
 };
 
