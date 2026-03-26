@@ -27,10 +27,10 @@ const TIER_LABELS: Record<string, string> = {
   custom: 'Maatwerk',
 };
 
-const RISK_CLASS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const RISK_CLASS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
   minimal: { label: 'Minimaal', variant: 'secondary' },
   limited: { label: 'Beperkt', variant: 'outline' },
-  high: { label: 'Hoog', variant: 'default' },
+  high: { label: 'Hoog', variant: 'default', className: 'bg-orange-500 text-white' },
   unacceptable: { label: 'Onaanvaardbaar', variant: 'destructive' },
 };
 
