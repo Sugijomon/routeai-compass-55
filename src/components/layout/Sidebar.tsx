@@ -10,7 +10,8 @@ import {
   Building2,
   HelpCircle,
   BookOpen,
-  Wrench
+  Wrench,
+  Library
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,7 @@ export function Sidebar() {
         title: 'Beheer',
         items: [
           { label: 'Tools Library', href: '/super-admin/tools', icon: Wrench },
+          { label: 'Model Library', href: '/super-admin/model-library', icon: Library },
           { label: 'Learning Library', href: '/super-admin/content', icon: BookOpen },
         ],
       },

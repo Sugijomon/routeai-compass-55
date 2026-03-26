@@ -39,7 +39,7 @@ import OrgInvitePage from "./pages/super-admin/OrgInvitePage";
 import ToolsLibraryManagement from "./pages/super-admin/ToolsLibraryManagement";
 import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManagement";
 import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
-
+import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
 export default function App() {
   return (
     <BrowserRouter>
@@ -109,6 +109,14 @@ export default function App() {
               <CrossOrgUserManagement />
             </AuthRoute>
           } 
+        />
+        <Route
+          path="/super-admin/model-library"
+          element={
+            <AuthRoute requireAdmin>
+              <ModelLibraryPage />
+            </AuthRoute>
+          }
         />
         
         {/* Org Admin Dashboard - now at /admin */}
