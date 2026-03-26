@@ -29,7 +29,7 @@ import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
 import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
-import ShadowAdminDashboard from "./pages/admin/ShadowAdminDashboard";
+import ScanDashboard from "./pages/admin/ScanDashboard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
 import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
 // Super Admin management pages

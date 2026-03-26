@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
-export default function ShadowAdminDashboard() {
+export default function ScanDashboard() {
   const location = useLocation();
   const { profile } = useUserProfile();
   const { planType } = useOrgPlanType();
