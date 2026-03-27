@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateAssessment } from "@/hooks/useCreateAssessment";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ const V2_OPTIONS: { value: V2Main; label: string; desc: string; icon: React.Reac
 
 export default function NewAssessment() {
   const navigate = useNavigate();
+  const { mutate: createAssessment, isPending } = useCreateAssessment();
   const [step, setStep] = useState(1);
   const [toolNameRaw, setToolNameRaw] = useState("");
   const [answers, setAnswers] = useState<Partial<SurveyAnswers>>({});
@@ -233,7 +235,6 @@ export default function NewAssessment() {
 
   // Bepaal of we op het resultaatscherm zitten
   const isResult = step === 99;
-  const displayStep = isResult ? totalSteps : step;
 
   return (
     <div className="min-h-screen bg-background">
@@ -607,19 +608,24 @@ export default function NewAssessment() {
           </div>
         )}
 
-        {/* Resultaat-placeholder */}
+        {/* Resultaat — opslaan en bekijken */}
         {step === 99 && (
           <Card>
             <CardContent className="py-12 text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                <Shield className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-2xl font-bold">Analyse gereed</h2>
               <p className="text-muted-foreground text-sm">
-                Opslaan en resultaat bekijken wordt in de volgende stap ingebouwd.
+                Je antwoorden zijn verwerkt. Klik hieronder om de beoordeling op te slaan en het resultaat te bekijken.
               </p>
-              <Button onClick={() => navigate("/dashboard")} className="mt-4">
-                Resultaat bekijken
+              <Button
+                onClick={() => createAssessment({ answers: answers as SurveyAnswers, toolNameRaw })}
+                disabled={isPending}
+                className="gap-2 mt-4"
+              >
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                {isPending ? 'Bezig met opslaan...' : 'Resultaat bekijken'}
               </Button>
             </CardContent>
           </Card>

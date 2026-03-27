@@ -7,6 +7,7 @@ import ToolCatalog from "./components/ToolCatalog";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
+import Assessment from "./pages/Assessment";
 import AssessmentGuard from "./components/guards/AssessmentGuard";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
@@ -158,6 +159,14 @@ export default function App() {
               <AssessmentGuard>
                 <NewAssessment />
               </AssessmentGuard>
+            </AuthRoute>
+          } 
+        />
+        <Route 
+          path="/assessment/:id" 
+          element={
+            <AuthRoute>
+              <Assessment />
             </AuthRoute>
           } 
         />
