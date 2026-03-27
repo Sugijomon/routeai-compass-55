@@ -100,6 +100,7 @@ export function Sidebar() {
         title: 'Menu',
         items: [
           { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+          { label: 'Mijn AI Checks', href: '/assessments', icon: Shield },
           { label: 'Training', href: '/learn', icon: GraduationCap },
           { label: 'Mijn Licentie', href: '/license', icon: Award },
         ],

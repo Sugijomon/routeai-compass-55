@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, ClipboardCheck } from 'lucide-react';
+import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
 
 export default function Assessment() {
   const { id } = useParams<{ id: string }>();
