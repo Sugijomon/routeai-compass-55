@@ -25,6 +25,7 @@ export type Database = {
           dpo_instructions: string[] | null
           dpo_oversight_required: boolean
           escalation_refs: string[] | null
+          eu_act_category: string | null
           fria_required: boolean
           id: string
           org_id: string
@@ -55,6 +56,7 @@ export type Database = {
           dpo_instructions?: string[] | null
           dpo_oversight_required?: boolean
           escalation_refs?: string[] | null
+          eu_act_category?: string | null
           fria_required?: boolean
           id?: string
           org_id: string
@@ -85,6 +87,7 @@ export type Database = {
           dpo_instructions?: string[] | null
           dpo_oversight_required?: boolean
           escalation_refs?: string[] | null
+          eu_act_category?: string | null
           fria_required?: boolean
           id?: string
           org_id?: string

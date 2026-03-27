@@ -89,9 +89,20 @@ export interface Assessment {
 }
 
 // UI-configuratie per route
+// EU AI Act risicocategorieën (correspondeert met generated column eu_act_category)
+export type EuActCategory = 'minimal_risk' | 'transparency_risk' | 'high_risk' | 'prohibited' | 'unknown';
+
+export const EU_ACT_CATEGORY_LABELS: Record<EuActCategory, string> = {
+  minimal_risk:       'Minimaal risico',
+  transparency_risk:  'Transparantierisico',
+  high_risk:          'Hoog risico',
+  prohibited:         'Verboden',
+  unknown:            'Onbekend',
+};
+
 export const ROUTE_CONFIG = {
-  green:  { label: 'Groen',  hex: '#16a34a', bg: 'bg-green-100',  text: 'text-green-800'  },
-  yellow: { label: 'Amber',  hex: '#d97706', bg: 'bg-amber-100',  text: 'text-amber-800'  },
-  orange: { label: 'Oranje', hex: '#ea580c', bg: 'bg-orange-100', text: 'text-orange-800' },
-  red:    { label: 'Rood',   hex: '#dc2626', bg: 'bg-red-100',    text: 'text-red-800'    },
+  green:  { label: 'Groen',  hex: '#16a34a', bg: 'bg-green-100',  text: 'text-green-800',  euActCategory: 'minimal_risk' as EuActCategory },
+  yellow: { label: 'Amber',  hex: '#d97706', bg: 'bg-amber-100',  text: 'text-amber-800',  euActCategory: 'transparency_risk' as EuActCategory },
+  orange: { label: 'Oranje', hex: '#ea580c', bg: 'bg-orange-100', text: 'text-orange-800', euActCategory: 'high_risk' as EuActCategory },
+  red:    { label: 'Rood',   hex: '#dc2626', bg: 'bg-red-100',    text: 'text-red-800',    euActCategory: 'prohibited' as EuActCategory },
 } as const;
