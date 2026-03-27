@@ -235,7 +235,6 @@ export default function NewAssessment() {
 
   // Bepaal of we op het resultaatscherm zitten
   const isResult = step === 99;
-  const displayStep = isResult ? totalSteps : step;
 
   return (
     <div className="min-h-screen bg-background">
