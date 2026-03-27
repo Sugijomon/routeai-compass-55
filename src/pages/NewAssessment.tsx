@@ -69,6 +69,7 @@ const V2_OPTIONS: { value: V2Main; label: string; desc: string; icon: React.Reac
 
 export default function NewAssessment() {
   const navigate = useNavigate();
+  const { mutate: createAssessment, isPending } = useCreateAssessment();
   const [step, setStep] = useState(1);
   const [toolNameRaw, setToolNameRaw] = useState("");
   const [answers, setAnswers] = useState<Partial<SurveyAnswers>>({});

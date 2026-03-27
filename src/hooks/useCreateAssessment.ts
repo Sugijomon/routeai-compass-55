@@ -24,7 +24,7 @@ export function useCreateAssessment() {
           org_id: profile.org_id,
           created_by: user.id,
           tool_name_raw: toolNameRaw,
-          survey_answers: answers as unknown as Record<string, unknown>,
+          survey_answers: answers as unknown as Record<string, never>,
           route: output.route,
           primary_archetype: output.primary_archetype,
           secondary_archetypes: output.secondary_archetypes,
