@@ -20,7 +20,7 @@ export function useCreateAssessment() {
 
       const { data, error } = await supabase
         .from('assessments')
-        .insert({
+        .insert([{
           org_id: profile.org_id,
           created_by: user.id,
           tool_name_raw: toolNameRaw,
@@ -43,7 +43,7 @@ export function useCreateAssessment() {
           user_instructions: output.user_instructions,
           dpo_instructions: output.dpo_instructions,
           status: 'active',
-        })
+        }])
         .select('id')
         .single();
 
