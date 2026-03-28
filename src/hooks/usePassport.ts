@@ -1,10 +1,55 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { toast } from 'sonner';
 
 export function usePassport() {
   const { profile } = useUserProfile();
   const orgId = profile?.org_id;
+
+  // Sectie 1+2: Identiteit + governance-principes
+  const { data: identity, refetch: refetchIdentity } = useQuery({
+    queryKey: ['passport-identity', orgId],
+    queryFn: async () => {
+      if (!orgId) return null;
+      const { data } = await supabase
+        .from('passport_identity')
+        .select('*')
+        .eq('org_id', orgId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  const { data: orgName } = useQuery({
+    queryKey: ['passport-org-name', orgId],
+    queryFn: async () => {
+      if (!orgId) return null;
+      const { data } = await supabase
+        .from('organizations')
+        .select('name, created_at')
+        .eq('id', orgId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  const saveIdentity = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      if (!orgId) throw new Error('Geen org_id');
+      const { error } = await supabase
+        .from('passport_identity')
+        .upsert({ org_id: orgId, ...payload } as never, { onConflict: 'org_id' });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchIdentity();
+      toast.success('Opgeslagen.');
+    },
+    onError: () => toast.error('Opslaan mislukt.'),
+  });
 
   // Sectie 3: Tool catalog + shadow AI discovery
   const { data: toolCatalog } = useQuery({
@@ -107,5 +152,5 @@ export function usePassport() {
     enabled: !!orgId,
   });
 
-  return { toolCatalog, shadowDiscoveries, assessmentRegister, annexIII, literacyCoverage };
+  return { identity, orgName, saveIdentity, toolCatalog, shadowDiscoveries, assessmentRegister, annexIII, literacyCoverage };
 }
