@@ -6,24 +6,31 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+import { useUserProfile } from '@/hooks/useUserProfile';
+
 export function useOnboardingCourse() {
   const { user } = useAuth();
+  const { profile } = useUserProfile();
   const userId = user?.id;
+  const orgId = profile?.org_id;
 
-  // Haal het onboarding-course op
+  // Haal het onboarding-course op, gefilterd op org_id
   const { data: onboardingCourse, isLoading: courseLoading } = useQuery({
-    queryKey: ['onboarding-course'],
+    queryKey: ['onboarding-course', orgId],
     queryFn: async () => {
+      if (!orgId) return null;
       const { data, error } = await supabase
         .from('courses')
         .select('*')
         .eq('required_for_onboarding', true)
         .eq('is_published', true)
+        .eq('org_id', orgId)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    enabled: !!orgId,
   });
 
   // Haal user's voortgang op

@@ -32,15 +32,18 @@ export function useOnboardingStatus(): OnboardingStatus {
     enabled: !!user && !!profile?.org_id,
   });
 
+  const currentOrgId = profile?.org_id;
+
   const { data: courseProgress } = useQuery({
-    queryKey: ['onboarding-course-progress', user?.id],
+    queryKey: ['onboarding-course-progress', user?.id, currentOrgId],
     queryFn: async () => {
-      if (!user) return { started: false, completed: false, pct: 0 };
+      if (!user || !currentOrgId) return { started: false, completed: false, pct: 0 };
       const { data: courses } = await supabase
         .from('courses')
         .select('id')
         .eq('required_for_onboarding', true)
         .eq('is_published', true)
+        .eq('org_id', currentOrgId)
         .limit(1);
       if (!courses?.[0]) return { started: false, completed: false, pct: 0 };
 
@@ -75,7 +78,7 @@ export function useOnboardingStatus(): OnboardingStatus {
 
       return { started, completed: allCompleted, pct: totalPct };
     },
-    enabled: !!user,
+    enabled: !!user && !!currentOrgId,
   });
 
   const { data: assessmentCount } = useQuery({
