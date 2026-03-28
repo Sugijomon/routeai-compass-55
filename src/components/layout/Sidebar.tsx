@@ -60,6 +60,7 @@ export function Sidebar() {
         title: 'Shadow AI Scan',
         items: [
           { label: 'Scan beheer', href: '/admin/shadow', icon: Shield },
+          { label: 'Passport', href: '/admin/passport', icon: BookOpen },
         ],
       },
     ];

@@ -43,6 +43,7 @@ import ToolsLibraryManagement from "./pages/super-admin/ToolsLibraryManagement";
 import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManagement";
 import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
 import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
+import PassportPage from "./pages/admin/PassportPage";
 export default function App() {
   return (
     <BrowserRouter>
@@ -394,6 +395,7 @@ export default function App() {
         <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
         <Route path="/admin/shadow" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanDashboard /></AuthRoute>} />
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
+        <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
         
         {/* Debug page */}
         <Route path="/debug-quiz" element={<DebugQuiz />} />
