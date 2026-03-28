@@ -1,35 +1,78 @@
 import { Link } from 'react-router-dom';
-import { Wrench, FileText, HelpCircle, ExternalLink } from 'lucide-react';
+import { Wrench, FileText, HelpCircle, ExternalLink, Sparkles, GraduationCap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-const actions = [
-  {
-    label: 'AI Tools Bekijken',
-    description: 'Goedgekeurde tools voor jouw taken',
-    href: '/tools',
-    icon: Wrench,
-    color: 'text-primary',
-    bg: 'bg-primary/10',
-  },
-  {
-    label: 'Mijn Capabilities',
-    description: 'Bekijk wat je mag doen',
-    href: '/license',
-    icon: FileText,
-    color: 'text-accent-foreground',
-    bg: 'bg-accent',
-  },
-  {
-    label: 'Hulp & FAQ',
-    description: 'Veelgestelde vragen',
-    href: '/help',
-    icon: HelpCircle,
-    color: 'text-muted-foreground',
-    bg: 'bg-secondary',
-  },
-];
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export function QuickActionsCard() {
+  const { user } = useAuth();
+  const { hasAiRijbewijs } = useUserProfile();
+
+  const { data: assessmentCount } = useQuery({
+    queryKey: ['quick-action-assessments', user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { count } = await supabase
+        .from('assessments')
+        .select('id', { count: 'exact', head: true })
+        .eq('created_by', user.id);
+      return count ?? 0;
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+
+  const isFirstCheck = hasAiRijbewijs && (assessmentCount ?? 0) === 0;
+
+  // Dynamische acties op basis van rijbewijs-status
+  const actions = [
+    hasAiRijbewijs
+      ? {
+          label: isFirstCheck ? 'Je eerste AI Check starten' : 'Start AI Check',
+          description: isFirstCheck
+            ? 'Laat zien wat je mag doen met AI'
+            : 'Nieuwe AI-toepassing beoordelen',
+          href: '/assessments/new',
+          icon: Sparkles,
+          color: 'text-primary',
+          bg: 'bg-primary/10',
+        }
+      : {
+          label: 'AI Literacy cursus',
+          description: 'Behaal je AI-Rijbewijs',
+          href: '/learn',
+          icon: GraduationCap,
+          color: 'text-primary',
+          bg: 'bg-primary/10',
+        },
+    {
+      label: 'AI Tools Bekijken',
+      description: 'Goedgekeurde tools voor jouw taken',
+      href: '/tools',
+      icon: Wrench,
+      color: 'text-accent-foreground',
+      bg: 'bg-accent',
+    },
+    {
+      label: 'Mijn Capabilities',
+      description: 'Bekijk wat je mag doen',
+      href: '/license',
+      icon: FileText,
+      color: 'text-muted-foreground',
+      bg: 'bg-secondary',
+    },
+    {
+      label: 'Hulp & FAQ',
+      description: 'Veelgestelde vragen',
+      href: '/help',
+      icon: HelpCircle,
+      color: 'text-muted-foreground',
+      bg: 'bg-secondary',
+    },
+  ];
+
   return (
     <Card>
       <CardHeader className="pb-2">

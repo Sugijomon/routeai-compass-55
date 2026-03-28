@@ -4,6 +4,7 @@ import { LicenseStatusCard } from '@/components/dashboard/LicenseStatusCard';
 import { TrainingProgressCard } from '@/components/dashboard/TrainingProgressCard';
 import { QuickActionsCard } from '@/components/dashboard/QuickActionsCard';
 import { AdminStatsCard } from '@/components/dashboard/AdminStatsCard';
+import { OnboardingProgress } from '@/components/dashboard/OnboardingProgress';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useUserRole } from '@/hooks/useUserRole';
 
