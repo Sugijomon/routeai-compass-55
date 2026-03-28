@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   Settings,
+  Link2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,9 @@ import {
   useUpdateToolCatalog,
   OrgToolWithCatalog,
 } from "@/hooks/useOrgToolsCatalog";
+import { TypekaartBadge } from "@/components/model-library/TypekaartBadge";
+import { TypekaartLinkDialog } from "@/components/model-library/TypekaartLinkDialog";
+import { usePublishedTypekaarten, useLinkTypekaart } from "@/hooks/useTypekaartLink";
 
 interface ToolConfigFormProps {
   tool: OrgToolWithCatalog;
@@ -118,15 +122,31 @@ function ToolConfigForm({ tool, onSave, isSaving }: ToolConfigFormProps) {
   );
 }
 
+interface TypekaartMatch {
+  id: string;
+  display_name: string;
+  provider: string;
+  gpai_designated: boolean | null;
+  systemic_risk: boolean | null;
+  eu_license_status: string | null;
+  data_storage_region: string | null;
+  dpa_available: boolean | null;
+  trains_on_input: boolean | null;
+  contractual_restrictions: unknown;
+}
+
 interface ToolCardProps {
   tool: OrgToolWithCatalog;
   onToggle: (toolId: string, enable: boolean) => void;
   onUpdateConfig: (toolId: string, data: any) => void;
   isToggling: boolean;
   isUpdating: boolean;
+  typekaartMatch: TypekaartMatch | null;
+  onLinkTypekaart: () => void;
+  onUnlinkTypekaart: () => void;
 }
 
-function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating }: ToolCardProps) {
+function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating, typekaartMatch, onLinkTypekaart, onUnlinkTypekaart }: ToolCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const getCategoryLabel = (category: string | null) => {
@@ -163,6 +183,33 @@ function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating }: To
                   Contract vereist
                 </Badge>
               )}
+            </div>
+            {/* Typekaart badge */}
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <TypekaartBadge
+                typekaart={typekaartMatch ? {
+                  id: typekaartMatch.id,
+                  display_name: typekaartMatch.display_name,
+                  provider: typekaartMatch.provider,
+                  gpai_designated: typekaartMatch.gpai_designated ?? false,
+                  systemic_risk: typekaartMatch.systemic_risk ?? false,
+                  eu_license_status: typekaartMatch.eu_license_status ?? 'unknown',
+                  data_storage_region: typekaartMatch.data_storage_region,
+                  dpa_available: typekaartMatch.dpa_available ?? false,
+                  trains_on_input: typekaartMatch.trains_on_input ?? false,
+                  contractual_restrictions: (typekaartMatch.contractual_restrictions as Array<{ restriction: string; source: string }>) ?? [],
+                } : null}
+                onUnlink={typekaartMatch ? onUnlinkTypekaart : undefined}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={onLinkTypekaart}
+                title="Typekaart koppelen"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
               {tool.description || "Geen beschrijving beschikbaar"}
@@ -236,11 +283,14 @@ export default function ToolsCatalogManager() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [gpaiFilter, setGpaiFilter] = useState<string>("all");
+  const [linkingTool, setLinkingTool] = useState<{ id: string; name: string; typekaartId: string | null } | null>(null);
 
   const { data: tools, isLoading } = useOrgToolsCatalog();
   const { data: stats } = useOrgToolsStats();
   const toggleMutation = useToggleToolCatalog();
   const updateMutation = useUpdateToolCatalog();
+  const { data: typekaarten = [] } = usePublishedTypekaarten();
+  const { mutate: linkTypekaart } = useLinkTypekaart();
 
   const categories = [
     { value: "all", label: "Alle Categorieën" },
@@ -390,20 +440,44 @@ export default function ToolsCatalogManager() {
                 <p className="text-sm">Pas je filters aan of vraag een Super Admin om tools toe te voegen</p>
               </div>
             ) : (
-              filteredTools?.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={tool}
-                  onToggle={handleToggle}
-                  onUpdateConfig={handleUpdateConfig}
-                  isToggling={toggleMutation.isPending}
-                  isUpdating={updateMutation.isPending}
-                />
-              ))
+              filteredTools?.map((tool) => {
+                // Match typekaart by name (tools_library tools matched to model_typekaarten by name similarity)
+                const typekaartMatch = typekaarten.find(t =>
+                  t.display_name.toLowerCase().includes(tool.name.toLowerCase()) ||
+                  tool.name.toLowerCase().includes(t.display_name.toLowerCase())
+                ) ?? null;
+                return (
+                  <ToolCard
+                    key={tool.id}
+                    tool={tool}
+                    onToggle={handleToggle}
+                    onUpdateConfig={handleUpdateConfig}
+                    isToggling={toggleMutation.isPending}
+                    isUpdating={updateMutation.isPending}
+                    typekaartMatch={typekaartMatch}
+                    onLinkTypekaart={() => setLinkingTool({ id: tool.catalog_id ?? tool.id, name: tool.name, typekaartId: typekaartMatch?.id ?? null })}
+                    onUnlinkTypekaart={() => {
+                      if (tool.catalog_id) {
+                        linkTypekaart({ catalogEntryId: tool.catalog_id, typekaartId: null });
+                      }
+                    }}
+                  />
+                );
+              })
             )}
           </div>
         </CardContent>
       </Card>
+
+      {linkingTool && (
+        <TypekaartLinkDialog
+          open={!!linkingTool}
+          onOpenChange={(open) => !open && setLinkingTool(null)}
+          catalogEntryId={linkingTool.id}
+          toolName={linkingTool.name}
+          currentTypekaartId={linkingTool.typekaartId}
+        />
+      )}
     </div>
   );
 }
