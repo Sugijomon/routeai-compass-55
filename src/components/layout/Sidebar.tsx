@@ -86,7 +86,8 @@ export function Sidebar() {
           { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
           { label: 'Mijn AI Checks', href: '/assessments', icon: Shield },
           { label: 'Training', href: '/learn', icon: GraduationCap },
-          { label: 'Mijn Licentie', href: '/license', icon: Award },
+          // TODO: activeer zodra /license route bestaat
+          // { label: 'Mijn Licentie', href: '/license', icon: Award },
         ],
       },
       {
@@ -95,7 +96,8 @@ export function Sidebar() {
           { label: 'Overzicht', href: '/admin', icon: Users },
           { label: 'Passport', href: '/admin/passport', icon: BookOpen },
           { label: 'Gebruikersrollen', href: '/admin/users/roles', icon: Shield },
-          { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 },
+          // TODO: activeer zodra /admin/reports route bestaat
+          // { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 },
         ],
       },
     ];
@@ -107,7 +109,8 @@ export function Sidebar() {
           { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
           { label: 'Mijn AI Checks', href: '/assessments', icon: Shield },
           { label: 'Training', href: '/learn', icon: GraduationCap },
-          { label: 'Mijn Licentie', href: '/license', icon: Award },
+          // TODO: activeer zodra /license route bestaat
+          // { label: 'Mijn Licentie', href: '/license', icon: Award },
         ],
       },
     ];
@@ -135,20 +138,7 @@ export function Sidebar() {
           </div>
         ))}
 
-        {/* Help Section */}
-        <div className="mt-auto rounded-lg bg-accent p-4">
-          <h4 className="font-medium text-accent-foreground">Hulp nodig?</h4>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Bekijk onze documentatie of neem contact op.
-          </p>
-          <Link 
-            to="/help" 
-            className="mt-3 inline-flex items-center text-sm font-medium text-primary hover:underline"
-          >
-            Documentatie
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Link>
-        </div>
+        {/* TODO: activeer help-sectie zodra /help route bestaat */}
       </nav>
     </aside>
   );
