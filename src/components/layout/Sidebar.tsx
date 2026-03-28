@@ -11,7 +11,8 @@ import {
   HelpCircle,
   BookOpen,
   Wrench,
-  Library
+  Library,
+  Rocket
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
@@ -51,6 +52,7 @@ export function Sidebar() {
           { label: 'Tools Library', href: '/super-admin/tools', icon: Wrench },
           { label: 'Model Library', href: '/super-admin/model-library', icon: Library },
           { label: 'Learning Library', href: '/super-admin/content', icon: BookOpen },
+          { label: 'Pre-launch checklist', href: '/super-admin/test-checklist', icon: Rocket },
         ],
       },
     ];
