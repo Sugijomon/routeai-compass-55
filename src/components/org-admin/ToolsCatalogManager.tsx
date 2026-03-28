@@ -38,6 +38,9 @@ import {
   useUpdateToolCatalog,
   OrgToolWithCatalog,
 } from "@/hooks/useOrgToolsCatalog";
+import { TypekaartBadge } from "@/components/model-library/TypekaartBadge";
+import { TypekaartLinkDialog } from "@/components/model-library/TypekaartLinkDialog";
+import { usePublishedTypekaarten, useLinkTypekaart } from "@/hooks/useTypekaartLink";
 
 interface ToolConfigFormProps {
   tool: OrgToolWithCatalog;
