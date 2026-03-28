@@ -60,6 +60,7 @@ export function Sidebar() {
         title: 'Shadow AI Scan',
         items: [
           { label: 'Scan beheer', href: '/admin/shadow', icon: Shield },
+          { label: 'Passport', href: '/admin/passport', icon: BookOpen },
         ],
       },
     ];
@@ -90,6 +91,7 @@ export function Sidebar() {
         title: 'Beheer',
         items: [
           { label: 'Overzicht', href: '/admin', icon: Users },
+          { label: 'Passport', href: '/admin/passport', icon: BookOpen },
           { label: 'Gebruikersrollen', href: '/admin/users/roles', icon: Shield },
           { label: 'Rapportages', href: '/admin/reports', icon: BarChart3 },
         ],
