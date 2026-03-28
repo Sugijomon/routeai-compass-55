@@ -152,6 +152,16 @@ export default function App() {
           element={<Navigate to="/dashboard" replace />}
         />
         
+        {/* Assessments List */}
+        <Route
+          path="/assessments"
+          element={
+            <AuthRoute>
+              <Assessments />
+            </AuthRoute>
+          }
+        />
+        
         {/* Assessment Flow - Survey V1-V6 intake */}
         <Route 
           path="/assessments/new" 
