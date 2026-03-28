@@ -283,11 +283,14 @@ export default function ToolsCatalogManager() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [gpaiFilter, setGpaiFilter] = useState<string>("all");
+  const [linkingTool, setLinkingTool] = useState<{ id: string; name: string; typekaartId: string | null } | null>(null);
 
   const { data: tools, isLoading } = useOrgToolsCatalog();
   const { data: stats } = useOrgToolsStats();
   const toggleMutation = useToggleToolCatalog();
   const updateMutation = useUpdateToolCatalog();
+  const { data: typekaarten = [] } = usePublishedTypekaarten();
+  const { mutate: linkTypekaart } = useLinkTypekaart();
 
   const categories = [
     { value: "all", label: "Alle Categorieën" },
@@ -437,20 +440,44 @@ export default function ToolsCatalogManager() {
                 <p className="text-sm">Pas je filters aan of vraag een Super Admin om tools toe te voegen</p>
               </div>
             ) : (
-              filteredTools?.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={tool}
-                  onToggle={handleToggle}
-                  onUpdateConfig={handleUpdateConfig}
-                  isToggling={toggleMutation.isPending}
-                  isUpdating={updateMutation.isPending}
-                />
-              ))
+              filteredTools?.map((tool) => {
+                // Match typekaart by name (tools_library tools matched to model_typekaarten by name similarity)
+                const typekaartMatch = typekaarten.find(t =>
+                  t.display_name.toLowerCase().includes(tool.name.toLowerCase()) ||
+                  tool.name.toLowerCase().includes(t.display_name.toLowerCase())
+                ) ?? null;
+                return (
+                  <ToolCard
+                    key={tool.id}
+                    tool={tool}
+                    onToggle={handleToggle}
+                    onUpdateConfig={handleUpdateConfig}
+                    isToggling={toggleMutation.isPending}
+                    isUpdating={updateMutation.isPending}
+                    typekaartMatch={typekaartMatch}
+                    onLinkTypekaart={() => setLinkingTool({ id: tool.catalog_id ?? tool.id, name: tool.name, typekaartId: typekaartMatch?.id ?? null })}
+                    onUnlinkTypekaart={() => {
+                      if (tool.catalog_id) {
+                        linkTypekaart({ catalogEntryId: tool.catalog_id, typekaartId: null });
+                      }
+                    }}
+                  />
+                );
+              })
             )}
           </div>
         </CardContent>
       </Card>
+
+      {linkingTool && (
+        <TypekaartLinkDialog
+          open={!!linkingTool}
+          onOpenChange={(open) => !open && setLinkingTool(null)}
+          catalogEntryId={linkingTool.id}
+          toolName={linkingTool.name}
+          currentTypekaartId={linkingTool.typekaartId}
+        />
+      )}
     </div>
   );
 }
