@@ -122,15 +122,31 @@ function ToolConfigForm({ tool, onSave, isSaving }: ToolConfigFormProps) {
   );
 }
 
+interface TypekaartMatch {
+  id: string;
+  display_name: string;
+  provider: string;
+  gpai_designated: boolean | null;
+  systemic_risk: boolean | null;
+  eu_license_status: string | null;
+  data_storage_region: string | null;
+  dpa_available: boolean | null;
+  trains_on_input: boolean | null;
+  contractual_restrictions: unknown;
+}
+
 interface ToolCardProps {
   tool: OrgToolWithCatalog;
   onToggle: (toolId: string, enable: boolean) => void;
   onUpdateConfig: (toolId: string, data: any) => void;
   isToggling: boolean;
   isUpdating: boolean;
+  typekaartMatch: TypekaartMatch | null;
+  onLinkTypekaart: () => void;
+  onUnlinkTypekaart: () => void;
 }
 
-function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating }: ToolCardProps) {
+function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating, typekaartMatch, onLinkTypekaart, onUnlinkTypekaart }: ToolCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const getCategoryLabel = (category: string | null) => {
@@ -167,6 +183,34 @@ function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating }: To
                   Contract vereist
                 </Badge>
               )}
+            </div>
+            {/* Typekaart badge */}
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <TypekaartBadge
+                typekaart={typekaartMatch ? {
+                  id: typekaartMatch.id,
+                  display_name: typekaartMatch.display_name,
+                  provider: typekaartMatch.provider,
+                  gpai_designated: typekaartMatch.gpai_designated ?? false,
+                  systemic_risk: typekaartMatch.systemic_risk ?? false,
+                  eu_license_status: typekaartMatch.eu_license_status ?? 'unknown',
+                  data_storage_region: typekaartMatch.data_storage_region,
+                  dpa_available: typekaartMatch.dpa_available ?? false,
+                  trains_on_input: typekaartMatch.trains_on_input ?? false,
+                  contractual_restrictions: (typekaartMatch.contractual_restrictions as Array<{ restriction: string; source: string }>) ?? [],
+                } : null}
+                onUnlink={typekaartMatch ? onUnlinkTypekaart : undefined}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={onLinkTypekaart}
+                title="Typekaart koppelen"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
             </div>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
               {tool.description || "Geen beschrijving beschikbaar"}
