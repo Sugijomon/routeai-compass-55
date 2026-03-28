@@ -85,20 +85,14 @@ export default function AdminDashboard() {
       href: '/admin/lessons',
       show: true,
     },
-    {
-      title: 'Rapporten',
-      description: 'Bekijk statistieken en voortgang',
-      icon: BarChart3,
-      href: '/admin/database-check',
-      show: canManageOrg,
-    },
-    {
-      title: 'Instellingen',
-      description: 'Platform configuratie',
-      icon: Settings,
-      href: '/admin/routes-audit',
-      show: isSuperAdmin,
-    },
+    // TODO: activeer zodra /admin/reports route bestaat
+    // {
+    //   title: 'Rapporten',
+    //   description: 'Bekijk statistieken en voortgang',
+    //   icon: BarChart3,
+    //   href: '/admin/reports',
+    //   show: canManageOrg,
+    // },
   ].filter(action => action.show);
 
   return (
