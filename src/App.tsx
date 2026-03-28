@@ -69,9 +69,9 @@ export default function App() {
         <Route 
           path="/super-admin" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <SuperAdminDashboard />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         
@@ -79,57 +79,57 @@ export default function App() {
         <Route 
           path="/super-admin/organizations" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <OrganizationsManagement />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         <Route 
           path="/super-admin/organizations/:orgId/uitnodigen" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <OrgInvitePage />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         <Route 
           path="/super-admin/tools" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <ToolsLibraryManagement />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         <Route 
           path="/super-admin/content" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <LearningLibraryManagement />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         <Route 
           path="/super-admin/users" 
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <CrossOrgUserManagement />
-            </AuthRoute>
+            </RequireSuperAdmin>
           } 
         />
         <Route
           path="/super-admin/model-library"
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <ModelLibraryPage />
-            </AuthRoute>
+            </RequireSuperAdmin>
           }
         />
         <Route
           path="/super-admin/test-checklist"
           element={
-            <AuthRoute requireAdmin>
+            <RequireSuperAdmin>
               <TestChecklist />
-            </AuthRoute>
+            </RequireSuperAdmin>
           }
         />
         
