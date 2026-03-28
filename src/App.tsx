@@ -15,14 +15,15 @@ import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseEdit from "./pages/admin/AdminCourseEdit";
-import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
-import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
+// TODO: debug-only pagina's — niet opnemen in productie
+// import AdminDatabaseCheck from "./pages/admin/AdminDatabaseCheck";
+// import AdminRoutesAudit from "./pages/admin/AdminRoutesAudit";
 import UserRolesManagement from "./pages/admin/UserRolesManagement";
 import LessonPlayer from "./pages/learn/LessonPlayer";
 import CoursePlayer from "./pages/learn/CoursePlayer";
 import TrainingOverview from "./pages/learn/TrainingOverview";
 import LessonQuestionsPage from "./pages/learn/LessonQuestionsPage";
-import DebugQuiz from "./pages/DebugQuiz";
+// import DebugQuiz from "./pages/DebugQuiz";
 import ContentEditorDashboard from "./pages/editor/ContentEditorDashboard";
 import EditorDashboard from "./pages/editor/EditorDashboard";
 import QuestionEditor from "./pages/editor/QuestionEditor";
@@ -302,25 +303,10 @@ export default function App() {
           } 
         />
         
-        {/* Admin Database Check */}
-        <Route 
-          path="/admin/database-check" 
-          element={
-            <AuthRoute requireAdmin>
-              <AdminDatabaseCheck />
-            </AuthRoute>
-          } 
-        />
-        
-        {/* Admin Routes Audit */}
-        <Route 
-          path="/admin/routes-audit" 
-          element={
-            <AuthRoute requireAdmin>
-              <AdminRoutesAudit />
-            </AuthRoute>
-          } 
-        />
+        {/* TODO: debug-only routes verwijderd uit productie-build
+        <Route path="/admin/database-check" element={<AuthRoute requireAdmin><AdminDatabaseCheck /></AuthRoute>} />
+        <Route path="/admin/routes-audit" element={<AuthRoute requireAdmin><AdminRoutesAudit /></AuthRoute>} />
+        */}
         
         {/* User Roles Management */}
         <Route 
@@ -407,8 +393,9 @@ export default function App() {
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
         
-        {/* Debug page */}
+        {/* TODO: debug-only — niet opnemen in productie
         <Route path="/debug-quiz" element={<DebugQuiz />} />
+        */}
         
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
