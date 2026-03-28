@@ -106,3 +106,11 @@ export const ROUTE_CONFIG = {
   orange: { label: 'Oranje', hex: '#ea580c', bg: 'bg-orange-100', text: 'text-orange-800', euActCategory: 'high_risk' as EuActCategory },
   red:    { label: 'Rood',   hex: '#dc2626', bg: 'bg-red-100',    text: 'text-red-800',    euActCategory: 'prohibited' as EuActCategory },
 } as const;
+
+export type IncidentSeverity = 'low' | 'medium' | 'high';
+
+export const SEVERITY_CONFIG = {
+  low:    { label: 'Laag',  bg: 'bg-green-100',  text: 'text-green-800'  },
+  medium: { label: 'Middel', bg: 'bg-amber-100',  text: 'text-amber-800'  },
+  high:   { label: 'Hoog',  bg: 'bg-red-100',    text: 'text-red-800'    },
+} as const;
