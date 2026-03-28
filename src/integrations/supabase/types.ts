@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      archetype_ml_map: {
+        Row: {
+          archetype_code: string
+          context_card_text: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          library_item_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          archetype_code: string
+          context_card_text?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          library_item_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          archetype_code?: string
+          context_card_text?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          library_item_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetype_ml_map_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "learning_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           archetype_refs: string[]
