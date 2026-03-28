@@ -123,6 +123,14 @@ export default function DpoDashboard() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="incidents" className="gap-2">
+            Incidenten
+            {(incidents ?? []).filter((inc: any) => !inc.dpo_reviewed_at && inc.dpo_notified).length > 0 && (
+              <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">
+                {(incidents ?? []).filter((inc: any) => !inc.dpo_reviewed_at && inc.dpo_notified).length}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* ═══ TAB: Shadow AI Scan ═══ */}
