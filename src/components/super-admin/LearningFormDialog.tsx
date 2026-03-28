@@ -105,7 +105,7 @@ export function LearningFormDialog({
       form.reset({
         title: item.title,
         description: item.description || "",
-        content_type: item.content_type,
+        content_type: item.content_type as string as "assessment" | "course" | "document" | "module",
         difficulty_level: item.difficulty_level || "basic",
         status: item.status,
         version: item.version || "1.0",
