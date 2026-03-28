@@ -21,7 +21,8 @@ export function useCreateAssessment() {
       if (!user || !profile?.org_id) throw new Error('Niet ingelogd of geen organisatie');
 
       let output = buildEngineOutput(answers, toolNameRaw);
-      let assessmentStatus: AssessmentStatus = output.route === 'orange' ? 'pending_dpo' : 'active';
+      // pending_dpo wordt opgeslagen als 'active' — de DPO-trigger bepaalt notificatie via route
+      let assessmentStatus: 'active' | 'pending_review' = 'active';
 
       // Claude-assist flow voor V2 vrije tekst
       if (needsClaudeAssist(answers) && v2Freetext?.trim()) {
@@ -58,7 +59,7 @@ export function useCreateAssessment() {
                 reason_filtered: funcData.reason_filtered ?? undefined,
                 routing_method: 'claude_assisted',
               };
-              assessmentStatus = output.route === 'orange' ? 'pending_dpo' : 'active';
+              assessmentStatus = output.route === 'orange' ? 'active' : 'active';
             }
           } catch {
             assessmentStatus = 'pending_review';
