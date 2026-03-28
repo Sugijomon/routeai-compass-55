@@ -3,7 +3,7 @@
 
 export type AssessmentRoute  = 'green' | 'yellow' | 'orange' | 'red';
 export type RoutingMethod    = 'deterministic' | 'claude_assisted';
-export type AssessmentStatus = 'active' | 'paused' | 'stopped' | 'superseded';
+export type AssessmentStatus = 'active' | 'paused' | 'stopped' | 'superseded' | 'pending_dpo' | 'pending_review';
 
 export type ArchetypeCode =
   | 'G-01' | 'G-02' | 'G-03' | 'G-04'
