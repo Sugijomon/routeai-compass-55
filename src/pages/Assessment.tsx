@@ -12,16 +12,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Flag } from 'lucide-react';
 import { ReportIncidentDialog } from '@/components/incidents/ReportIncidentDialog';
-import { supabase } from '@/integrations/supabase/client';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { ROUTE_CONFIG, EU_ACT_CATEGORY_LABELS } from '@/types/assessment';
-import type { AssessmentRoute, EuActCategory } from '@/types/assessment';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
 
 export default function Assessment() {
   const { id } = useParams<{ id: string }>();
