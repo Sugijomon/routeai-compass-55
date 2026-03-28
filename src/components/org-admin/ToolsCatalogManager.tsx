@@ -211,7 +211,6 @@ function ToolCard({ tool, onToggle, onUpdateConfig, isToggling, isUpdating, type
                 <Link2 className="h-3.5 w-3.5" />
               </Button>
             </div>
-            </div>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
               {tool.description || "Geen beschrijving beschikbaar"}
             </p>
