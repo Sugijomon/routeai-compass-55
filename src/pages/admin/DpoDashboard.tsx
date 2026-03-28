@@ -9,15 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3, FileText, CheckCircle } from 'lucide-react';
+import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3, FileText, CheckCircle, Flag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useDpoDashboard } from '@/hooks/useDpoDashboard';
 import { DpoNotificationBar } from '@/components/admin/DpoNotificationBar';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAssessmentReviewQueue } from '@/hooks/useAssessmentReviewQueue';
 import { AssessmentReviewSheet } from '@/components/admin/AssessmentReviewSheet';
-import { ROUTE_CONFIG } from '@/types/assessment';
+import { ROUTE_CONFIG, SEVERITY_CONFIG } from '@/types/assessment';
 import { toast } from 'sonner';
+import { useOrgIncidents } from '@/hooks/useIncidents';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -67,6 +68,7 @@ export default function DpoDashboard() {
   } = useDpoDashboard();
 
   const { queue, isLoading: queueLoading, decide, getNotificationId } = useAssessmentReviewQueue();
+  const { data: incidents, isLoading: incidentsLoading } = useOrgIncidents();
 
   const [selectedRun, setSelectedRun] = useState<typeof pendingReviews[number] | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
@@ -118,6 +120,14 @@ export default function DpoDashboard() {
             {queue.length > 0 && (
               <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">
                 {queue.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="incidents" className="gap-2">
+            Incidenten
+            {(incidents ?? []).filter((inc: any) => !inc.dpo_reviewed_at && inc.dpo_notified).length > 0 && (
+              <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">
+                {(incidents ?? []).filter((inc: any) => !inc.dpo_reviewed_at && inc.dpo_notified).length}
               </Badge>
             )}
           </TabsTrigger>
@@ -345,6 +355,78 @@ export default function DpoDashboard() {
                           <Button size="sm" onClick={() => setSelectedAssessment(assessment as unknown as Record<string, unknown>)}>
                             Beoordelen
                           </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ═══ TAB: Incidenten ═══ */}
+        <TabsContent value="incidents" className="space-y-6 mt-6">
+          <div>
+            <h2 className="text-xl font-semibold">Incidentlog</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gemelde AI-incidenten. Medium en Hoog triggeren automatisch een DPO-notificatie.
+            </p>
+          </div>
+
+          {incidentsLoading ? (
+            <Skeleton className="h-48 w-full" />
+          ) : (incidents ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Flag className="h-12 w-12 text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground">Nog geen incidenten gemeld.</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Beschrijving</TableHead>
+                    <TableHead>Ernst</TableHead>
+                    <TableHead>Tool</TableHead>
+                    <TableHead>Gemeld door</TableHead>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>DPO-status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(incidents ?? []).map((inc: any) => {
+                    const sev = inc.severity as keyof typeof SEVERITY_CONFIG;
+                    const sevConfig = SEVERITY_CONFIG[sev];
+                    const reporterProfile = inc.profiles as Record<string, string> | null;
+                    const assessmentData = inc.assessments as Record<string, string> | null;
+                    return (
+                      <TableRow key={inc.id}>
+                        <TableCell className="max-w-xs">
+                          <p className="text-sm line-clamp-2">{inc.description}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${sevConfig.bg} ${sevConfig.text} border-0 text-xs`}>
+                            {sevConfig.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {assessmentData?.tool_name_raw ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {reporterProfile?.full_name ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(inc.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          {inc.dpo_reviewed_at ? (
+                            <Badge className="bg-green-100 text-green-800 border-0 text-xs">Behandeld</Badge>
+                          ) : inc.dpo_notified ? (
+                            <Badge variant="secondary" className="text-xs">DPO geïnformeerd</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     );

@@ -418,6 +418,83 @@ export type Database = {
           },
         ]
       }
+      incidents: {
+        Row: {
+          assessment_id: string | null
+          created_at: string
+          description: string
+          dpo_action: Database["public"]["Enums"]["incident_dpo_action"] | null
+          dpo_notes: string | null
+          dpo_notified: boolean
+          dpo_reviewed_at: string | null
+          dpo_reviewed_by: string | null
+          id: string
+          org_id: string
+          output_used: string | null
+          reported_by: string
+          severity: Database["public"]["Enums"]["incident_severity"]
+        }
+        Insert: {
+          assessment_id?: string | null
+          created_at?: string
+          description: string
+          dpo_action?: Database["public"]["Enums"]["incident_dpo_action"] | null
+          dpo_notes?: string | null
+          dpo_notified?: boolean
+          dpo_reviewed_at?: string | null
+          dpo_reviewed_by?: string | null
+          id?: string
+          org_id: string
+          output_used?: string | null
+          reported_by: string
+          severity: Database["public"]["Enums"]["incident_severity"]
+        }
+        Update: {
+          assessment_id?: string | null
+          created_at?: string
+          description?: string
+          dpo_action?: Database["public"]["Enums"]["incident_dpo_action"] | null
+          dpo_notes?: string | null
+          dpo_notified?: boolean
+          dpo_reviewed_at?: string | null
+          dpo_reviewed_by?: string | null
+          id?: string
+          org_id?: string
+          output_used?: string | null
+          reported_by?: string
+          severity?: Database["public"]["Enums"]["incident_severity"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_dpo_reviewed_by_fkey"
+            columns: ["dpo_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_answers: {
         Row: {
           answered_at: string | null
@@ -1893,6 +1970,12 @@ export type Database = {
         | "incident_high"
         | "reexam_required"
         | "tool_discovery_pending"
+      incident_dpo_action:
+        | "auto_handled"
+        | "reviewed"
+        | "intervention_planned"
+        | "resolved"
+      incident_severity: "low" | "medium" | "high"
       learning_content_type:
         | "course"
         | "module"
@@ -2061,6 +2144,13 @@ export const Constants = {
         "reexam_required",
         "tool_discovery_pending",
       ],
+      incident_dpo_action: [
+        "auto_handled",
+        "reviewed",
+        "intervention_planned",
+        "resolved",
+      ],
+      incident_severity: ["low", "medium", "high"],
       learning_content_type: [
         "course",
         "module",
