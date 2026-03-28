@@ -25,7 +25,7 @@ export function useAssessmentReviewQueue() {
           profiles!assessments_created_by_fkey(full_name, email, department)
         `)
         .eq('org_id', orgId)
-        .in('status', ['pending_dpo', 'pending_review'])
+        .in('status', ['pending_dpo' as never, 'pending_review'])
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data ?? [];

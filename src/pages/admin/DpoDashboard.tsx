@@ -279,10 +279,10 @@ export default function DpoDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard
               title="Wacht op DPO"
-              value={queueLoading ? '…' : queue.filter(a => a.status === 'pending_dpo').length}
+              value={queueLoading ? '…' : queue.filter(a => (a.status as string) === 'pending_dpo').length}
               icon={FileText}
               isLoading={queueLoading}
-              valueClassName={queue.filter(a => a.status === 'pending_dpo').length > 0 ? 'text-orange-600' : undefined}
+              valueClassName={queue.filter(a => (a.status as string) === 'pending_dpo').length > 0 ? 'text-orange-600' : undefined}
             />
             <StatCard
               title="Toelichting vereist"
