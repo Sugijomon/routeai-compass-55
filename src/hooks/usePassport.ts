@@ -123,16 +123,24 @@ export function usePassport() {
   const saveIdentity = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
       if (!orgId) throw new Error('Geen org_id');
+
+      // Defence-in-depth: filter payload door whitelist voordat het naar DB gaat
+      const safePayload = filterPayloadByWhitelist(payload);
+
+      if (Object.keys(safePayload).length === 0) {
+        throw new Error('Geen schrijfbare velden in payload. Controleer de sectie-whitelist.');
+      }
+
       const { error } = await supabase
         .from('passport_identity')
-        .upsert({ org_id: orgId, ...payload } as never, { onConflict: 'org_id' });
+        .upsert({ org_id: orgId, ...safePayload } as never, { onConflict: 'org_id' });
       if (error) throw error;
     },
     onSuccess: () => {
       refetchIdentity();
       toast.success('Opgeslagen.');
     },
-    onError: () => toast.error('Opslaan mislukt.'),
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Opslaan mislukt.'),
   });
 
   // Sectie 3: Tool catalog + shadow AI discovery
