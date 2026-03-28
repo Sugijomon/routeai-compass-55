@@ -59,7 +59,7 @@ export function useCreateAssessment() {
                 reason_filtered: funcData.reason_filtered ?? undefined,
                 routing_method: 'claude_assisted',
               };
-              assessmentStatus = output.route === 'orange' ? 'active' : 'active';
+              assessmentStatus = 'active';
             }
           } catch {
             assessmentStatus = 'pending_review';
