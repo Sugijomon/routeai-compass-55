@@ -421,8 +421,11 @@ export type Database = {
       }
       learning_library: {
         Row: {
+          archetype_codes: string[] | null
+          cluster_id: string | null
           content: Json | null
           content_type: Database["public"]["Enums"]["learning_content_type"]
+          context_card: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -431,7 +434,9 @@ export type Database = {
             | null
           estimated_duration_minutes: number | null
           id: string
+          is_activation_req: boolean | null
           learning_objectives: string[] | null
+          lesson_id: string | null
           org_id: string | null
           required_for_license: string[] | null
           status: Database["public"]["Enums"]["learning_status"]
@@ -440,8 +445,11 @@ export type Database = {
           version: string | null
         }
         Insert: {
+          archetype_codes?: string[] | null
+          cluster_id?: string | null
           content?: Json | null
           content_type: Database["public"]["Enums"]["learning_content_type"]
+          context_card?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -450,7 +458,9 @@ export type Database = {
             | null
           estimated_duration_minutes?: number | null
           id?: string
+          is_activation_req?: boolean | null
           learning_objectives?: string[] | null
+          lesson_id?: string | null
           org_id?: string | null
           required_for_license?: string[] | null
           status?: Database["public"]["Enums"]["learning_status"]
@@ -459,8 +469,11 @@ export type Database = {
           version?: string | null
         }
         Update: {
+          archetype_codes?: string[] | null
+          cluster_id?: string | null
           content?: Json | null
           content_type?: Database["public"]["Enums"]["learning_content_type"]
+          context_card?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -469,7 +482,9 @@ export type Database = {
             | null
           estimated_duration_minutes?: number | null
           id?: string
+          is_activation_req?: boolean | null
           learning_objectives?: string[] | null
+          lesson_id?: string | null
           org_id?: string | null
           required_for_license?: string[] | null
           status?: Database["public"]["Enums"]["learning_status"]
@@ -483,6 +498,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_library_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
           {
@@ -1732,7 +1754,12 @@ export type Database = {
         | "incident_high"
         | "reexam_required"
         | "tool_discovery_pending"
-      learning_content_type: "course" | "module" | "assessment" | "document"
+      learning_content_type:
+        | "course"
+        | "module"
+        | "assessment"
+        | "document"
+        | "microlearning"
       learning_difficulty_level: "basic" | "intermediate" | "advanced"
       learning_status: "draft" | "published" | "deprecated"
       question_type:
@@ -1895,7 +1922,13 @@ export const Constants = {
         "reexam_required",
         "tool_discovery_pending",
       ],
-      learning_content_type: ["course", "module", "assessment", "document"],
+      learning_content_type: [
+        "course",
+        "module",
+        "assessment",
+        "document",
+        "microlearning",
+      ],
       learning_difficulty_level: ["basic", "intermediate", "advanced"],
       learning_status: ["draft", "published", "deprecated"],
       question_type: [
