@@ -74,6 +74,31 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check 1: Caller's org_id moet overeenkomen met orgId (super_admin mag alles)
+    if (!isSuperAdmin) {
+      const { data: callerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("org_id")
+        .eq("id", callerId)
+        .single();
+
+      if (!callerProfile || callerProfile.org_id !== orgId) {
+        return new Response(
+          JSON.stringify({ error: "Je kunt alleen gebruikers uitnodigen voor je eigen organisatie." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 },
+        );
+      }
+    }
+
+    // Check 2: org_admin en dpo mogen alleen user, manager, dpo toewijzen
+    const ORG_ADMIN_ALLOWED_ROLES = ["user", "manager", "dpo"];
+    if (!isSuperAdmin && !ORG_ADMIN_ALLOWED_ROLES.includes(role)) {
+      return new Response(
+        JSON.stringify({ error: `De rol '${role}' kan alleen door een platformbeheerder worden toegewezen.` }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 },
+      );
+    }
+
     // Invite user via admin API
     const inviteOptions: Record<string, unknown> = {
       data: {
