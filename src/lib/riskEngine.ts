@@ -170,9 +170,12 @@ export function determineRoute(answers: SurveyAnswers): RouteResult {
       break;
 
     default:
-      route = 'green';
-      archetype = 'G-01';
-      routingMethod = 'claude_assisted';
+      // Geen stille green-fallback — onbekende V2_main is een programmafout
+      throw new Error(
+        `Ongeldige V2_main waarde: "${answers.V2_main}". ` +
+        `Verwacht: supportive | informative | evaluative | decision_prep | autonomous. ` +
+        `Laat de medewerker de vraag opnieuw beantwoorden.`
+      );
   }
 
   // ── Stap 4: Escalatie-regels (alleen omhoog) ──
