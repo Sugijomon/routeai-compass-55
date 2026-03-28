@@ -8,6 +8,7 @@ import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
 import Assessment from "./pages/Assessment";
+import Assessments from "./pages/Assessments";
 import AssessmentGuard from "./components/guards/AssessmentGuard";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
@@ -149,6 +150,16 @@ export default function App() {
         <Route 
           path="/user-dashboard" 
           element={<Navigate to="/dashboard" replace />}
+        />
+        
+        {/* Assessments List */}
+        <Route
+          path="/assessments"
+          element={
+            <AuthRoute>
+              <Assessments />
+            </AuthRoute>
+          }
         />
         
         {/* Assessment Flow - Survey V1-V6 intake */}

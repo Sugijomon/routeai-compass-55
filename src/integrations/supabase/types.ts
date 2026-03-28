@@ -52,6 +52,107 @@ export type Database = {
           },
         ]
       }
+      assessment_ml_assignments: {
+        Row: {
+          assessment_id: string
+          assigned_at: string
+          context_card_text: string | null
+          id: string
+          is_required: boolean
+          library_item_id: string
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          assigned_at?: string
+          context_card_text?: string | null
+          id?: string
+          is_required?: boolean
+          library_item_id: string
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          assigned_at?: string
+          context_card_text?: string | null
+          id?: string
+          is_required?: boolean
+          library_item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_ml_assignments_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_ml_assignments_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "learning_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_ml_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_ml_completions: {
+        Row: {
+          assessment_id: string
+          completed_at: string
+          id: string
+          library_item_id: string
+          module_version: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          completed_at?: string
+          id?: string
+          library_item_id: string
+          module_version?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          completed_at?: string
+          id?: string
+          library_item_id?: string
+          module_version?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_ml_completions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_ml_completions_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "learning_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_ml_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           archetype_refs: string[]
