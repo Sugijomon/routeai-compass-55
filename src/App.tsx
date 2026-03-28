@@ -43,6 +43,7 @@ import ToolsLibraryManagement from "./pages/super-admin/ToolsLibraryManagement";
 import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManagement";
 import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
 import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
+import TestChecklist from "./pages/super-admin/TestChecklist";
 import PassportPage from "./pages/admin/PassportPage";
 export default function App() {
   return (
@@ -119,6 +120,14 @@ export default function App() {
           element={
             <AuthRoute requireAdmin>
               <ModelLibraryPage />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/super-admin/test-checklist"
+          element={
+            <AuthRoute requireAdmin>
+              <TestChecklist />
             </AuthRoute>
           }
         />
