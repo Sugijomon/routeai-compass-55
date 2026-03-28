@@ -97,7 +97,12 @@ export default function ExamenPage() {
     completeCurrentAttempt,
     startNewAttempt,
     isLoading: attemptsLoading,
+    isBlocked,
+    failedAttempts,
+    attemptCount,
   } = useLessonAttempts({ lessonId, userId });
+
+  const { profile } = useUserProfile();
 
   const handleCanProceed = (canProceed: boolean) => setCanProceedFromBlock(canProceed);
 
@@ -132,12 +137,23 @@ export default function ExamenPage() {
         completed_at: new Date().toISOString(),
       }, { onConflict: 'user_id,lesson_id' });
 
-      if (passed) {
+    if (passed) {
         // The trigger will handle granting the rijbewijs — just refetch the profile
         await refetchProfile();
         toast.success('Gefeliciteerd! Je hebt het AI Literacy examen gehaald!');
         setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
       } else {
+        // DPO-notificatie bij 3e mislukte poging
+        const newFailedCount = failedAttempts.length + 1;
+        if (newFailedCount >= 3 && profile?.org_id) {
+          await supabase.from('dpo_notifications').insert({
+            org_id: profile.org_id,
+            type: 'reexam_required' as any,
+            status: 'pending',
+            notes: `Medewerker ${profile.full_name ?? userId} heeft het AI Literacy examen 3× niet gehaald. Heractivatie vereist.`,
+          });
+        }
+
         setCompletionData({
           score: percentage,
           earnedPoints,
@@ -202,6 +218,36 @@ export default function ExamenPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Blocked after 3 failed attempts
+  if (isBlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+              <Shield className="h-10 w-10 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">Examen geblokkeerd</h2>
+              <p className="text-muted-foreground">
+                Je hebt het examen 3 keer geprobeerd zonder te slagen.
+                Je DPO of leidinggevende heeft een melding ontvangen.
+                Neem contact op voor heractivatie.
+              </p>
+              <p className="text-sm font-medium text-destructive">
+                Pogingen: {attemptCount}/3
+              </p>
+            </div>
+            <Button variant="outline" onClick={handleSignOut} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Uitloggen
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -296,6 +342,7 @@ export default function ExamenPage() {
           hasQuizzes={completionData.hasQuizzes}
           passingScore={completionData.passingScore}
           attemptNumber={completionData.attemptNumber}
+          attemptsUsed={attemptCount}
           onContinue={() => setShowCompletionModal(false)}
           onRetry={handleRetry}
         />

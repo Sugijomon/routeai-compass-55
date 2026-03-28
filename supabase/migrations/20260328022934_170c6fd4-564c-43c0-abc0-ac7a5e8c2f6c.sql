@@ -1,0 +1,1 @@
+ALTER TYPE public.dpo_notification_type ADD VALUE IF NOT EXISTS 'reexam_required';

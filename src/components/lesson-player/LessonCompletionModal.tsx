@@ -11,6 +11,7 @@ interface LessonCompletionModalProps {
   hasQuizzes: boolean;
   passingScore: number; // percentage required to pass (0-100)
   attemptNumber?: number; // current attempt number
+  attemptsUsed?: number; // total completed attempts so far
   onContinue: () => void;
   onRetry?: () => void; // callback for retry button
 }
@@ -36,6 +37,7 @@ export function LessonCompletionModal({
   hasQuizzes,
   passingScore,
   attemptNumber,
+  attemptsUsed,
   onContinue,
   onRetry,
 }: LessonCompletionModalProps) {
@@ -114,8 +116,14 @@ export function LessonCompletionModal({
           </div>
         </div>
 
+        {attemptsUsed !== undefined && attemptsUsed >= 2 && !passed && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            Dit was je laatste poging. Na afsluiten van dit scherm is het examen geblokkeerd.
+          </div>
+        )}
+
         <Button onClick={handleButtonClick} className="w-full" size="lg">
-          {passed ? 'Doorgaan' : 'Opnieuw proberen'}
+          {passed ? 'Doorgaan' : (attemptsUsed !== undefined && attemptsUsed >= 2 ? 'Sluiten' : 'Opnieuw proberen')}
         </Button>
       </DialogContent>
     </Dialog>
