@@ -1724,6 +1724,7 @@ export type Database = {
         | "stopped"
         | "superseded"
         | "pending_review"
+        | "pending_dpo"
       dpo_notification_status: "pending" | "seen" | "actioned" | "dismissed"
       dpo_notification_type:
         | "orange_route_new"
@@ -1884,6 +1885,7 @@ export const Constants = {
         "stopped",
         "superseded",
         "pending_review",
+        "pending_dpo",
       ],
       dpo_notification_status: ["pending", "seen", "actioned", "dismissed"],
       dpo_notification_type: [
