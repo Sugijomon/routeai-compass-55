@@ -8,6 +8,7 @@ import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
 import NewAssessment from "./pages/NewAssessment";
 import Assessment from "./pages/Assessment";
+import Assessments from "./pages/Assessments";
 import AssessmentGuard from "./components/guards/AssessmentGuard";
 import AdminLessons from "./pages/admin/AdminLessons";
 import AdminLessonEdit from "./pages/admin/AdminLessonEdit";
