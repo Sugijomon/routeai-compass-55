@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      {member.role === "admin" && <Badge variant="outline">Beheerder</Badge>}
+                      {member.role === "org_admin" && <Badge variant="outline">Beheerder</Badge>}
                       {member.has_ai_rijbewijs ? (
                         <Badge className="bg-primary/10 text-primary border-primary/20">
                           <Award className="h-3 w-3 mr-1" />
