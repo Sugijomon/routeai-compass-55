@@ -364,6 +364,78 @@ export default function DpoDashboard() {
             </div>
           )}
         </TabsContent>
+
+        {/* ═══ TAB: Incidenten ═══ */}
+        <TabsContent value="incidents" className="space-y-6 mt-6">
+          <div>
+            <h2 className="text-xl font-semibold">Incidentlog</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gemelde AI-incidenten. Medium en Hoog triggeren automatisch een DPO-notificatie.
+            </p>
+          </div>
+
+          {incidentsLoading ? (
+            <Skeleton className="h-48 w-full" />
+          ) : (incidents ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Flag className="h-12 w-12 text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground">Nog geen incidenten gemeld.</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Beschrijving</TableHead>
+                    <TableHead>Ernst</TableHead>
+                    <TableHead>Tool</TableHead>
+                    <TableHead>Gemeld door</TableHead>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>DPO-status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(incidents ?? []).map((inc: any) => {
+                    const sev = inc.severity as keyof typeof SEVERITY_CONFIG;
+                    const sevConfig = SEVERITY_CONFIG[sev];
+                    const reporterProfile = inc.profiles as Record<string, string> | null;
+                    const assessmentData = inc.assessments as Record<string, string> | null;
+                    return (
+                      <TableRow key={inc.id}>
+                        <TableCell className="max-w-xs">
+                          <p className="text-sm line-clamp-2">{inc.description}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${sevConfig.bg} ${sevConfig.text} border-0 text-xs`}>
+                            {sevConfig.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {assessmentData?.tool_name_raw ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {reporterProfile?.full_name ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(inc.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          {inc.dpo_reviewed_at ? (
+                            <Badge className="bg-green-100 text-green-800 border-0 text-xs">Behandeld</Badge>
+                          ) : inc.dpo_notified ? (
+                            <Badge variant="secondary" className="text-xs">DPO geïnformeerd</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Shadow Survey Review Sheet */}
