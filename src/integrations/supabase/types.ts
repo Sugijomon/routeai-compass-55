@@ -1199,6 +1199,56 @@ export type Database = {
         }
         Relationships: []
       }
+      passport_identity: {
+        Row: {
+          ai_policy_url: string | null
+          created_at: string | null
+          dpo_email: string | null
+          dpo_name: string | null
+          governance_scope: string | null
+          id: string
+          last_reviewed_at: string | null
+          org_description: string | null
+          org_id: string
+          review_cycle: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_policy_url?: string | null
+          created_at?: string | null
+          dpo_email?: string | null
+          dpo_name?: string | null
+          governance_scope?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          org_description?: string | null
+          org_id: string
+          review_cycle?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_policy_url?: string | null
+          created_at?: string | null
+          dpo_email?: string | null
+          dpo_name?: string | null
+          governance_scope?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          org_description?: string | null
+          org_id?: string
+          review_cycle?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passport_identity_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           ai_rijbewijs_obtained_at: string | null
