@@ -342,6 +342,7 @@ export default function ExamenPage() {
           hasQuizzes={completionData.hasQuizzes}
           passingScore={completionData.passingScore}
           attemptNumber={completionData.attemptNumber}
+          attemptsUsed={attemptCount}
           onContinue={() => setShowCompletionModal(false)}
           onRetry={handleRetry}
         />
