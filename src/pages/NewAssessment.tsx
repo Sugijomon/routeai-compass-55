@@ -620,7 +620,7 @@ export default function NewAssessment() {
                 Je antwoorden zijn verwerkt. Klik hieronder om de beoordeling op te slaan en het resultaat te bekijken.
               </p>
               <Button
-                onClick={() => createAssessment({ answers: answers as SurveyAnswers, toolNameRaw })}
+                onClick={() => createAssessment({ answers: answers as SurveyAnswers, toolNameRaw, v2Freetext: v2Sub === 'other' ? v2Freetext : undefined })}
                 disabled={isPending}
                 className="gap-2 mt-4"
               >

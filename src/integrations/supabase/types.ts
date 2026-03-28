@@ -1718,7 +1718,12 @@ export type Database = {
         | "manager"
         | "dpo"
       assessment_route: "green" | "yellow" | "orange" | "red"
-      assessment_status: "active" | "paused" | "stopped" | "superseded"
+      assessment_status:
+        | "active"
+        | "paused"
+        | "stopped"
+        | "superseded"
+        | "pending_review"
       dpo_notification_status: "pending" | "seen" | "actioned" | "dismissed"
       dpo_notification_type:
         | "orange_route_new"
@@ -1873,7 +1878,13 @@ export const Constants = {
         "dpo",
       ],
       assessment_route: ["green", "yellow", "orange", "red"],
-      assessment_status: ["active", "paused", "stopped", "superseded"],
+      assessment_status: [
+        "active",
+        "paused",
+        "stopped",
+        "superseded",
+        "pending_review",
+      ],
       dpo_notification_status: ["pending", "seen", "actioned", "dismissed"],
       dpo_notification_type: [
         "orange_route_new",

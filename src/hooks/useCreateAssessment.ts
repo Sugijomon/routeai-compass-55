@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { buildEngineOutput } from '@/lib/riskEngine';
-import type { SurveyAnswers } from '@/types/assessment';
+import { buildEngineOutput, needsClaudeAssist, tryKeywordMatch } from '@/lib/riskEngine';
+import type { SurveyAnswers, AssessmentStatus, ArchetypeCode } from '@/types/assessment';
 import { toast } from 'sonner';
 
 export function useCreateAssessment() {
@@ -13,10 +13,59 @@ export function useCreateAssessment() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: async ({ answers, toolNameRaw }: { answers: SurveyAnswers; toolNameRaw: string }) => {
+    mutationFn: async ({ answers, toolNameRaw, v2Freetext }: {
+      answers: SurveyAnswers;
+      toolNameRaw: string;
+      v2Freetext?: string;
+    }) => {
       if (!user || !profile?.org_id) throw new Error('Niet ingelogd of geen organisatie');
 
-      const output = buildEngineOutput(answers, toolNameRaw);
+      let output = buildEngineOutput(answers, toolNameRaw);
+      // pending_dpo wordt opgeslagen als 'active' — de DPO-trigger bepaalt notificatie via route
+      let assessmentStatus: 'active' | 'pending_review' = 'active';
+
+      // Claude-assist flow voor V2 vrije tekst
+      if (needsClaudeAssist(answers) && v2Freetext?.trim()) {
+        // Stap 1: keyword-matching
+        const keywordMatch = tryKeywordMatch(v2Freetext);
+
+        if (keywordMatch) {
+          // Keyword gevonden — geen AI-aanroep nodig
+          output = {
+            ...output,
+            primary_archetype: keywordMatch as ArchetypeCode,
+            routing_method: 'deterministic',
+          };
+        } else {
+          // Geen keyword-match → Edge Function
+          try {
+            const { data: funcData, error: funcError } = await supabase.functions.invoke('claude-archetype-assist', {
+              body: {
+                tool_name_raw: toolNameRaw,
+                v2_freetext: v2Freetext,
+                deterministic_route: output.route,
+              },
+            });
+
+            if (funcError || funcData?.error) {
+              // Timeout of fout → pending_review
+              assessmentStatus = 'pending_review';
+            } else {
+              // AI heeft een archetype en/of route teruggegeven
+              output = {
+                ...output,
+                primary_archetype: (funcData.archetype ?? output.primary_archetype) as ArchetypeCode,
+                route: funcData.route ?? output.route,
+                reason_filtered: funcData.reason_filtered ?? undefined,
+                routing_method: 'claude_assisted',
+              };
+              assessmentStatus = 'active';
+            }
+          } catch {
+            assessmentStatus = 'pending_review';
+          }
+        }
+      }
 
       const { data, error } = await supabase
         .from('assessments')
@@ -42,7 +91,7 @@ export function useCreateAssessment() {
           dpo_oversight_required: output.dpo_oversight_required,
           user_instructions: output.user_instructions,
           dpo_instructions: output.dpo_instructions,
-          status: 'active',
+          status: assessmentStatus,
         }])
         .select('id')
         .single();

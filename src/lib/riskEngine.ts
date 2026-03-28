@@ -16,6 +16,35 @@ import type {
   AssessmentRequirements,
 } from '@/types/assessment';
 
+// ─── Keyword-mapping voor V2 vrije tekst ───
+const KEYWORD_MAP: Array<{ keywords: string[]; archetype: ArchetypeCode }> = [
+  { keywords: ['cv', 'sollicitant', 'recruitment', 'werving', 'selectie', 'cv screening'], archetype: 'O-01' },
+  { keywords: ['student', 'beoordelen', 'tentamen', 'examen', 'cijfer', 'evaluatie leerling'], archetype: 'O-01' },
+  { keywords: ['krediet', 'lening', 'credit scoring', 'kredietwaardig', 'financieel risico'], archetype: 'O-02' },
+  { keywords: ['agent', 'workflow', 'automatisch mailen', 'zelfstandig', 'autonoom versturen'], archetype: 'O-03' },
+  { keywords: ['e-mail schrijven', 'email schrijven', 'mail opstellen', 'brief schrijven'], archetype: 'G-01' },
+  { keywords: ['samenvatten', 'samenvatting', 'summarize', 'korter maken'], archetype: 'G-02' },
+  { keywords: ['brainstorm', 'ideeën genereren', 'creatief', 'slogans', 'namen bedenken'], archetype: 'G-03' },
+  { keywords: ['kennisbank', 'interne documenten', 'rag', 'qa over', 'zoeken in'], archetype: 'G-04' },
+  { keywords: ['vertalen', 'vertaling', 'translate', 'vertaaltool'], archetype: 'Y-02' },
+  { keywords: ['data analyseren', 'statistieken', 'dashboard', 'grafiek maken', 'trends'], archetype: 'Y-03' },
+  { keywords: ['social scoring', 'gedragsscore', 'burgerscore', 'manipulatie', 'gezichtsherkenning'], archetype: 'R-01' },
+];
+
+export function tryKeywordMatch(freetext: string): ArchetypeCode | null {
+  const lower = freetext.toLowerCase();
+  for (const entry of KEYWORD_MAP) {
+    if (entry.keywords.some(k => lower.includes(k))) return entry.archetype;
+  }
+  return null;
+}
+
+export function needsClaudeAssist(answers: Partial<SurveyAnswers>): boolean {
+  if (answers.V2_main === 'supportive' && answers.V2_sub === 'other') return true;
+  if (answers.V2_main === 'informative' && answers.V2_sub === 'other') return true;
+  return false;
+}
+
 export const DECISION_VERSION = 'beslislogica-v2.1';
 
 // ─── Route-niveau volgorde (voor escalatie-vergelijking) ───
