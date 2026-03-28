@@ -3,6 +3,90 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
 
+// Schrijfmodus per passport-sectie
+type WriteMode = 'editable' | 'admin_only' | 'system_only';
+
+interface SectionFieldConfig {
+  writeMode: WriteMode;
+  allowedFields: string[];
+}
+
+// Whitelist: alleen velden met writeMode 'editable' passeren het upsert-filter.
+// admin_only en system_only worden client-side gestript als extra beveiligingslaag.
+// De DB-trigger/RLS blijft authoritative — dit is defence-in-depth.
+const PASSPORT_FIELD_CONFIG: Record<string, SectionFieldConfig> = {
+  // Sectie 1: Organisatie-identiteit — handmatig bewerkbaar door org_admin
+  identity: {
+    writeMode: 'editable',
+    allowedFields: ['org_description', 'dpo_name', 'dpo_email', 'ai_policy_url'],
+  },
+  // Sectie 2: Governance-principes — handmatig bewerkbaar door org_admin
+  governance: {
+    writeMode: 'editable',
+    allowedFields: ['governance_scope', 'review_cycle', 'last_reviewed_at'],
+  },
+  // Sectie 3: Tool catalogus — system_only, gevuld via org_tools_catalog
+  toolCatalog: {
+    writeMode: 'system_only',
+    allowedFields: [],
+  },
+  // Sectie 5: Assessment register — system_only, gevuld via assessments tabel
+  assessmentRegister: {
+    writeMode: 'system_only',
+    allowedFields: [],
+  },
+  // Sectie 6: Annex III index — system_only, afgeleide van assessments
+  annexIII: {
+    writeMode: 'system_only',
+    allowedFields: [],
+  },
+  // Sectie 12: AI Literacy dekking — system_only, afgeleide van profiles
+  literacyCoverage: {
+    writeMode: 'system_only',
+    allowedFields: [],
+  },
+};
+
+/**
+ * Filtert payload op basis van de sectie-whitelist.
+ * Alleen velden uit secties met writeMode 'editable' worden doorgelaten.
+ * Onbekende velden worden altijd gestript.
+ */
+function filterPayloadByWhitelist(
+  payload: Record<string, unknown>,
+  sections: string[] = ['identity', 'governance']
+): Record<string, unknown> {
+  const allAllowedFields = new Set<string>();
+
+  for (const section of sections) {
+    const config = PASSPORT_FIELD_CONFIG[section];
+    if (!config || config.writeMode !== 'editable') continue;
+    for (const field of config.allowedFields) {
+      allAllowedFields.add(field);
+    }
+  }
+
+  const filtered: Record<string, unknown> = {};
+  const blocked: string[] = [];
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (allAllowedFields.has(key)) {
+      filtered[key] = value;
+    } else {
+      blocked.push(key);
+    }
+  }
+
+  if (blocked.length > 0) {
+    console.warn(
+      `[usePassport] Geblokkeerde velden uit upsert-payload: ${blocked.join(', ')}. ` +
+      `Alleen editable velden worden doorgelaten.`
+    );
+  }
+
+  return filtered;
+}
+
 export function usePassport() {
   const { profile } = useUserProfile();
   const orgId = profile?.org_id;
