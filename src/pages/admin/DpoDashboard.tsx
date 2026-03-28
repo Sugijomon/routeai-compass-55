@@ -9,15 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3, FileText, CheckCircle } from 'lucide-react';
+import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3, FileText, CheckCircle, Flag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useDpoDashboard } from '@/hooks/useDpoDashboard';
 import { DpoNotificationBar } from '@/components/admin/DpoNotificationBar';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAssessmentReviewQueue } from '@/hooks/useAssessmentReviewQueue';
 import { AssessmentReviewSheet } from '@/components/admin/AssessmentReviewSheet';
-import { ROUTE_CONFIG } from '@/types/assessment';
+import { ROUTE_CONFIG, SEVERITY_CONFIG } from '@/types/assessment';
 import { toast } from 'sonner';
+import { useOrgIncidents } from '@/hooks/useIncidents';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -67,6 +68,7 @@ export default function DpoDashboard() {
   } = useDpoDashboard();
 
   const { queue, isLoading: queueLoading, decide, getNotificationId } = useAssessmentReviewQueue();
+  const { data: incidents, isLoading: incidentsLoading } = useOrgIncidents();
 
   const [selectedRun, setSelectedRun] = useState<typeof pendingReviews[number] | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');

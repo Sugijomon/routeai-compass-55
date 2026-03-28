@@ -192,6 +192,12 @@ export default function Assessment() {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+        <ReportIncidentDialog
+          open={incidentOpen}
+          onOpenChange={setIncidentOpen}
+          assessmentId={assessment.id}
+          toolName={assessment.tool_name_raw}
+        />
       </div>
     </AppLayout>
   );
