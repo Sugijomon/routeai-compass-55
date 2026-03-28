@@ -15,7 +15,7 @@ import {
   Building2, 
   Shield,
   BarChart3,
-  Settings,
+  
   Trash2,
   UserCog
 } from 'lucide-react';
