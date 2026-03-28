@@ -161,6 +161,15 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
   // Get completed attempts only
   const completedAttempts = attempts.filter(a => a.completed_at);
 
+  // Failed attempts (completed but not passed)
+  const failedAttempts = completedAttempts.filter(a => !a.passed);
+
+  // Has user ever passed?
+  const hasPassedBefore = completedAttempts.some(a => a.passed);
+
+  // Blocked after 3 failed attempts without ever passing
+  const isBlocked = !hasPassedBefore && failedAttempts.length >= 3;
+
   // Best attempt (highest percentage)
   const bestAttempt = completedAttempts.length > 0
     ? completedAttempts.reduce((best, current) => 
@@ -174,11 +183,15 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
   return {
     attempts,
     completedAttempts,
+    failedAttempts,
     activeAttempt,
     currentAttemptId,
     currentAttemptNumber: activeAttempt?.attempt_number ?? currentAttemptNumber,
     bestAttempt,
     passingAttempt,
+    hasPassedBefore,
+    isBlocked,
+    attemptCount: completedAttempts.length,
     isLoading,
     startNewAttempt,
     completeCurrentAttempt,
