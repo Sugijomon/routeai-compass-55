@@ -38,6 +38,13 @@ const Index = () => {
         </div>
       )}
 
+      {/* Onboarding voortgang — verdwijnt automatisch na eerste AI Check */}
+      {!canManageOrg && (
+        <div className="mb-6">
+          <OnboardingProgress />
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <LicenseStatusCard license={null} />
