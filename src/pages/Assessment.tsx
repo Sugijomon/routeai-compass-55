@@ -1,5 +1,17 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { ROUTE_CONFIG, EU_ACT_CATEGORY_LABELS } from '@/types/assessment';
+import type { AssessmentRoute, EuActCategory } from '@/types/assessment';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Flag } from 'lucide-react';
+import { ReportIncidentDialog } from '@/components/incidents/ReportIncidentDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ROUTE_CONFIG, EU_ACT_CATEGORY_LABELS } from '@/types/assessment';
@@ -14,6 +26,7 @@ import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle } from 'l
 export default function Assessment() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [incidentOpen, setIncidentOpen] = useState(false);
 
   const { data: assessment, isLoading } = useQuery({
     queryKey: ['assessment', id],
@@ -65,9 +78,19 @@ export default function Assessment() {
     <AppLayout>
       <div className="mx-auto max-w-2xl space-y-6 py-6">
         {/* Terugknop */}
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2 -ml-2">
-          <ArrowLeft className="h-4 w-4" /> Terug naar dashboard
+        <Button variant="ghost" onClick={() => navigate('/assessments')} className="gap-2 -ml-2">
+          <ArrowLeft className="h-4 w-4" /> Terug naar overzicht
         </Button>
+
+        {/* Incident melden — alleen bij actieve assessment */}
+        {assessment.status === 'active' && (
+          <div className="flex justify-end -mt-4">
+            <Button variant="ghost" size="sm" onClick={() => setIncidentOpen(true)} className="gap-2 text-muted-foreground hover:text-foreground">
+              <Flag className="h-4 w-4" />
+              Incident melden
+            </Button>
+          </div>
+        )}
 
         {/* Header */}
         <div>
