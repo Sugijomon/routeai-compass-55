@@ -30,6 +30,7 @@ import { MicrolearningEditSheet } from '@/components/admin/lesson-editor/Microle
 export default function ContentEditorDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { profile } = useUserProfile();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');

@@ -40,6 +40,7 @@ interface LessonFormData {
 export function CreateLessonDialog({ open, onOpenChange }: CreateLessonDialogProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { profile } = useUserProfile();
   
   const [formData, setFormData] = useState<LessonFormData>({
     title: '',

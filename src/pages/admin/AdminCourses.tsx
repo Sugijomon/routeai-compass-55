@@ -40,6 +40,7 @@ interface CourseWithLessonCount extends Course {
 
 export default function AdminCourses() {
   const dashboardUrl = useDashboardRedirect();
+  const { profile } = useUserProfile();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({
