@@ -1,20 +1,26 @@
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Bell } from 'lucide-react';
 
-interface Props {
-  onSwitchToTypekaarten: () => void;
-}
-
-export function AlertsTab({ onSwitchToTypekaarten }: Props) {
+export function AlertsTab() {
   return (
-    <div className="text-center py-16 space-y-4">
-      <Bell className="h-10 w-10 mx-auto text-muted-foreground" />
-      <p className="text-muted-foreground">
-        Automatische model-alerts worden hier weergegeven zodra de RSS-adapter actief is.
-      </p>
-      <Button variant="outline" size="sm" onClick={onSwitchToTypekaarten}>
-        Model handmatig toevoegen
-      </Button>
-    </div>
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-16 space-y-4">
+        <div className="rounded-full bg-muted p-4">
+          <Bell className="h-8 w-8 text-muted-foreground" />
+        </div>
+
+        <div className="text-center space-y-1">
+          <p className="font-medium">Automatische model-alerts</p>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Nieuwe modellen gedetecteerd via RSS of model card adapters verschijnen hier.
+            De RSS-adapter is een post-launch feature (Sprint 3g).
+          </p>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Voorlopig: voeg nieuwe typekaarten handmatig toe via het tabblad "Typekaarten".
+        </p>
+      </CardContent>
+    </Card>
   );
 }
