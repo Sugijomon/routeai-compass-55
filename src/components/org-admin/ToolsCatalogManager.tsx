@@ -324,11 +324,16 @@ export default function ToolsCatalogManager() {
   });
 
   const handleToggle = (toolId: string, enable: boolean) => {
-    toggleMutation.mutate({ toolId, enable });
+    // Zoek catalog_id op — useToggleToolCatalog verwacht het catalog entry id
+    const tool = tools?.find(t => t.id === toolId);
+    const catalogId = tool?.catalog_id ?? toolId;
+    toggleMutation.mutate({ toolId: catalogId, enable });
   };
 
   const handleUpdateConfig = (toolId: string, data: any) => {
-    updateMutation.mutate({ tool_id: toolId, ...data });
+    const tool = tools?.find(t => t.id === toolId);
+    const catalogId = tool?.catalog_id ?? toolId;
+    updateMutation.mutate({ tool_id: catalogId, ...data });
   };
 
   if (isLoading) {

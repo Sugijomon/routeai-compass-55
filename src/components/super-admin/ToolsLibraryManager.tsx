@@ -105,12 +105,19 @@ function ToolUsageCount({ toolId }: { toolId: string }) {
   const { data: count, isLoading } = useQuery({
     queryKey: ["tool-usage-count", toolId],
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from("tools_catalog")
+      // Zoek tool naam, dan tel org_tools_catalog entries
+      const { data: tool } = await supabase
+        .from("tools_library")
+        .select("name")
+        .eq("id", toolId)
+        .single();
+      if (!tool) return 0;
+      const { count: cnt, error } = await supabase
+        .from("org_tools_catalog")
         .select("*", { count: "exact", head: true })
-        .eq("tool_id", toolId);
+        .ilike("tool_name", tool.name);
       if (error) throw error;
-      return count || 0;
+      return cnt || 0;
     },
   });
 

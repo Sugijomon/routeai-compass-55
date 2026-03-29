@@ -73,13 +73,13 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
     },
   });
 
-  // Haal tools_catalog + tools_library op voor deze org
+  // Haal org_tools_catalog op voor deze org
   const { data: catalogData, isLoading: catalogLoading } = useQuery({
     queryKey: ['org-catalog-for-matching', orgId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tools_catalog')
-        .select('id, tool_id, is_enabled, requires_approval, custom_risk_notes, custom_guidelines')
+        .from('org_tools_catalog')
+        .select('id, tool_name, status, notes')
         .eq('org_id', orgId);
       if (error) throw error;
       return data ?? [];
@@ -106,9 +106,9 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
     const processMatches = async () => {
       setProcessing(true);
 
-      // Bouw lookup: library tool_id -> catalog entry
-      const catalogByToolId = new Map(
-        catalogData.map((c) => [c.tool_id, c])
+      // Bouw lookup: tool_name (lowercase) -> catalog entry
+      const catalogByName = new Map(
+        catalogData.map((c) => [c.tool_name.toLowerCase(), c])
       );
 
       const matched: ToolMatchResult[] = [];
@@ -118,51 +118,54 @@ export default function ShadowSurveyResults({ surveyRunId, orgId, onComplete }: 
       for (const disc of discoveries) {
         const toolNameLower = disc.tool_name.toLowerCase();
 
-        // Zoek match in tools_library (case-insensitive bevat-match)
+        // Zoek match in org_tools_catalog (case-insensitive)
+        const catalogEntry = catalogByName.get(toolNameLower) ??
+          [...catalogByName.entries()].find(([name]) =>
+            name.includes(toolNameLower) || toolNameLower.includes(name)
+          )?.[1];
+
+        // Zoek match in tools_library voor resulting_tool_id
         const libraryMatch = libraryData.find((lib) =>
           lib.name.toLowerCase().includes(toolNameLower) ||
           toolNameLower.includes(lib.name.toLowerCase())
         );
 
-        if (!libraryMatch) {
-          // Geen match → grijs
+        if (libraryMatch) {
+          updates.push({ discoveryId: disc.id, toolId: libraryMatch.id });
+        }
+
+        if (!catalogEntry) {
+          // Niet in catalogus → grijs
           matched.push({
             toolName: disc.tool_name,
             discoveryId: disc.id,
             status: 'grey',
           });
           pendingIds.push(disc.id);
-          continue;
-        }
-
-        const catalogEntry = catalogByToolId.get(libraryMatch.id);
-        updates.push({ discoveryId: disc.id, toolId: libraryMatch.id });
-
-        if (!catalogEntry || !catalogEntry.is_enabled) {
-          // Niet in catalogus of uitgeschakeld → rood
+        } else if (catalogEntry.status === 'not_approved') {
+          // Niet goedgekeurd → rood
           matched.push({
             toolName: disc.tool_name,
             discoveryId: disc.id,
             status: 'red',
-            reason: catalogEntry?.custom_risk_notes || 'Deze tool is niet goedgekeurd voor gebruik binnen de organisatie.',
-            alternative: catalogEntry?.custom_guidelines || undefined,
-            matchedToolId: libraryMatch.id,
+            reason: catalogEntry.notes || 'Deze tool is niet goedgekeurd voor gebruik binnen de organisatie.',
+            matchedToolId: libraryMatch?.id,
           });
-        } else if (catalogEntry.requires_approval) {
-          // Goedkeuring vereist → geel
+        } else if (catalogEntry.status === 'under_review' || catalogEntry.status === 'known_unconfigured') {
+          // Wordt beoordeeld → geel
           matched.push({
             toolName: disc.tool_name,
             discoveryId: disc.id,
             status: 'yellow',
-            matchedToolId: libraryMatch.id,
+            matchedToolId: libraryMatch?.id,
           });
         } else {
-          // Goedgekeurd → groen
+          // approved → groen
           matched.push({
             toolName: disc.tool_name,
             discoveryId: disc.id,
             status: 'green',
-            matchedToolId: libraryMatch.id,
+            matchedToolId: libraryMatch?.id,
           });
         }
       }

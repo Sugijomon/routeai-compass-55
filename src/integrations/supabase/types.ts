@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      _legacy_tools_catalog: {
+        Row: {
+          allowed_roles: string[] | null
+          contract_expiry_date: string | null
+          contract_reference: string | null
+          cost_center: string | null
+          created_at: string | null
+          custom_display_name: string | null
+          custom_guidelines: string | null
+          custom_icon_url: string | null
+          custom_risk_notes: string | null
+          display_priority: number | null
+          id: string
+          is_enabled: boolean | null
+          monthly_cost: number | null
+          notes: string | null
+          org_id: string
+          procurement_contact: string | null
+          procurement_date: string | null
+          requires_approval: boolean | null
+          tool_id: string
+          updated_at: string | null
+          usage_limits: string | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          contract_expiry_date?: string | null
+          contract_reference?: string | null
+          cost_center?: string | null
+          created_at?: string | null
+          custom_display_name?: string | null
+          custom_guidelines?: string | null
+          custom_icon_url?: string | null
+          custom_risk_notes?: string | null
+          display_priority?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          org_id: string
+          procurement_contact?: string | null
+          procurement_date?: string | null
+          requires_approval?: boolean | null
+          tool_id: string
+          updated_at?: string | null
+          usage_limits?: string | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          contract_expiry_date?: string | null
+          contract_reference?: string | null
+          cost_center?: string | null
+          created_at?: string | null
+          custom_display_name?: string | null
+          custom_guidelines?: string | null
+          custom_icon_url?: string | null
+          custom_risk_notes?: string | null
+          display_priority?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          org_id?: string
+          procurement_contact?: string | null
+          procurement_date?: string | null
+          requires_approval?: boolean | null
+          tool_id?: string
+          updated_at?: string | null
+          usage_limits?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tools_catalog_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tools_catalog_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archetype_ml_map: {
         Row: {
           archetype_code: string
@@ -1344,47 +1431,6 @@ export type Database = {
           },
         ]
       }
-      shadow_survey_reports: {
-        Row: {
-          generated_at: string | null
-          generated_by: string | null
-          id: string
-          import_status: string | null
-          imported_to_routeai_at: string | null
-          org_id: string
-          report_data: Json
-          survey_version: string
-        }
-        Insert: {
-          generated_at?: string | null
-          generated_by?: string | null
-          id?: string
-          import_status?: string | null
-          imported_to_routeai_at?: string | null
-          org_id: string
-          report_data?: Json
-          survey_version?: string
-        }
-        Update: {
-          generated_at?: string | null
-          generated_by?: string | null
-          id?: string
-          import_status?: string | null
-          imported_to_routeai_at?: string | null
-          org_id?: string
-          report_data?: Json
-          survey_version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shadow_survey_reports_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       shadow_survey_runs: {
         Row: {
           ai_maturity_score: number | null
@@ -1540,93 +1586,6 @@ export type Database = {
             columns: ["survey_run_id"]
             isOneToOne: false
             referencedRelation: "shadow_survey_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tools_catalog: {
-        Row: {
-          allowed_roles: string[] | null
-          contract_expiry_date: string | null
-          contract_reference: string | null
-          cost_center: string | null
-          created_at: string | null
-          custom_display_name: string | null
-          custom_guidelines: string | null
-          custom_icon_url: string | null
-          custom_risk_notes: string | null
-          display_priority: number | null
-          id: string
-          is_enabled: boolean | null
-          monthly_cost: number | null
-          notes: string | null
-          org_id: string
-          procurement_contact: string | null
-          procurement_date: string | null
-          requires_approval: boolean | null
-          tool_id: string
-          updated_at: string | null
-          usage_limits: string | null
-        }
-        Insert: {
-          allowed_roles?: string[] | null
-          contract_expiry_date?: string | null
-          contract_reference?: string | null
-          cost_center?: string | null
-          created_at?: string | null
-          custom_display_name?: string | null
-          custom_guidelines?: string | null
-          custom_icon_url?: string | null
-          custom_risk_notes?: string | null
-          display_priority?: number | null
-          id?: string
-          is_enabled?: boolean | null
-          monthly_cost?: number | null
-          notes?: string | null
-          org_id: string
-          procurement_contact?: string | null
-          procurement_date?: string | null
-          requires_approval?: boolean | null
-          tool_id: string
-          updated_at?: string | null
-          usage_limits?: string | null
-        }
-        Update: {
-          allowed_roles?: string[] | null
-          contract_expiry_date?: string | null
-          contract_reference?: string | null
-          cost_center?: string | null
-          created_at?: string | null
-          custom_display_name?: string | null
-          custom_guidelines?: string | null
-          custom_icon_url?: string | null
-          custom_risk_notes?: string | null
-          display_priority?: number | null
-          id?: string
-          is_enabled?: boolean | null
-          monthly_cost?: number | null
-          notes?: string | null
-          org_id?: string
-          procurement_contact?: string | null
-          procurement_date?: string | null
-          requires_approval?: boolean | null
-          tool_id?: string
-          updated_at?: string | null
-          usage_limits?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tools_catalog_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tools_catalog_tool_id_fkey"
-            columns: ["tool_id"]
-            isOneToOne: false
-            referencedRelation: "tools_library"
             referencedColumns: ["id"]
           },
         ]
