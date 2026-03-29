@@ -1,180 +1,186 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useCreateTypekaart, type CreateTypekaartInput } from '@/hooks/useModelTypekaarten';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editId?: string | null;
 }
 
-const MODEL_TYPES = [
-  { value: 'language_model', label: 'Language model' },
-  { value: 'image_model', label: 'Image model' },
-  { value: 'multimodal', label: 'Multimodal' },
-  { value: 'code_model', label: 'Code model' },
-  { value: 'other', label: 'Overig' },
-];
+const DEFAULT_FORM = {
+  canonical_id: '', display_name: '', provider: '', model_type: 'GPAI',
+  gpai_designated: false, systemic_risk: false,
+  eu_license_status: 'open', hosting_region: 'US', data_storage_region: 'US',
+  trains_on_input: false, dpa_available: false,
+  typekaart_version: '1.0', status: 'draft',
+};
 
-const EU_LICENSE_OPTIONS = [
-  { value: 'open', label: 'Open' },
-  { value: 'restricted', label: 'Restricted' },
-  { value: 'prohibited', label: 'Prohibited' },
-  { value: 'unknown', label: 'Unknown' },
-];
+export function CreateTypekaartDialog({ open, onOpenChange, editId }: Props) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const isEdit = !!editId;
 
-const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-  { value: 'deprecated', label: 'Deprecated' },
-];
-
-export function CreateTypekaartDialog({ open, onOpenChange }: Props) {
-  const create = useCreateTypekaart();
-
-  const [form, setForm] = useState<CreateTypekaartInput>({
-    canonical_id: '',
-    display_name: '',
-    provider: '',
-    model_type: 'language_model',
-    gpai_designated: false,
-    systemic_risk: false,
-    eu_license_status: 'unknown',
-    hosting_region: '',
-    data_storage_region: '',
-    trains_on_input: false,
-    dpa_available: false,
-    status: 'draft',
+  const { data: existing } = useQuery({
+    queryKey: ['typekaart-detail', editId],
+    queryFn: async () => {
+      if (!editId) return null;
+      const { data } = await supabase.from('model_typekaarten').select('*').eq('id', editId).single();
+      return data;
+    },
+    enabled: !!editId,
   });
 
-  const setField = <K extends keyof CreateTypekaartInput>(k: K, v: CreateTypekaartInput[K]) =>
-    setForm(prev => ({ ...prev, [k]: v }));
+  useEffect(() => {
+    if (existing) {
+      setForm({
+        canonical_id: existing.canonical_id ?? '',
+        display_name: existing.display_name ?? '',
+        provider: existing.provider ?? '',
+        model_type: existing.model_type ?? 'GPAI',
+        gpai_designated: existing.gpai_designated ?? false,
+        systemic_risk: existing.systemic_risk ?? false,
+        eu_license_status: existing.eu_license_status ?? 'open',
+        hosting_region: existing.hosting_region ?? 'US',
+        data_storage_region: existing.data_storage_region ?? 'US',
+        trains_on_input: existing.trains_on_input ?? false,
+        dpa_available: existing.dpa_available ?? false,
+        typekaart_version: existing.typekaart_version ?? '1.0',
+        status: existing.status ?? 'draft',
+      });
+    } else if (!editId) {
+      setForm(DEFAULT_FORM);
+    }
+  }, [existing, editId]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        ...form,
+        last_verified_at: new Date().toISOString(),
+      };
+      if (isEdit) {
+        const { error } = await supabase.from('model_typekaarten').update(payload).eq('id', editId!);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('model_typekaarten').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['typekaarten-all'] });
+      qc.invalidateQueries({ queryKey: ['typekaarten-published'] });
+      toast.success(isEdit ? 'Typekaart bijgewerkt.' : 'Typekaart aangemaakt.');
+      onOpenChange(false);
+    },
+    onError: (e: Error) => toast.error(`Opslaan mislukt: ${e.message}`),
+  });
+
+  const f = (field: keyof typeof form) => (val: string | boolean) =>
+    setForm(prev => ({ ...prev, [field]: val }));
 
   const isValid = form.canonical_id.trim() && form.display_name.trim() && form.provider.trim();
-
-  const handleSave = async (publishNow: boolean) => {
-    if (!isValid) return;
-    const input = {
-      ...form,
-      status: publishNow ? 'published' : 'draft',
-      hosting_region: form.hosting_region || undefined,
-      data_storage_region: form.data_storage_region || undefined,
-    };
-    await create.mutateAsync(input);
-    onOpenChange(false);
-    resetForm();
-  };
-
-  const resetForm = () => setForm({
-    canonical_id: '', display_name: '', provider: '', model_type: 'language_model',
-    gpai_designated: false, systemic_risk: false, eu_license_status: 'unknown',
-    hosting_region: '', data_storage_region: '', trains_on_input: false, dpa_available: false, status: 'draft',
-  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nieuwe typekaart</DialogTitle>
+          <DialogTitle>{isEdit ? 'Typekaart bewerken' : 'Nieuwe typekaart'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 pt-2">
-          {/* display_name */}
-          <div className="space-y-1.5">
+        <div className="space-y-5 pt-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Canonical ID *</Label>
+              <Input value={form.canonical_id} onChange={e => f('canonical_id')(e.target.value)}
+                placeholder="bijv. chatgpt-plus" className="mt-1" disabled={isEdit} />
+            </div>
+            <div>
+              <Label>Versie</Label>
+              <Input value={form.typekaart_version} onChange={e => f('typekaart_version')(e.target.value)} className="mt-1" />
+            </div>
+          </div>
+          <div>
             <Label>Weergavenaam *</Label>
-            <Input value={form.display_name} onChange={e => setField('display_name', e.target.value)} placeholder="GPT-4o" />
+            <Input value={form.display_name} onChange={e => f('display_name')(e.target.value)} className="mt-1" />
           </div>
-
-          {/* canonical_id */}
-          <div className="space-y-1.5">
-            <Label>Canonical ID *</Label>
-            <Input value={form.canonical_id} onChange={e => setField('canonical_id', e.target.value)} placeholder="gpt-4o" />
-          </div>
-
-          {/* provider */}
-          <div className="space-y-1.5">
-            <Label>Aanbieder *</Label>
-            <Input value={form.provider} onChange={e => setField('provider', e.target.value)} placeholder="OpenAI" />
-          </div>
-
-          {/* model_type */}
-          <div className="space-y-1.5">
-            <Label>Modeltype</Label>
-            <Select value={form.model_type} onValueChange={v => setField('model_type', v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {MODEL_TYPES.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Toggles rij */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="text-sm">GPAI</Label>
-              <Switch checked={form.gpai_designated} onCheckedChange={v => setField('gpai_designated', v)} />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Aanbieder *</Label>
+              <Input value={form.provider} onChange={e => f('provider')(e.target.value)} className="mt-1" />
             </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="text-sm">Systemisch risico</Label>
-              <Switch checked={form.systemic_risk} onCheckedChange={v => setField('systemic_risk', v)} />
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="text-sm">Traint op input</Label>
-              <Switch checked={form.trains_on_input} onCheckedChange={v => setField('trains_on_input', v)} />
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="text-sm">DPA beschikbaar</Label>
-              <Switch checked={form.dpa_available} onCheckedChange={v => setField('dpa_available', v)} />
+            <div>
+              <Label>Modeltype</Label>
+              <Input value={form.model_type} onChange={e => f('model_type')(e.target.value)} className="mt-1" placeholder="GPAI" />
             </div>
           </div>
 
-          {/* eu_license_status */}
-          <div className="space-y-1.5">
-            <Label>EU-licentiestatus</Label>
-            <Select value={form.eu_license_status} onValueChange={v => setField('eu_license_status', v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {EU_LICENSE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Hosting & storage */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Hosting-regio</Label>
-              <Input value={form.hosting_region ?? ''} onChange={e => setField('hosting_region', e.target.value)} placeholder="EU / US / Globaal" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>EU-licentiestatus</Label>
+              <Select value={form.eu_license_status} onValueChange={v => f('eu_license_status')(v)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="restricted">Beperkt</SelectItem>
+                  <SelectItem value="prohibited">Verboden</SelectItem>
+                  <SelectItem value="unknown">Onbekend</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>Data-opslagregio</Label>
-              <Input value={form.data_storage_region ?? ''} onChange={e => setField('data_storage_region', e.target.value)} placeholder="EU / US / Globaal" />
+            <div>
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={v => f('status')(v)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Gepubliceerd</SelectItem>
+                  <SelectItem value="deprecated">Gearchiveerd</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Status */}
-          <div className="space-y-1.5">
-            <Label>Status</Label>
-            <Select value={form.status} onValueChange={v => setField('status', v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Hosting regio</Label>
+              <Input value={form.hosting_region} onChange={e => f('hosting_region')(e.target.value)}
+                className="mt-1" placeholder="EU / US / Mixed" />
+            </div>
+            <div>
+              <Label>Dataopslag regio</Label>
+              <Input value={form.data_storage_region} onChange={e => f('data_storage_region')(e.target.value)}
+                className="mt-1" placeholder="EU / US / Mixed" />
+            </div>
           </div>
 
-          {/* Acties */}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={!isValid || create.isPending}>
-              Opslaan als draft
-            </Button>
-            <Button onClick={() => handleSave(true)} disabled={!isValid || create.isPending}>
-              Publiceren
-            </Button>
+          <div className="space-y-3 rounded-lg border p-4">
+            {[
+              { field: 'gpai_designated' as const, label: 'GPAI-aangemerkt', desc: 'Officieel als GPAI geregistreerd door EU AI Office' },
+              { field: 'systemic_risk' as const, label: 'Systemisch risico', desc: 'Boven 10²⁵ FLOPs drempel (Art. 55–56 EU AI Act)' },
+              { field: 'trains_on_input' as const, label: 'Traint op input', desc: 'Standaard: model leert van gebruikersinvoer' },
+              { field: 'dpa_available' as const, label: 'DPA beschikbaar', desc: 'Verwerkersovereenkomst beschikbaar via vendor' },
+            ].map(({ field, label, desc }) => (
+              <div key={field} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+                <Switch checked={form[field] as boolean} onCheckedChange={v => f(field)(v)} />
+              </div>
+            ))}
           </div>
+
+          <Button onClick={() => save.mutate()} disabled={!isValid || save.isPending} className="w-full">
+            {save.isPending ? 'Opslaan...' : isEdit ? 'Wijzigingen opslaan' : 'Typekaart aanmaken'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

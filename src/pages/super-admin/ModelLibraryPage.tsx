@@ -34,7 +34,7 @@ export default function ModelLibraryPage() {
         </TabsContent>
 
         <TabsContent value="alerts">
-          <AlertsTab onSwitchToTypekaarten={() => setActiveTab('typekaarten')} />
+          <AlertsTab />
         </TabsContent>
 
         <TabsContent value="changelog">
