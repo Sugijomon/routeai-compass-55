@@ -66,7 +66,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
     return '/editor/cursussen';
   }
   if (roles.includes('dpo')) {
-    return '/admin?tab=risk-profiles';
+    return '/admin/shadow';
   }
   if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
     return '/admin';
