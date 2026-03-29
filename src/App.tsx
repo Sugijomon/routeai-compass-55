@@ -33,7 +33,7 @@ import OrganisatieOnboarding from "./pages/onboarding/OrganisatieOnboarding";
 import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
 import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
-import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
+
 import ScanDashboard from "./pages/admin/ScanDashboard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
@@ -379,7 +379,7 @@ export default function App() {
         <Route path="/shadow-survey" element={<AuthRoute><ShadowSurveyPage /></AuthRoute>} />
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
-        <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
+        
         <Route path="/admin/shadow" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanDashboard /></AuthRoute>} />
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />

@@ -28,7 +28,7 @@ import { toast } from 'sonner';
 
 export default function ExamenPage() {
   const { user, signOut } = useAuth();
-  const { hasAiRijbewijs, refetch: refetchProfile } = useUserProfile();
+  const { hasAiRijbewijs, refetch: refetchProfile, profile } = useUserProfile();
   const { isSuperAdmin, isOrgAdmin, isContentEditor } = useUserRole();
   const navigate = useNavigate();
   const userId = user?.id ?? null;
@@ -104,7 +104,7 @@ export default function ExamenPage() {
     attemptCount,
   } = useLessonAttempts({ lessonId, userId });
 
-  const { profile } = useUserProfile();
+  
 
   const handleCanProceed = (canProceed: boolean) => setCanProceedFromBlock(canProceed);
 
