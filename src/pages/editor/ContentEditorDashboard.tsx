@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GraduationCap, BookOpen, CheckCircle, Plus, Trash2, BookMarked } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ export default function ContentEditorDashboard() {
     try {
       const { data, error } = await supabase
         .from('courses')
-        .insert({ title: newTitle.trim(), description: newDescription.trim() || null })
+        .insert({ title: newTitle.trim(), description: newDescription.trim() || null, org_id: profile?.org_id })
         .select('id')
         .single();
       if (error) throw error;

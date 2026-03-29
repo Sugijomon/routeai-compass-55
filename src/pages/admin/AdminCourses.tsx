@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -94,6 +95,7 @@ export default function AdminCourses() {
         unlocks_capability: formData.unlocks_capability || null,
         passing_threshold: formData.passing_threshold,
         is_published: false,
+        org_id: profile?.org_id,
       });
 
       if (error) throw error;
