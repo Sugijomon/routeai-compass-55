@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Loader2, Info } from 'lucide-react';
+import { TeamParticipationBadge } from './TeamParticipationBadge';
 
 type UsesAi = 'ja_regelmatig' | 'soms' | 'zelden' | 'niet_dat_ik_weet' | 'nee';
 type Frequency = 'dagelijks' | 'wekelijks' | 'maandelijks' | 'af_en_toe';
@@ -105,6 +106,8 @@ export default function OrientationStep({ surveyRunId, onNext, onBack }: Props) 
           zodat er duidelijke, ondersteunende afspraken gemaakt kunnen worden.
         </p>
       </div>
+
+      <TeamParticipationBadge />
 
       {/* Vraag 1 */}
       <Card>

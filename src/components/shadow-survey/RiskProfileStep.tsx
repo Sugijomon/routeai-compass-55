@@ -20,6 +20,7 @@ import {
   ArrowRight, Loader2, ShieldCheck, ShieldAlert, Shield,
   AlertTriangle, CheckCircle2, Search, Target, Info, Eye,
 } from 'lucide-react';
+import { TeamParticipationBadge } from './TeamParticipationBadge';
 
 // --- Mapping van antwoorden naar riskEngine-sleutels ---
 
@@ -350,6 +351,8 @@ export default function RiskProfileStep({
         <p className="text-sm text-muted-foreground">Stap 6 van 6 — Risicoprofiel</p>
         <Progress value={90} className="h-2" />
       </div>
+
+      <TeamParticipationBadge />
 
       {/* V1 — Data classificatie */}
       <Card>
