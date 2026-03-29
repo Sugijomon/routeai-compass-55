@@ -415,7 +415,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean | null
-          org_id?: string
+          org_id: string
           passing_threshold?: number | null
           required_for_onboarding?: boolean | null
           title: string
@@ -979,7 +979,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           lesson_type?: string
-          org_id?: string
+          org_id: string
           passing_score?: number | null
           title: string
           updated_at?: string | null
