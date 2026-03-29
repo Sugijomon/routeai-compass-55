@@ -10,9 +10,86 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Flag } from 'lucide-react';
+import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Flag, Clock, ShieldAlert, Pause } from 'lucide-react';
 import { ReportIncidentDialog } from '@/components/incidents/ReportIncidentDialog';
 import { MicrolearningCard } from '@/components/assessments/MicrolearningCard';
+
+function StatusBanner({ status, route }: { status: string; route: string }) {
+  if (status === 'active' && route !== 'orange') return null;
+
+  if (status === 'active' && route === 'orange') {
+    return (
+      <Alert className="border-green-200 bg-green-50">
+        <CheckCircle className="h-4 w-4 text-green-700" />
+        <AlertDescription className="text-green-900">
+          Je DPO heeft goedgekeurd en de micro-learning is afgerond. Je mag deze toepassing nu inzetten.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (status === 'pending_dpo') {
+    return (
+      <Alert className="border-amber-200 bg-amber-50">
+        <Clock className="h-4 w-4 text-amber-700" />
+        <AlertDescription className="text-amber-900">
+          Nog niet actief. Twee stappen zijn nodig voordat je kunt starten:
+          <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
+            <li>Voltooi de micro-learning hieronder</li>
+            <li>Je DPO geeft goedkeuring (dit loopt parallel)</li>
+          </ol>
+          <p className="text-xs mt-2 text-amber-700">Het assessment wordt automatisch actief zodra beide stappen zijn afgerond.</p>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (status === 'pending_review') {
+    return (
+      <Alert className="border-blue-200 bg-blue-50">
+        <Info className="h-4 w-4 text-blue-700" />
+        <AlertDescription className="text-blue-900">
+          De AI kon de use-case niet volledig classificeren. Je DPO of beheerder bekijkt dit assessment handmatig.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (status === 'stopped') {
+    return (
+      <Alert variant="destructive">
+        <ShieldAlert className="h-4 w-4" />
+        <AlertDescription>
+          Dit assessment is gestopt door de DPO. Neem contact op met je beheerder voor meer informatie.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (status === 'paused') {
+    return (
+      <Alert className="border-muted bg-muted/30">
+        <Pause className="h-4 w-4 text-muted-foreground" />
+        <AlertDescription className="text-muted-foreground">
+          Dit assessment is tijdelijk gepauzeerd.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (route === 'red') {
+    return (
+      <Alert variant="destructive">
+        <XCircle className="h-4 w-4" />
+        <AlertDescription>
+          Gebruik is geblokkeerd. Neem contact op met IT en de juridische afdeling voordat je verdere stappen zet.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return null;
+}
 
 export default function Assessment() {
   const { id } = useParams<{ id: string }>();
@@ -48,8 +125,8 @@ export default function Assessment() {
       <AppLayout>
         <div className="mx-auto max-w-2xl text-center py-12">
           <p className="text-muted-foreground">Assessment niet gevonden.</p>
-          <Button onClick={() => navigate('/dashboard')} className="mt-4">
-            ← Terug naar dashboard
+          <Button onClick={() => navigate('/assessments')} className="mt-4">
+            ← Terug naar overzicht
           </Button>
         </div>
       </AppLayout>
@@ -59,6 +136,7 @@ export default function Assessment() {
   const route = assessment.route as AssessmentRoute;
   const config = ROUTE_CONFIG[route];
   const euCategory = (assessment.eu_act_category ?? 'unknown') as EuActCategory;
+  const status = assessment.status as string;
 
   const RouteIcon = route === 'green' ? CheckCircle
     : route === 'yellow' ? Info
@@ -74,7 +152,7 @@ export default function Assessment() {
         </Button>
 
         {/* Incident melden — alleen bij actieve assessment */}
-        {assessment.status === 'active' && (
+        {status === 'active' && (
           <div className="flex justify-end -mt-4">
             <Button variant="ghost" size="sm" onClick={() => setIncidentOpen(true)} className="gap-2 text-muted-foreground hover:text-foreground">
               <Flag className="h-4 w-4" />
@@ -90,7 +168,7 @@ export default function Assessment() {
         </div>
 
         {/* Route-kaart */}
-        <Card className={`border-l-4`} style={{ borderLeftColor: config.hex }}>
+        <Card className="border-l-4" style={{ borderLeftColor: config.hex }}>
           <CardContent className="py-6">
             <div className="flex items-start gap-4">
               <div
@@ -114,34 +192,21 @@ export default function Assessment() {
           </CardContent>
         </Card>
 
-        {/* Route-specifieke melding */}
-        {route === 'orange' && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Jouw DPO heeft een melding ontvangen. Het gebruik van deze toepassing start nadat de DPO heeft beoordeeld en eventuele extra voorwaarden zijn vastgesteld.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Status-bewuste banner */}
+        <StatusBanner status={status} route={route} />
 
         {/* Micro-learning — alleen bij oranje route */}
         {route === 'orange' && (
           <MicrolearningCard assessmentId={assessment.id} />
         )}
-        {route === 'red' && (
-          <Alert variant="destructive">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>
-              Gebruik is geblokkeerd. Neem contact op met IT en de juridische afdeling voordat je verdere stappen zet.
-            </AlertDescription>
-          </Alert>
-        )}
 
-        {/* Jouw instructies */}
+        {/* Jouw instructies — toon altijd, maar met context */}
         {assessment.user_instructions && assessment.user_instructions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Jouw instructies</CardTitle>
+              <CardTitle className="text-base">
+                {status === 'active' ? 'Jouw instructies' : 'Instructies (actief na goedkeuring)'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
