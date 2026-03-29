@@ -1,4 +1,5 @@
 import { Shield, User, Settings, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
+import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -103,7 +104,8 @@ export function Header() {
         </div>
 
         {/* User Menu */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <NotificationsBell />
           {/* Employee view indicator */}
           {canSwitchView && isInEmployeeView && (
             <Badge variant="outline" className="hidden gap-1.5 border-primary/30 bg-primary/5 text-primary md:flex">
