@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -39,6 +40,7 @@ interface LessonFormData {
 export function CreateLessonDialog({ open, onOpenChange }: CreateLessonDialogProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { profile } = useUserProfile();
   
   const [formData, setFormData] = useState<LessonFormData>({
     title: '',
@@ -64,6 +66,7 @@ export function CreateLessonDialog({ open, onOpenChange }: CreateLessonDialogPro
           blocks: [],
           is_published: false,
           created_by: user?.id || null,
+          org_id: profile?.org_id,
         })
         .select()
         .single();

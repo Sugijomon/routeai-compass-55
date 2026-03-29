@@ -1,0 +1,5 @@
+ALTER TABLE public.courses
+  ALTER COLUMN org_id DROP DEFAULT;
+
+ALTER TABLE public.lessons
+  ALTER COLUMN org_id DROP DEFAULT;

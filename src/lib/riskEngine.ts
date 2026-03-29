@@ -55,10 +55,6 @@ const ROUTE_LEVEL: Record<AssessmentRoute, number> = {
   red: 3,
 };
 
-function maxRoute(a: AssessmentRoute, b: AssessmentRoute): AssessmentRoute {
-  return ROUTE_LEVEL[a] >= ROUTE_LEVEL[b] ? a : b;
-}
-
 // ─── V6 trigger ───
 export function shouldShowV6(answers: Partial<SurveyAnswers>): boolean {
   const v2 = answers.V2_main;
@@ -350,89 +346,3 @@ export function buildEngineOutput(answers: SurveyAnswers, toolNameRaw: string): 
   };
 }
 
-// ─── Test-functie ───
-export function testRouting(): void {
-  const scenarios: { label: string; answers: SurveyAnswers; expected: AssessmentRoute }[] = [
-    {
-      label: '1. Groene route: tekst herschrijven, intern, publieke data, HITL',
-      answers: {
-        V1: 'standard', V2_main: 'supportive', V2_sub: 'rewriting',
-        V2_freetext_original: null, V3: 'internal', V4: 'public', V5: 'hitl_strict',
-      },
-      expected: 'green',
-    },
-    {
-      label: '2. Gele route: vertaling, extern, publieke data',
-      answers: {
-        V1: 'standard', V2_main: 'informative', V2_sub: 'translation',
-        V2_freetext_original: null, V3: 'external', V4: 'public', V5: 'hitl_alert',
-      },
-      expected: 'yellow',
-    },
-    {
-      label: '3. Oranje route: CV-screening (evaluatief), extern',
-      answers: {
-        V1: 'standard', V2_main: 'evaluative',
-        V2_freetext_original: null, V3: 'external', V4: 'personal', V5: 'hitl_strict',
-      },
-      expected: 'orange',
-    },
-    {
-      label: '4. Rode route: V1 technische modificatie',
-      answers: {
-        V1: 'technical_modification', V2_main: 'supportive',
-        V2_freetext_original: null, V3: 'self', V4: 'public', V5: 'hitl_strict',
-      },
-      expected: 'red',
-    },
-    {
-      label: '5. Escalatie: groen → geel door extern + persoonsgegevens',
-      answers: {
-        V1: 'standard', V2_main: 'supportive', V2_sub: 'text_generation',
-        V2_freetext_original: null, V3: 'external', V4: 'personal', V5: 'hitl_alert',
-      },
-      expected: 'yellow',
-    },
-    {
-      label: '6. Escalatie: groen → oranje door bijzondere persoonsgegevens',
-      answers: {
-        V1: 'standard', V2_main: 'supportive', V2_sub: 'creative',
-        V2_freetext_original: null, V3: 'internal', V4: 'sensitive', V5: 'hitl_strict',
-      },
-      expected: 'orange',
-    },
-  ];
-
-  console.log('=== RouteAI Risk Engine — Test Routing ===');
-  console.log(`Decision version: ${DECISION_VERSION}\n`);
-
-  let passed = 0;
-  for (const s of scenarios) {
-    const result = determineRoute(s.answers);
-    const ok = result.route === s.expected;
-    if (ok) passed++;
-    console.log(
-      `${ok ? '✅' : '❌'} ${s.label}`,
-      `\n   Route: ${result.route} (verwacht: ${s.expected})`,
-      `| Archetype: ${result.primaryArchetype}`,
-      `| Method: ${result.routingMethod}`,
-      result.escalationRefs.length > 0 ? `| Escalaties: ${result.escalationRefs.join(', ')}` : '',
-    );
-  }
-
-  console.log(`\n=== Resultaat: ${passed}/${scenarios.length} geslaagd ===`);
-
-  // V6 trigger test
-  console.log('\n=== V6 Trigger Tests ===');
-  const v6Tests = [
-    { label: 'evaluative+vulnerable+automated', v2: 'evaluative' as const, v3: 'vulnerable' as const, v4: 'public' as const, v5: 'automated' as const, expected: true },
-    { label: 'supportive+internal+hitl', v2: 'supportive' as const, v3: 'internal' as const, v4: 'public' as const, v5: 'hitl_strict' as const, expected: false },
-    { label: 'decision_prep+vulnerable+sensitive', v2: 'decision_prep' as const, v3: 'vulnerable' as const, v4: 'sensitive' as const, v5: 'hitl_alert' as const, expected: true },
-  ];
-
-  for (const t of v6Tests) {
-    const result = shouldShowV6({ V2_main: t.v2, V3: t.v3, V4: t.v4, V5: t.v5 });
-    const ok = result === t.expected;
-    console.log(`${ok ? '✅' : '❌'} V6 ${t.label}: ${result} (verwacht: ${t.expected})`);
-  }
-}

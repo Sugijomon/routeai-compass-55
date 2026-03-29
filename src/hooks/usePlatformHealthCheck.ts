@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface HealthCheck {
   label: string;
@@ -8,9 +9,13 @@ interface HealthCheck {
 }
 
 export function usePlatformHealthCheck() {
+  const { profile } = useUserProfile();
+  const orgId = profile?.org_id;
+
   const checks = useQuery({
-    queryKey: ['platform-health'],
+    queryKey: ['platform-health', orgId],
     queryFn: async (): Promise<HealthCheck[]> => {
+      if (!orgId) return [];
       const results: HealthCheck[] = [];
 
       // 1. AI Literacy cursus aanwezig en gepubliceerd
@@ -19,6 +24,7 @@ export function usePlatformHealthCheck() {
           .from('courses')
           .select('id, title, is_published')
           .eq('required_for_onboarding', true)
+          .eq('org_id', orgId)
           .maybeSingle();
         results.push({
           label: 'AI Literacy cursus aanwezig en gepubliceerd',
@@ -134,6 +140,7 @@ export function usePlatformHealthCheck() {
 
       return results;
     },
+    enabled: !!orgId,
     refetchInterval: false,
     staleTime: 0,
   });
