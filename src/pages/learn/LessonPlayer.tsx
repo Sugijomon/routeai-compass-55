@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock, LessonTopic, parseLessonContent } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
+import { useMicrolearningAssignment } from '@/hooks/useMicrolearningAssignment';
 import { CourseSidebar } from '@/components/lesson-player/CourseSidebar';
 import { LessonContentTopBar } from '@/components/lesson-player/LessonContentTopBar';
 import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFooter';
