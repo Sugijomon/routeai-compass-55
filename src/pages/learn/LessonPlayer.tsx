@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LessonBlock, LessonTopic, parseLessonContent } from '@/types/lesson-blocks';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useLessonAttempts } from '@/hooks/useLessonAttempts';
+import { useMicrolearningAssignment } from '@/hooks/useMicrolearningAssignment';
 import { CourseSidebar } from '@/components/lesson-player/CourseSidebar';
 import { LessonContentTopBar } from '@/components/lesson-player/LessonContentTopBar';
 import { LessonPlayerFooter } from '@/components/lesson-player/LessonPlayerFooter';
@@ -32,9 +33,11 @@ export default function LessonPlayer() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [searchParams] = useSearchParams();
   const courseId = searchParams.get('courseId');
+  const assessmentId = searchParams.get('assessment') ?? undefined;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
+  const { markCompleted, assignment } = useMicrolearningAssignment(assessmentId);
 
   useEffect(() => {
     const getUser = async () => {
@@ -191,6 +194,18 @@ export default function LessonPlayer() {
           time_spent: timeSpent, completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,lesson_id' });
       if (error) throw error;
+
+      // Als dit een micro-learning is voor een assessment, registreer voltooiing
+      if (assessmentId && assignment?.learning_library) {
+        const libraryItem = assignment.learning_library as Record<string, unknown>;
+        if (libraryItem?.id) {
+          try {
+            await markCompleted.mutateAsync(libraryItem.id as string);
+          } catch {
+            // Fout wordt al getoond via toast in de hook
+          }
+        }
+      }
 
       const courseResult = await updateCourseProgress();
       if (courseResult?.courseComplete) {
