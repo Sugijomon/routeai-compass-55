@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Loader2, ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Flag } from 'lucide-react';
 import { ReportIncidentDialog } from '@/components/incidents/ReportIncidentDialog';
+import { MicrolearningCard } from '@/components/assessments/MicrolearningCard';
 
 export default function Assessment() {
   const { id } = useParams<{ id: string }>();
@@ -121,6 +122,11 @@ export default function Assessment() {
               Jouw DPO heeft een melding ontvangen. Het gebruik van deze toepassing start nadat de DPO heeft beoordeeld en eventuele extra voorwaarden zijn vastgesteld.
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Micro-learning — alleen bij oranje route */}
+        {route === 'orange' && (
+          <MicrolearningCard assessmentId={assessment.id} />
         )}
         {route === 'red' && (
           <Alert variant="destructive">
