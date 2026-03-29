@@ -173,7 +173,7 @@ export default function ShadowSurveyPage() {
         {/* Stap 2: Oriëntatie */}
         {surveyRunId && step === 'orientation' && (
           <>
-            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <TeamParticipationBadge />
             <OrientationStep
               surveyRunId={surveyRunId}
               onNext={handleOrientationNext}
@@ -212,7 +212,7 @@ export default function ShadowSurveyPage() {
         {/* Stap 6: Risicoprofiel */}
         {surveyRunId && step === 'risk' && (
           <>
-            <TeamParticipationBadge orgId={orgId!} currentUserId={user!.id} />
+            <TeamParticipationBadge />
             <RiskProfileStep
               surveyRunId={surveyRunId}
               orgId={orgId!}
