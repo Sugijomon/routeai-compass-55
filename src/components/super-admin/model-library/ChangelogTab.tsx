@@ -1,107 +1,73 @@
-import { useState, useMemo } from 'react';
-import { useTypekaartUpdates, useModelTypekaarten } from '@/hooks/useModelTypekaarten';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
-
-const CHANGE_TYPE_BADGE: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
-  major: { label: 'Major', variant: 'default' },
-  minor: { label: 'Minor', variant: 'secondary' },
-  patch: { label: 'Patch', variant: 'outline' },
-};
-
-const STATUS_BADGE: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
-  pending: { label: 'Pending', variant: 'secondary' },
-  approved: { label: 'Goedgekeurd', variant: 'default' },
-  rejected: { label: 'Afgewezen', variant: 'destructive' },
-};
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { nl } from 'date-fns/locale';
 
 export function ChangelogTab() {
-  const { data: updates, isLoading } = useTypekaartUpdates();
-  const { data: typekaarten } = useModelTypekaarten();
-  const [filterTypekaart, setFilterTypekaart] = useState('all');
-  const [filterChangeType, setFilterChangeType] = useState('all');
+  const { data: log = [], isLoading } = useQuery({
+    queryKey: ['typekaart-changelog'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('model_typekaart_updates')
+        .select(`*, model_typekaarten(display_name)`)
+        .in('status', ['approved', 'rejected'])
+        .order('approved_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
-  const filtered = useMemo(() => {
-    if (!updates) return [];
-    return updates.filter(u => {
-      if (filterTypekaart !== 'all' && u.typekaart_id !== filterTypekaart) return false;
-      if (filterChangeType !== 'all' && u.change_type !== filterChangeType) return false;
-      return true;
-    });
-  }, [updates, filterTypekaart, filterChangeType]);
-
-  if (isLoading) {
-    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  }
+  const STATUS_COLORS: Record<string, string> = {
+    approved: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800',
+  };
+  const STATUS_LABELS: Record<string, string> = { approved: 'Goedgekeurd', rejected: 'Afgewezen' };
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex gap-3">
-        <Select value={filterTypekaart} onValueChange={setFilterTypekaart}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filter op model" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle modellen</SelectItem>
-            {(typekaarten ?? []).map(tk => (
-              <SelectItem key={tk.id} value={tk.id}>{tk.display_name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filterChangeType} onValueChange={setFilterChangeType}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Change type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle types</SelectItem>
-            <SelectItem value="major">Major</SelectItem>
-            <SelectItem value="minor">Minor</SelectItem>
-            <SelectItem value="patch">Patch</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <p className="text-sm text-muted-foreground">Laatste 100 afgehandelde wijzigingen.</p>
 
-      {filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Geen changelog-items gevonden.
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
         </div>
+      ) : log.length === 0 ? (
+        <p className="text-center py-12 text-muted-foreground">Nog geen afgehandelde wijzigingen.</p>
       ) : (
         <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Datum</TableHead>
                 <TableHead>Model</TableHead>
                 <TableHead>Veld</TableHead>
-                <TableHead>Oud → Nieuw</TableHead>
+                <TableHead>Nieuwe waarde</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Datum</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(u => {
-                const ct = u.change_type ? CHANGE_TYPE_BADGE[u.change_type] : null;
-                const st = STATUS_BADGE[u.status] ?? STATUS_BADGE.pending;
+              {log.map(entry => {
+                const tk = entry.model_typekaarten as Record<string, string> | null;
                 return (
-                  <TableRow key={u.id}>
-                    <TableCell className="text-xs whitespace-nowrap">
-                      {new Date(u.created_at).toLocaleDateString('nl-NL')}
-                    </TableCell>
-                    <TableCell className="font-medium text-sm">{u.typekaart_display_name}</TableCell>
-                    <TableCell className="text-sm font-mono">{u.field_name}</TableCell>
-                    <TableCell className="text-sm">
-                      <span className="text-muted-foreground">{u.old_value ?? '—'}</span>
-                      <span className="mx-1">→</span>
-                      <span className="font-medium">{u.new_value ?? '—'}</span>
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-medium text-sm">{tk?.display_name ?? '—'}</TableCell>
+                    <TableCell className="text-sm font-mono">{entry.field_name}</TableCell>
+                    <TableCell className="text-sm">{entry.new_value ?? '—'}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">{entry.change_type ?? '—'}</Badge>
                     </TableCell>
                     <TableCell>
-                      {ct && <Badge variant={ct.variant} className="text-xs">{ct.label}</Badge>}
+                      <Badge className={`text-xs ${STATUS_COLORS[entry.status ?? ''] ?? ''}`}>
+                        {STATUS_LABELS[entry.status ?? ''] ?? entry.status}
+                      </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={st.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className="text-xs">{st.label}</Badge>
+                    <TableCell className="text-xs">
+                      {entry.approved_at ? format(new Date(entry.approved_at), 'd MMM yyyy', { locale: nl }) : '—'}
                     </TableCell>
                   </TableRow>
                 );
