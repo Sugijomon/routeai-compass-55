@@ -13,10 +13,11 @@ import { AlertTriangle, ClipboardCheck, ShieldAlert, BarChart3, FileText, CheckC
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useDpoDashboard } from '@/hooks/useDpoDashboard';
 import { DpoNotificationBar } from '@/components/admin/DpoNotificationBar';
+import { ROUTE_CONFIG, SEVERITY_CONFIG, ASSESSMENT_STATUS_LABELS } from '@/types/assessment';
+import type { AssessmentStatus } from '@/types/assessment';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAssessmentReviewQueue } from '@/hooks/useAssessmentReviewQueue';
 import { AssessmentReviewSheet } from '@/components/admin/AssessmentReviewSheet';
-import { ROUTE_CONFIG, SEVERITY_CONFIG } from '@/types/assessment';
 import { toast } from 'sonner';
 import { useOrgIncidents } from '@/hooks/useIncidents';
 import { format } from 'date-fns';
@@ -348,7 +349,7 @@ export default function DpoDashboard() {
                         <TableCell>{formatDate(assessment.created_at)}</TableCell>
                         <TableCell>
                           <Badge variant={assessment.status === 'pending_review' ? 'destructive' : 'secondary'}>
-                            {assessment.status === 'pending_review' ? 'Toelichting vereist' : 'Wacht op DPO'}
+                            {ASSESSMENT_STATUS_LABELS[assessment.status as AssessmentStatus] ?? assessment.status}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ROUTE_CONFIG } from '@/types/assessment';
-import type { AssessmentRoute } from '@/types/assessment';
+import { ROUTE_CONFIG, ASSESSMENT_STATUS_LABELS } from '@/types/assessment';
+import type { AssessmentRoute, AssessmentStatus } from '@/types/assessment';
 import { Plus, CheckCircle, AlertTriangle, Info, XCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -20,14 +20,6 @@ const ROUTE_ICONS = {
   red: XCircle,
 } as const;
 
-const STATUS_LABELS: Record<string, string> = {
-  active: 'Actief',
-  pending_dpo: 'Wacht op DPO',
-  pending_review: 'Toelichting vereist',
-  paused: 'Gepauzeerd',
-  stopped: 'Gestopt',
-  superseded: 'Vervangen',
-};
 
 export default function Assessments() {
   const navigate = useNavigate();
@@ -127,7 +119,7 @@ export default function Assessments() {
                             {isPending && (
                               <Badge variant="secondary" className="text-xs gap-1">
                                 <Clock className="h-3 w-3" />
-                                {STATUS_LABELS[status] ?? status}
+                                {ASSESSMENT_STATUS_LABELS[status as AssessmentStatus] ?? status}
                               </Badge>
                             )}
                           </div>
