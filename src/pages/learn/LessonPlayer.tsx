@@ -38,7 +38,6 @@ export default function LessonPlayer() {
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
   const { markCompleted, assignment } = useMicrolearningAssignment(assessmentId);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
