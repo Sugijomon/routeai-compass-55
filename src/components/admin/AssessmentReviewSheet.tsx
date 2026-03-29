@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Info, Clock } from 'lucide-react';
 import { ROUTE_CONFIG } from '@/types/assessment';
+import { supabase } from '@/integrations/supabase/client';
 import type { DpoDecision } from '@/hooks/useAssessmentReviewQueue';
 
 const V3_LABELS: Record<string, string> = {
@@ -21,6 +23,65 @@ const V5_LABELS: Record<string, string> = {
   hitl_strict: 'Menselijk toezicht (strikt)', hitl_alert: 'Toezicht met alertheid',
   automated: 'Geautomatiseerd',
 };
+
+// Inline component: ML-voltooiingsstatus voor DPO-review
+function MlCompletionStatus({ assessmentId }: { assessmentId: string }) {
+  const { data: completions } = useQuery({
+    queryKey: ['ml-completion-dpo', assessmentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('assessment_ml_completions')
+        .select('completed_at, library_item_id')
+        .eq('assessment_id', assessmentId);
+      return data ?? [];
+    },
+  });
+
+  const { data: assignment } = useQuery({
+    queryKey: ['ml-assignment-dpo', assessmentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('assessment_ml_assignments')
+        .select('is_required, learning_library!assessment_ml_assignments_library_item_id_fkey(title)')
+        .eq('assessment_id', assessmentId)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  if (!assignment) return null;
+
+  const isCompleted = completions && completions.length > 0;
+  const mlTitle = (assignment.learning_library as Record<string, unknown> | null)?.title as string ?? 'Micro-learning';
+
+  return (
+    <div className="space-y-2">
+      <Separator />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium">Micro-learning status</p>
+          <p className="text-xs text-muted-foreground">{mlTitle}</p>
+        </div>
+        {isCompleted ? (
+          <Badge className="bg-green-100 text-green-800 border-0 gap-1">
+            <CheckCircle className="h-3 w-3" />
+            Afgerond
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="gap-1 text-amber-700 border-amber-300">
+            <Clock className="h-3 w-3" />
+            Nog niet gestart
+          </Badge>
+        )}
+      </div>
+      {!isCompleted && assignment.is_required && (
+        <p className="text-xs text-amber-700 bg-amber-50 rounded-md p-2">
+          ⚠ Medewerker heeft de micro-learning nog niet voltooid. Na jouw goedkeuring wordt het assessment pas actief zodra dit is afgerond.
+        </p>
+      )}
+    </div>
+  );
+}
 
 interface Props {
   assessment: Record<string, unknown> | null;
@@ -106,6 +167,11 @@ export function AssessmentReviewSheet({ assessment, notificationId, onClose, onD
               </div>
             </div>
           </div>
+
+          {/* ML-voltooiingsstatus */}
+          {(assessment.status as string) === 'pending_dpo' && (
+            <MlCompletionStatus assessmentId={assessment.id as string} />
+          )}
 
           {/* Compliance-flags */}
           {(assessment.dpia_required || assessment.fria_required) && (
