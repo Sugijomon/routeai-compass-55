@@ -60,18 +60,20 @@ export default function ExamenPage() {
 
   // Fetch the ai_literacy_exam lesson
   const { data: lesson, isLoading: lessonLoading, error } = useQuery({
-    queryKey: ['ai-literacy-exam'],
+    queryKey: ['ai-literacy-exam', profile?.org_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lessons')
         .select('*')
         .eq('lesson_type', 'ai_literacy_exam')
         .eq('is_published', true)
+        .eq('org_id', profile?.org_id ?? '00000000-0000-0000-0000-000000000001')
         .limit(1)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
+    enabled: !!user && !!profile?.org_id,
   });
 
   const lessonId = lesson?.id ?? '';

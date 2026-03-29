@@ -50,7 +50,7 @@ export function useAssessmentReviewQueue() {
       const { error: aErr } = await supabase
         .from('assessments')
         .update({
-          status: newAssessmentStatus as 'active' | 'stopped',
+          status: newAssessmentStatus,
           reviewer_admin_id: profile?.id,
           reviewed_at: new Date().toISOString(),
         })

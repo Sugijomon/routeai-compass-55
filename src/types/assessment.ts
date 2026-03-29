@@ -5,6 +5,15 @@ export type AssessmentRoute  = 'green' | 'yellow' | 'orange' | 'red';
 export type RoutingMethod    = 'deterministic' | 'claude_assisted';
 export type AssessmentStatus = 'active' | 'paused' | 'stopped' | 'superseded' | 'pending_dpo' | 'pending_review';
 
+export const ASSESSMENT_STATUS_LABELS: Record<AssessmentStatus, string> = {
+  active: 'Actief',
+  paused: 'Gepauzeerd',
+  stopped: 'Gestopt',
+  superseded: 'Vervangen',
+  pending_dpo: 'Wacht op DPO',
+  pending_review: 'Toelichting vereist',
+};
+
 export type ArchetypeCode =
   | 'G-01' | 'G-02' | 'G-03' | 'G-04'
   | 'Y-01' | 'Y-02' | 'Y-03'
