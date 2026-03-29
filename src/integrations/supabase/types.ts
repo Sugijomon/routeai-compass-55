@@ -1145,6 +1145,66 @@ export type Database = {
           },
         ]
       }
+      org_notifications: {
+        Row: {
+          action_url: string | null
+          body: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_read: boolean
+          org_id: string
+          read_at: string | null
+          read_by: string | null
+          severity: Database["public"]["Enums"]["org_notification_severity"]
+          source: Database["public"]["Enums"]["org_notification_source"]
+          title: string
+        }
+        Insert: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          org_id: string
+          read_at?: string | null
+          read_by?: string | null
+          severity?: Database["public"]["Enums"]["org_notification_severity"]
+          source: Database["public"]["Enums"]["org_notification_source"]
+          title: string
+        }
+        Update: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          org_id?: string
+          read_at?: string | null
+          read_by?: string | null
+          severity?: Database["public"]["Enums"]["org_notification_severity"]
+          source?: Database["public"]["Enums"]["org_notification_source"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_notifications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_notifications_read_by_fkey"
+            columns: ["read_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_tools_catalog: {
         Row: {
           added_at: string | null
@@ -1993,6 +2053,8 @@ export type Database = {
         | "microlearning"
       learning_difficulty_level: "basic" | "intermediate" | "advanced"
       learning_status: "draft" | "published" | "deprecated"
+      org_notification_severity: "info" | "warning" | "critical"
+      org_notification_source: "scan_engine" | "model_library" | "system"
       question_type:
         | "multiple_choice"
         | "multiple_select"
@@ -2168,6 +2230,8 @@ export const Constants = {
       ],
       learning_difficulty_level: ["basic", "intermediate", "advanced"],
       learning_status: ["draft", "published", "deprecated"],
+      org_notification_severity: ["info", "warning", "critical"],
+      org_notification_source: ["scan_engine", "model_library", "system"],
       question_type: [
         "multiple_choice",
         "multiple_select",
