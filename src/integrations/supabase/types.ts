@@ -1406,6 +1406,7 @@ export type Database = {
           has_ai_rijbewijs: boolean | null
           id: string
           import_batch_id: string | null
+          is_active: boolean
           org_id: string
           routeai_invited_at: string | null
           updated_at: string | null
@@ -1419,6 +1420,7 @@ export type Database = {
           has_ai_rijbewijs?: boolean | null
           id: string
           import_batch_id?: string | null
+          is_active?: boolean
           org_id?: string
           routeai_invited_at?: string | null
           updated_at?: string | null
@@ -1432,6 +1434,7 @@ export type Database = {
           has_ai_rijbewijs?: boolean | null
           id?: string
           import_batch_id?: string | null
+          is_active?: boolean
           org_id?: string
           routeai_invited_at?: string | null
           updated_at?: string | null

@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, ArrowLeft, Loader2, Shield, Edit } from 'lucide-react';
@@ -37,6 +38,7 @@ interface UserWithRoles {
   org_id: string;
   organization_name?: string;
   roles: AppRole[];
+  is_active: boolean;
 }
 
 const ROLE_LABELS: Record<AppRole, string> = {
@@ -84,7 +86,7 @@ export default function CrossOrgUserManagement() {
       // Fetch profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, full_name, org_id')
+        .select('id, email, full_name, org_id, is_active')
         .order('email');
 
       if (profilesError) throw profilesError;
@@ -108,6 +110,7 @@ export default function CrossOrgUserManagement() {
       // Map roles to users
       const usersWithRoles: UserWithRoles[] = profiles.map(profile => ({
         ...profile,
+        is_active: profile.is_active ?? true,
         organization_name: orgMap.get(profile.org_id) || 'Onbekend',
         roles: roles
           .filter(r => r.user_id === profile.id)
@@ -179,6 +182,24 @@ export default function CrossOrgUserManagement() {
     },
     onError: () => {
       toast.error('Kon rollen niet bijwerken');
+    }
+  });
+
+  // Toggle is_active mutation
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: isActive })
+        .eq('id', userId);
+      if (error) throw error;
+    },
+    onSuccess: (_, { isActive }) => {
+      queryClient.invalidateQueries({ queryKey: ['cross-org-users'] });
+      toast.success(isActive ? 'Gebruiker geactiveerd' : 'Gebruiker gedeactiveerd');
+    },
+    onError: () => {
+      toast.error('Kon status niet wijzigen');
     }
   });
 
@@ -309,12 +330,13 @@ export default function CrossOrgUserManagement() {
                     <TableHead>Email</TableHead>
                     <TableHead>Organisatie</TableHead>
                     <TableHead>Rollen</TableHead>
+                    <TableHead>Actief</TableHead>
                     <TableHead>Acties</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className={!user.is_active ? 'opacity-50' : ''}>
                       <TableCell className="font-medium">
                         {user.full_name || 'Onbekend'}
                       </TableCell>
@@ -336,6 +358,15 @@ export default function CrossOrgUserManagement() {
                             ))
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={user.is_active}
+                          onCheckedChange={(checked) =>
+                            toggleActiveMutation.mutate({ userId: user.id, isActive: checked })
+                          }
+                          disabled={toggleActiveMutation.isPending}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button

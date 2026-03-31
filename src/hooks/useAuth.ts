@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -92,19 +93,26 @@ export function useAuth() {
         
         // Defer Supabase calls with setTimeout to prevent deadlock
         if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id).then((isAdmin) => {
-              setAuthState(prev => {
-                if (prev.isSigningOut) return prev;
-                return {
-                  ...prev,
-                  user: session.user,
-                  session,
-                  isLoading: false,
-                  isAdmin,
-                  hasCheckedAdmin: true,
-                };
-              });
+          setTimeout(async () => {
+            const [isAdmin, isActive] = await Promise.all([
+              checkAdminRole(session.user.id),
+              checkIsActive(session.user.id),
+            ]);
+            if (!isActive) {
+              toast.error('Je account is gedeactiveerd. Neem contact op met je beheerder.');
+              await supabase.auth.signOut({ scope: 'local' });
+              return;
+            }
+            setAuthState(prev => {
+              if (prev.isSigningOut) return prev;
+              return {
+                ...prev,
+                user: session.user,
+                session,
+                isLoading: false,
+                isAdmin,
+                hasCheckedAdmin: true,
+              };
             });
           }, 0);
         }
@@ -112,20 +120,27 @@ export function useAuth() {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        checkAdminRole(session.user.id).then((isAdmin) => {
-          setAuthState(prev => {
-            if (prev.isSigningOut) return prev;
-            return {
-              ...prev,
-              user: session.user,
-              session,
-              isLoading: false,
-              isAdmin,
-              hasCheckedAdmin: true,
-            };
-          });
+        const [isAdmin, isActive] = await Promise.all([
+          checkAdminRole(session.user.id),
+          checkIsActive(session.user.id),
+        ]);
+        if (!isActive) {
+          toast.error('Je account is gedeactiveerd. Neem contact op met je beheerder.');
+          await supabase.auth.signOut({ scope: 'local' });
+          return;
+        }
+        setAuthState(prev => {
+          if (prev.isSigningOut) return prev;
+          return {
+            ...prev,
+            user: session.user,
+            session,
+            isLoading: false,
+            isAdmin,
+            hasCheckedAdmin: true,
+          };
         });
       } else {
         setAuthState(prev => ({
@@ -146,8 +161,6 @@ export function useAuth() {
 
 async function checkAdminRole(userId: string): Promise<boolean> {
   try {
-    // Check for any admin-level role - use limit(1) instead of maybeSingle()
-    // to handle users with multiple admin roles
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -160,10 +173,28 @@ async function checkAdminRole(userId: string): Promise<boolean> {
       return false;
     }
 
-    // Returns true if at least one admin role exists
     return Array.isArray(data) && data.length > 0;
   } catch {
     return false;
+  }
+}
+
+async function checkIsActive(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('is_active')
+      .eq('id', userId)
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking is_active:', error);
+      return true; // fail open als check faalt
+    }
+
+    return Array.isArray(data) && data.length > 0 ? (data[0].is_active ?? true) : true;
+  } catch {
+    return true;
   }
 }
 
