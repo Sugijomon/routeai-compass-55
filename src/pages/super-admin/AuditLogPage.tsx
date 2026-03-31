@@ -154,7 +154,7 @@ export default function AuditLogPage() {
   return (
     <AppLayout>
       <main className="container mx-auto px-4 py-8 space-y-6">
-        <PageHeader title="Auditlog" description="Overzicht van alle beheeracties op het platform" />
+        <PageHeader title="Auditlog" subtitle="Overzicht van alle beheeracties op het platform" />
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
