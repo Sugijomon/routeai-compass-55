@@ -137,12 +137,27 @@ Deno.serve(async (req) => {
       "De organisatie";
     const dpoEmail = callerProfile?.email || "";
 
+    // Vervang variabelen in de custom email template
+    const firstName = (name || email).split(" ")[0] || email;
+    const substituteVars = (text: string): string =>
+      text
+        .replace(/\[voornaam\]/g, firstName)
+        .replace(/\[manager_naam\]/g, managerName)
+        .replace(/\[org_name\]/g, orgName)
+        .replace(/\[deadline\]/g, deadlineStr)
+        .replace(/\[dpo_email\]/g, dpoEmail);
+
+    const resolvedSubject = email_subject ? substituteVars(email_subject) : undefined;
+    const resolvedBody = email_body ? substituteVars(email_body) : undefined;
+
     // Invite user via admin API
     const inviteOptions: Record<string, unknown> = {
       data: {
         org_id: orgId,
         role: role,
         full_name: name || email,
+        ...(resolvedSubject && { invite_email_subject: resolvedSubject }),
+        ...(resolvedBody && { invite_email_body: resolvedBody }),
       },
     };
 
