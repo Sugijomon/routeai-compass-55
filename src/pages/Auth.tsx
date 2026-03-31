@@ -309,35 +309,6 @@ export default function Auth() {
                   Inloggen met wachtwoord
                 </button>
 
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">of</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full py-5 text-base"
-                  onClick={() => handleOAuthLogin('google')}
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <GoogleIcon />}
-                  Inloggen met Google
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full py-5 text-base"
-                  onClick={() => handleOAuthLogin('apple')}
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <AppleIcon />}
-                  Inloggen met Apple
-                </Button>
               </>
             )}
           </CardContent>
