@@ -18,10 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Mail } from "lucide-react";
-import { useInviteUser } from "@/hooks/useOrgUsers";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import InviteEmailTemplateEditor, {
+  type InviteEmailTemplate,
+} from "./InviteEmailTemplateEditor";
 
 interface InviteUserDialogProps {
   open: boolean;
