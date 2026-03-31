@@ -1441,11 +1441,13 @@ export type Database = {
       profiles: {
         Row: {
           ai_rijbewijs_obtained_at: string | null
+          banner_password_dismissed: boolean
           created_at: string | null
           department: string | null
           email: string | null
           full_name: string | null
           has_ai_rijbewijs: boolean | null
+          has_set_password: boolean
           id: string
           import_batch_id: string | null
           is_active: boolean
@@ -1455,11 +1457,13 @@ export type Database = {
         }
         Insert: {
           ai_rijbewijs_obtained_at?: string | null
+          banner_password_dismissed?: boolean
           created_at?: string | null
           department?: string | null
           email?: string | null
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
+          has_set_password?: boolean
           id: string
           import_batch_id?: string | null
           is_active?: boolean
@@ -1469,11 +1473,13 @@ export type Database = {
         }
         Update: {
           ai_rijbewijs_obtained_at?: string | null
+          banner_password_dismissed?: boolean
           created_at?: string | null
           department?: string | null
           email?: string | null
           full_name?: string | null
           has_ai_rijbewijs?: boolean | null
+          has_set_password?: boolean
           id?: string
           import_batch_id?: string | null
           is_active?: boolean
