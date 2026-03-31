@@ -243,14 +243,20 @@ export default function ScanEmployeeTable() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Users className="h-5 w-5 text-primary" />
-          Medewerkers
-        </CardTitle>
-        <CardDescription>
-          Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div className="space-y-1.5">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="h-5 w-5 text-primary" />
+            Medewerkers
+          </CardTitle>
+          <CardDescription>
+            Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
+          </CardDescription>
+        </div>
+        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Medewerkers uitnodigen
+        </Button>
       </CardHeader>
       <CardContent>
         {/* Actiebalk bij selectie */}
@@ -284,7 +290,27 @@ export default function ScanEmployeeTable() {
           <EmptyState
             icon={Users}
             title="Nog geen medewerkers"
-            description="Nodig medewerkers uit via de configuratie-wizard of bulk-import."
+            description={
+              <span>
+                Nodig medewerkers uit via de{" "}
+                <button
+                  type="button"
+                  className="underline text-primary hover:text-primary/80 font-medium"
+                  onClick={() => navigate("/admin/shadow/setup")}
+                >
+                  configuratie-wizard
+                </button>
+                {" "}of{" "}
+                <button
+                  type="button"
+                  className="underline text-primary hover:text-primary/80 font-medium"
+                  onClick={() => setBulkImportOpen(true)}
+                >
+                  bulk-import
+                </button>
+                .
+              </span>
+            }
           />
         ) : (
           <div className="rounded-md border">
