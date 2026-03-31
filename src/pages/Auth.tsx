@@ -131,21 +131,6 @@ export default function Auth() {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'apple') => {
-    setIsLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error(`${provider === 'google' ? 'Google' : 'Apple'} login mislukt`);
-      }
-    } catch {
-      toast.error(`${provider === 'google' ? 'Google' : 'Apple'} login mislukt`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
