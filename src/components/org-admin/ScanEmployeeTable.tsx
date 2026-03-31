@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, Send, Loader2, Mail } from "lucide-react";
+import { Users, Send, Loader2, UserPlus } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import BulkImportDialog from "./BulkImportDialog";
 
 type EmployeeStatus = "uitgenodigd" | "ingelogd" | "scan_voltooid" | "heeft_al_account";
 
@@ -47,12 +49,14 @@ const STATUS_CONFIG: Record<EmployeeStatus, { label: string; className: string }
 };
 
 export default function ScanEmployeeTable() {
+  const navigate = useNavigate();
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
   const orgId = profile?.org_id;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   // Haal profielen op voor deze organisatie (alleen user-rollen)
   const { data: profiles, isLoading: profilesLoading } = useQuery({
@@ -239,14 +243,20 @@ export default function ScanEmployeeTable() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Users className="h-5 w-5 text-primary" />
-          Medewerkers
-        </CardTitle>
-        <CardDescription>
-          Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div className="space-y-1.5">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="h-5 w-5 text-primary" />
+            Medewerkers
+          </CardTitle>
+          <CardDescription>
+            Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
+          </CardDescription>
+        </div>
+        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Medewerkers uitnodigen
+        </Button>
       </CardHeader>
       <CardContent>
         {/* Actiebalk bij selectie */}
@@ -280,7 +290,27 @@ export default function ScanEmployeeTable() {
           <EmptyState
             icon={Users}
             title="Nog geen medewerkers"
-            description="Nodig medewerkers uit via de configuratie-wizard of bulk-import."
+            description={
+              <span>
+                Nodig medewerkers uit via de{" "}
+                <button
+                  type="button"
+                  className="underline text-primary hover:text-primary/80 font-medium"
+                  onClick={() => navigate("/admin/shadow/setup")}
+                >
+                  configuratie-wizard
+                </button>
+                {" "}of{" "}
+                <button
+                  type="button"
+                  className="underline text-primary hover:text-primary/80 font-medium"
+                  onClick={() => setBulkImportOpen(true)}
+                >
+                  bulk-import
+                </button>
+                .
+              </span>
+            }
           />
         ) : (
           <div className="rounded-md border">
@@ -343,6 +373,11 @@ export default function ScanEmployeeTable() {
           </div>
         )}
       </CardContent>
+
+      <BulkImportDialog
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
+      />
     </Card>
   );
 }

@@ -6,7 +6,7 @@ import { LucideIcon } from "lucide-react";
 interface EmptyStateProps {
   icon?: LucideIcon;
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   action?: {
     label: string;
     onClick: () => void;
