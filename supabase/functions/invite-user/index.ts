@@ -11,6 +11,8 @@ interface InviteUserRequest {
   orgId: string;
   name?: string;
   redirect_to?: string;
+  email_subject?: string;
+  email_body?: string;
 }
 
 Deno.serve(async (req) => {
