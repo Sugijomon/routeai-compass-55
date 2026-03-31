@@ -336,7 +336,7 @@ export default function CrossOrgUserManagement() {
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className={!user.is_active ? 'opacity-50' : ''}>
                       <TableCell className="font-medium">
                         {user.full_name || 'Onbekend'}
                       </TableCell>
@@ -358,6 +358,15 @@ export default function CrossOrgUserManagement() {
                             ))
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={user.is_active}
+                          onCheckedChange={(checked) =>
+                            toggleActiveMutation.mutate({ userId: user.id, isActive: checked })
+                          }
+                          disabled={toggleActiveMutation.isPending}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button
