@@ -195,6 +195,54 @@ export default function Auth() {
                   Andere methode kiezen
                 </Button>
               </div>
+            ) : resetSent ? (
+              <div className="text-center p-4 rounded-lg bg-muted">
+                <Mail className="w-8 h-8 mx-auto mb-2 text-primary" />
+                <p className="font-medium text-foreground">Check je e-mail</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  We hebben een resetlink gestuurd naar <strong>{email}</strong>
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => { setResetSent(false); setMode('password'); }}
+                >
+                  Terug naar inloggen
+                </Button>
+              </div>
+            ) : mode === 'reset' ? (
+              <>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setMode('password')}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Terug naar inloggen
+                </button>
+                <p className="text-sm text-muted-foreground">
+                  Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.
+                </p>
+                <form onSubmit={handlePasswordReset} className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="naam@bedrijf.nl"
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Stuur resetlink
+                  </Button>
+                </form>
+              </>
             ) : mode === 'password' ? (
               <>
                 {/* Wachtwoord-modus */}
