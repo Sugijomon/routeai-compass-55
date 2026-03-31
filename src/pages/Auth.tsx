@@ -252,6 +252,15 @@ export default function Auth() {
                       )}
                     </button>
                   </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setMode('reset')}
+                    >
+                      Wachtwoord vergeten?
+                    </button>
+                  </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -260,23 +269,15 @@ export default function Auth() {
                   </Button>
                 </form>
 
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setMode('reset')}
+                <p className="text-sm text-center text-muted-foreground">
+                  Geen wachtwoord?{' '}
+                  <span
+                    className="text-primary cursor-pointer hover:underline"
+                    onClick={() => setMode('magiclink')}
                   >
-                    Wachtwoord vergeten?
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
-                  onClick={() => setMode('magiclink')}
-                >
-                  Geen wachtwoord? Stuur inloglink
-                </button>
+                    Stuur inloglink
+                  </span>
+                </p>
 
               </>
             ) : (
