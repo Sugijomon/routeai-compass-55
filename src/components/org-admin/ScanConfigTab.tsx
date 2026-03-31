@@ -111,13 +111,33 @@ export default function ScanConfigTab() {
     },
   });
 
+  const saveContextMutation = useMutation({
+    mutationFn: async () => {
+      if (!profile?.org_id) throw new Error("Geen organisatie gevonden");
+      const newSettings = {
+        ...settings,
+        shadow_survey_org_size: orgSize,
+        shadow_survey_goal: goal,
+        shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
+      };
+      const { error } = await supabase
+        .from("organizations")
+        .update({ sector: sector || null, settings: newSettings as any })
+        .eq("id", profile.org_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      toast.success("Context opgeslagen");
+    },
+    onError: (err: Error) => {
+      toast.error(`Fout bij opslaan: ${err.message}`);
+    },
+  });
+
   const handleSaveContext = () => {
-    saveMutation.mutate({
-      shadow_survey_sector: sector,
-      shadow_survey_org_size: orgSize,
-      shadow_survey_goal: goal,
-      shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
-    });
+    saveContextMutation.mutate();
   };
 
   const handleSaveAmnesty = () => {
