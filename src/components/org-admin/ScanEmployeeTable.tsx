@@ -49,12 +49,14 @@ const STATUS_CONFIG: Record<EmployeeStatus, { label: string; className: string }
 };
 
 export default function ScanEmployeeTable() {
+  const navigate = useNavigate();
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
   const orgId = profile?.org_id;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   // Haal profielen op voor deze organisatie (alleen user-rollen)
   const { data: profiles, isLoading: profilesLoading } = useQuery({
