@@ -225,10 +225,21 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
     for (let i = 0; i < validRows.length; i++) {
       const row = validRows[i];
       try {
-        await inviteUser.mutateAsync({
+        const inviteBody: Record<string, unknown> = {
           email: row.email,
           role: row.rol,
+          orgId: profile?.org_id,
+          name: [row.voornaam, row.achternaam].filter(Boolean).join(" ") || undefined,
+        };
+        if (emailTemplate) {
+          inviteBody.email_subject = emailTemplate.subject;
+          inviteBody.email_body = emailTemplate.body;
+        }
+        const { data, error } = await supabase.functions.invoke("invite-user", {
+          body: inviteBody,
         });
+        if (error) throw error;
+        if (data && !data.success) throw new Error(data.error || "Mislukt");
         importResults.push({ email: row.email, success: true });
       } catch (err: any) {
         importResults.push({
