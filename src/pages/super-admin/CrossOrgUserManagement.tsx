@@ -37,6 +37,7 @@ interface UserWithRoles {
   org_id: string;
   organization_name?: string;
   roles: AppRole[];
+  is_active: boolean;
 }
 
 const ROLE_LABELS: Record<AppRole, string> = {
