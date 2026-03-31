@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, Send, Loader2, Mail, UserPlus } from "lucide-react";
+import { Users, Send, Loader2, UserPlus } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
