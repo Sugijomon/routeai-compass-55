@@ -243,6 +243,16 @@ export default function Auth() {
                   </Button>
                 </form>
 
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setMode('reset')}
+                  >
+                    Wachtwoord vergeten?
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
