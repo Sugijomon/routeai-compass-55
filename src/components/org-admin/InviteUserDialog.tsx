@@ -137,14 +137,16 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
           <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
             <p>De gebruiker ontvangt een e-mail met instructies om een account aan te maken.</p>
           </div>
+
+          <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuleren
           </Button>
-          <Button onClick={handleInvite} disabled={!email.trim() || inviteUser.isPending || checking}>
-            {(inviteUser.isPending || checking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleInvite} disabled={!email.trim() || isInviting || checking}>
+            {(isInviting || checking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Uitnodigen
           </Button>
         </DialogFooter>
