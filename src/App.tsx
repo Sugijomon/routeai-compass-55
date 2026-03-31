@@ -6,6 +6,7 @@ import OrgAdminDashboard from "./pages/OrgAdminDashboard";
 import ToolCatalog from "./components/ToolCatalog";
 import { AuthRoute } from "./components/AuthRoute";
 import Auth from "./pages/Auth";
+import UpdatePassword from "./pages/UpdatePassword";
 import NewAssessment from "./pages/NewAssessment";
 import Assessment from "./pages/Assessment";
 import Assessments from "./pages/Assessments";
