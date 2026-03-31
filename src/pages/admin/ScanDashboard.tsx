@@ -143,12 +143,14 @@ export default function ScanDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* RouteAI Transfer sectie — altijd zichtbaar onder de tabs */}
-        <Card>
-          <CardContent className="pt-6">
-            <RouteAITransferSection />
-          </CardContent>
-        </Card>
+        {/* RouteAI Transfer sectie — alleen voor super_admin bij plan_type 'both' */}
+        {planType === 'both' && isSuperAdmin && (
+          <Card>
+            <CardContent className="pt-6">
+              <RouteAITransferSection />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AppLayout>
   );
