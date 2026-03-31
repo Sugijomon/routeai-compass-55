@@ -12,6 +12,7 @@ import RouteAITransferSection from '@/components/admin/RouteAITransferSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useOrgPlanType } from '@/hooks/useOrgPlanType';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
