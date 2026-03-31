@@ -101,6 +101,48 @@ export type Database = {
           },
         ]
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          org_id: string | null
+          reason: string | null
+          target_id: string
+          target_table: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          org_id?: string | null
+          reason?: string | null
+          target_id: string
+          target_table: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          org_id?: string | null
+          reason?: string | null
+          target_id?: string
+          target_table?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       archetype_ml_map: {
         Row: {
           archetype_code: string
