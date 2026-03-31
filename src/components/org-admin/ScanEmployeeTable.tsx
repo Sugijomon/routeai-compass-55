@@ -373,6 +373,14 @@ export default function ScanEmployeeTable() {
           </div>
         )}
       </CardContent>
+
+      {orgId && (
+        <BulkImportDialog
+          open={bulkImportOpen}
+          onOpenChange={setBulkImportOpen}
+          orgId={orgId}
+        />
+      )}
     </Card>
   );
 }
