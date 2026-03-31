@@ -83,7 +83,7 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
   const [results, setResults] = useState<ImportResult[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inviteUser = useInviteUser();
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
   const { profile } = useUserProfile();
 
   const validRows = rows.filter((r) => !r.error);
