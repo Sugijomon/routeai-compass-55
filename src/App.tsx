@@ -46,6 +46,7 @@ import LearningLibraryManagement from "./pages/super-admin/LearningLibraryManage
 import CrossOrgUserManagement from "./pages/super-admin/CrossOrgUserManagement";
 import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
 import TestChecklist from "./pages/super-admin/TestChecklist";
+import AuditLogPage from "./pages/super-admin/AuditLogPage";
 import PassportPage from "./pages/admin/PassportPage";
 export default function App() {
   return (
@@ -130,6 +131,14 @@ export default function App() {
           element={
             <RequireSuperAdmin>
               <TestChecklist />
+            </RequireSuperAdmin>
+          }
+        />
+        <Route
+          path="/super-admin/audit"
+          element={
+            <RequireSuperAdmin>
+              <AuditLogPage />
             </RequireSuperAdmin>
           }
         />
