@@ -89,6 +89,7 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
     } finally {
       setIsInviting(false);
     }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
