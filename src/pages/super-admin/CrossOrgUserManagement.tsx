@@ -85,7 +85,7 @@ export default function CrossOrgUserManagement() {
       // Fetch profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, full_name, org_id')
+        .select('id, email, full_name, org_id, is_active')
         .order('email');
 
       if (profilesError) throw profilesError;
