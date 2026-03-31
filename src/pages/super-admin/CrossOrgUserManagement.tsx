@@ -184,6 +184,24 @@ export default function CrossOrgUserManagement() {
     }
   });
 
+  // Toggle is_active mutation
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: isActive })
+        .eq('id', userId);
+      if (error) throw error;
+    },
+    onSuccess: (_, { isActive }) => {
+      queryClient.invalidateQueries({ queryKey: ['cross-org-users'] });
+      toast.success(isActive ? 'Gebruiker geactiveerd' : 'Gebruiker gedeactiveerd');
+    },
+    onError: () => {
+      toast.error('Kon status niet wijzigen');
+    }
+  });
+
   // Filter users
   const filteredUsers = usersData?.filter(user => {
     const matchesSearch = 
