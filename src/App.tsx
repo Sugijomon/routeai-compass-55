@@ -134,6 +134,14 @@ export default function App() {
             </RequireSuperAdmin>
           }
         />
+        <Route
+          path="/super-admin/audit"
+          element={
+            <RequireSuperAdmin>
+              <AuditLogPage />
+            </RequireSuperAdmin>
+          }
+        />
         
         {/* Org Admin Dashboard - now at /admin */}
         <Route 
