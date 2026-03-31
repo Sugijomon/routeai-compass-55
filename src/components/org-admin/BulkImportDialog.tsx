@@ -383,12 +383,17 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
               <Button variant="outline" onClick={reset}>
                 Terug
               </Button>
-              <Button
-                onClick={handleImport}
-                disabled={validRows.length === 0}
-              >
-                Importeer {validRows.length} medewerker{validRows.length !== 1 ? "s" : ""}
-              </Button>
+              <div className="w-full space-y-4">
+                <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleImport}
+                    disabled={validRows.length === 0}
+                  >
+                    Importeer {validRows.length} medewerker{validRows.length !== 1 ? "s" : ""}
+                  </Button>
+                </div>
+              </div>
             </DialogFooter>
           </div>
         )}
