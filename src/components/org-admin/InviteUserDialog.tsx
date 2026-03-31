@@ -34,7 +34,8 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("user");
   const [checking, setChecking] = useState(false);
-  const inviteUser = useInviteUser();
+  const [isInviting, setIsInviting] = useState(false);
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
   const { profile } = useUserProfile();
 
   const handleInvite = async () => {
