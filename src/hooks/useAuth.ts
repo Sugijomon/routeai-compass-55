@@ -147,8 +147,6 @@ export function useAuth() {
 
 async function checkAdminRole(userId: string): Promise<boolean> {
   try {
-    // Check for any admin-level role - use limit(1) instead of maybeSingle()
-    // to handle users with multiple admin roles
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -161,10 +159,28 @@ async function checkAdminRole(userId: string): Promise<boolean> {
       return false;
     }
 
-    // Returns true if at least one admin role exists
     return Array.isArray(data) && data.length > 0;
   } catch {
     return false;
+  }
+}
+
+async function checkIsActive(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('is_active')
+      .eq('id', userId)
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking is_active:', error);
+      return true; // fail open als check faalt
+    }
+
+    return Array.isArray(data) && data.length > 0 ? (data[0].is_active ?? true) : true;
+  } catch {
+    return true;
   }
 }
 
