@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
 import KnownToolsStep from "./KnownToolsStep";
+import ScanEmployeeTable from "./ScanEmployeeTable";
 
 interface ScanSettings {
   shadow_survey_sector?: string;
@@ -342,6 +343,9 @@ export default function ScanConfigTab() {
 
       {/* Sectie 3 — Bekende tools */}
       <KnownToolsStep />
+
+      {/* Sectie 4 — Medewerkers */}
+      <ScanEmployeeTable />
     </div>
   );
 }
