@@ -130,6 +130,23 @@ export default function Auth() {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+      toast.success('Resetlink verstuurd! Check je e-mail.');
+    } catch (error: any) {
+      toast.error(error.message || 'Kon geen resetlink versturen.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleOAuthLogin = async (provider: 'google' | 'apple') => {
     setIsLoading(true);
     try {
