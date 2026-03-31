@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Shield, Mail, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
+import { Shield, Mail, Loader2, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { getDashboardPathFromRoles } from '@/hooks/useDashboardRedirect';
 
 const GoogleIcon = () => (
@@ -66,8 +66,9 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [mode, setMode] = useState<'password' | 'magiclink'>('password');
+  const [mode, setMode] = useState<'password' | 'magiclink' | 'reset'>('password');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Redirect als al ingelogd
   useEffect(() => {
@@ -129,6 +130,23 @@ export default function Auth() {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+      toast.success('Resetlink verstuurd! Check je e-mail.');
+    } catch (error: any) {
+      toast.error(error.message || 'Kon geen resetlink versturen.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleOAuthLogin = async (provider: 'google' | 'apple') => {
     setIsLoading(true);
     try {
@@ -177,6 +195,54 @@ export default function Auth() {
                   Andere methode kiezen
                 </Button>
               </div>
+            ) : resetSent ? (
+              <div className="text-center p-4 rounded-lg bg-muted">
+                <Mail className="w-8 h-8 mx-auto mb-2 text-primary" />
+                <p className="font-medium text-foreground">Check je e-mail</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  We hebben een resetlink gestuurd naar <strong>{email}</strong>
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => { setResetSent(false); setMode('password'); }}
+                >
+                  Terug naar inloggen
+                </Button>
+              </div>
+            ) : mode === 'reset' ? (
+              <>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setMode('password')}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Terug naar inloggen
+                </button>
+                <p className="text-sm text-muted-foreground">
+                  Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.
+                </p>
+                <form onSubmit={handlePasswordReset} className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="naam@bedrijf.nl"
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Stuur resetlink
+                  </Button>
+                </form>
+              </>
             ) : mode === 'password' ? (
               <>
                 {/* Wachtwoord-modus */}
@@ -224,6 +290,16 @@ export default function Auth() {
                     Inloggen
                   </Button>
                 </form>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setMode('reset')}
+                  >
+                    Wachtwoord vergeten?
+                  </button>
+                </div>
 
                 <button
                   type="button"
