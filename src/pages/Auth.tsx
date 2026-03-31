@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Shield, Mail, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
+import { Shield, Mail, Loader2, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { getDashboardPathFromRoles } from '@/hooks/useDashboardRedirect';
 
 const GoogleIcon = () => (
