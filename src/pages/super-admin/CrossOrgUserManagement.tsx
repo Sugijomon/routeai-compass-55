@@ -330,6 +330,7 @@ export default function CrossOrgUserManagement() {
                     <TableHead>Email</TableHead>
                     <TableHead>Organisatie</TableHead>
                     <TableHead>Rollen</TableHead>
+                    <TableHead>Actief</TableHead>
                     <TableHead>Acties</TableHead>
                   </TableRow>
                 </TableHeader>
