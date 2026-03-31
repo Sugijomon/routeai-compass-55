@@ -120,20 +120,27 @@ export function useAuth() {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        checkAdminRole(session.user.id).then((isAdmin) => {
-          setAuthState(prev => {
-            if (prev.isSigningOut) return prev;
-            return {
-              ...prev,
-              user: session.user,
-              session,
-              isLoading: false,
-              isAdmin,
-              hasCheckedAdmin: true,
-            };
-          });
+        const [isAdmin, isActive] = await Promise.all([
+          checkAdminRole(session.user.id),
+          checkIsActive(session.user.id),
+        ]);
+        if (!isActive) {
+          toast.error('Je account is gedeactiveerd. Neem contact op met je beheerder.');
+          await supabase.auth.signOut({ scope: 'local' });
+          return;
+        }
+        setAuthState(prev => {
+          if (prev.isSigningOut) return prev;
+          return {
+            ...prev,
+            user: session.user,
+            session,
+            isLoading: false,
+            isAdmin,
+            hasCheckedAdmin: true,
+          };
         });
       } else {
         setAuthState(prev => ({
