@@ -343,6 +343,9 @@ export default function ScanConfigTab() {
 
       {/* Sectie 3 — Bekende tools */}
       <KnownToolsStep />
+
+      {/* Sectie 4 — Medewerkers */}
+      <ScanEmployeeTable />
     </div>
   );
 }
