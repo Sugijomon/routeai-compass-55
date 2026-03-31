@@ -81,8 +81,8 @@ export default function ScanConfigTab() {
 
   // Sync state from DB
   useEffect(() => {
-    if (settings) {
-      setSector(settings.shadow_survey_sector || "");
+    if (organization) {
+      setSector(organization.sector || settings.shadow_survey_sector || "");
       setOrgSize(settings.shadow_survey_org_size || "");
       setGoal(settings.shadow_survey_goal || "");
       setGoalOther(settings.shadow_survey_goal_other || "");
