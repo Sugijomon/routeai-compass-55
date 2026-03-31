@@ -101,6 +101,42 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Haal org-naam op voor variabele-substitutie
+    const { data: orgRecord } = await supabaseAdmin
+      .from("organizations")
+      .select("name, settings")
+      .eq("id", orgId)
+      .single();
+
+    const orgName = orgRecord?.name || "Organisatie";
+    const orgSettings = (orgRecord?.settings || {}) as Record<string, unknown>;
+
+    // Bepaal amnestie-deadline
+    const amnestyActivatedAt = orgSettings.amnesty_activated_at
+      ? new Date(orgSettings.amnesty_activated_at as string)
+      : null;
+    const amnestyValidDays = (orgSettings.amnesty_valid_days as number) || 30;
+    const deadlineDate = amnestyActivatedAt
+      ? new Date(amnestyActivatedAt.getTime() + amnestyValidDays * 86400000)
+      : new Date(Date.now() + 30 * 86400000);
+    const deadlineStr = deadlineDate.toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    // Haal DPO/caller info op voor variabelen
+    const { data: callerProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", callerId)
+      .single();
+    const managerName =
+      (orgSettings.amnesty_manager_name as string) ||
+      callerProfile?.full_name ||
+      "De organisatie";
+    const dpoEmail = callerProfile?.email || "";
+
     // Invite user via admin API
     const inviteOptions: Record<string, unknown> = {
       data: {
