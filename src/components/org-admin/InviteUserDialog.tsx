@@ -64,11 +64,31 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
       setChecking(false);
     }
 
-    await inviteUser.mutateAsync({ email: email.trim(), role });
-    setEmail("");
-    setRole("user");
-    onOpenChange(false);
-  };
+    setIsInviting(true);
+    try {
+      const inviteBody: Record<string, unknown> = {
+        email: email.trim(),
+        role,
+        orgId: profile?.org_id,
+      };
+      if (emailTemplate) {
+        inviteBody.email_subject = emailTemplate.subject;
+        inviteBody.email_body = emailTemplate.body;
+      }
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: inviteBody,
+      });
+      if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || "Uitnodiging mislukt");
+      toast.success(`Uitnodiging verstuurd naar ${email.trim()}`);
+      setEmail("");
+      setRole("user");
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err.message || "Fout bij uitnodigen");
+    } finally {
+      setIsInviting(false);
+    }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
