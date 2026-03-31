@@ -109,6 +109,7 @@ export default function CrossOrgUserManagement() {
       // Map roles to users
       const usersWithRoles: UserWithRoles[] = profiles.map(profile => ({
         ...profile,
+        is_active: profile.is_active ?? true,
         organization_name: orgMap.get(profile.org_id) || 'Onbekend',
         roles: roles
           .filter(r => r.user_id === profile.id)
