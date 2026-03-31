@@ -21,6 +21,7 @@ export default function ScanDashboard() {
   const location = useLocation();
   const { profile } = useUserProfile();
   const { planType } = useOrgPlanType();
+  const { isSuperAdmin } = useUserRole();
   const orgId = profile?.org_id;
 
   // Bepaal of scan geconfigureerd is (amnesty_activated_at aanwezig)
