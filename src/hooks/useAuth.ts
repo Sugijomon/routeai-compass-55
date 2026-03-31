@@ -93,19 +93,26 @@ export function useAuth() {
         
         // Defer Supabase calls with setTimeout to prevent deadlock
         if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id).then((isAdmin) => {
-              setAuthState(prev => {
-                if (prev.isSigningOut) return prev;
-                return {
-                  ...prev,
-                  user: session.user,
-                  session,
-                  isLoading: false,
-                  isAdmin,
-                  hasCheckedAdmin: true,
-                };
-              });
+          setTimeout(async () => {
+            const [isAdmin, isActive] = await Promise.all([
+              checkAdminRole(session.user.id),
+              checkIsActive(session.user.id),
+            ]);
+            if (!isActive) {
+              toast.error('Je account is gedeactiveerd. Neem contact op met je beheerder.');
+              await supabase.auth.signOut({ scope: 'local' });
+              return;
+            }
+            setAuthState(prev => {
+              if (prev.isSigningOut) return prev;
+              return {
+                ...prev,
+                user: session.user,
+                session,
+                isLoading: false,
+                isAdmin,
+                hasCheckedAdmin: true,
+              };
             });
           }, 0);
         }
