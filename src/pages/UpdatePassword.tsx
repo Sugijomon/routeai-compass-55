@@ -24,8 +24,18 @@ export default function UpdatePassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+
+      // Markeer dat gebruiker een wachtwoord heeft ingesteld
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('profiles')
+          .update({ has_set_password: true } as any)
+          .eq('id', user.id);
+      }
+
       toast.success('Wachtwoord bijgewerkt. Je wordt doorgestuurd...');
-      setTimeout(() => navigate('/auth'), 1500);
+      setTimeout(() => navigate('/'), 1500);
     } catch (error: any) {
       toast.error(error.message || 'Kon wachtwoord niet bijwerken.');
     } finally {
