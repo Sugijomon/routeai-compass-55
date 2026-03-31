@@ -12,6 +12,7 @@ import RouteAITransferSection from '@/components/admin/RouteAITransferSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useOrgPlanType } from '@/hooks/useOrgPlanType';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function ScanDashboard() {
   const location = useLocation();
   const { profile } = useUserProfile();
   const { planType } = useOrgPlanType();
+  const { isSuperAdmin } = useUserRole();
   const orgId = profile?.org_id;
 
   // Bepaal of scan geconfigureerd is (amnesty_activated_at aanwezig)
@@ -141,12 +143,14 @@ export default function ScanDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* RouteAI Transfer sectie — altijd zichtbaar onder de tabs */}
-        <Card>
-          <CardContent className="pt-6">
-            <RouteAITransferSection />
-          </CardContent>
-        </Card>
+        {/* RouteAI Transfer sectie — alleen voor super_admin bij plan_type 'both' */}
+        {planType === 'both' && isSuperAdmin && (
+          <Card>
+            <CardContent className="pt-6">
+              <RouteAITransferSection />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AppLayout>
   );
