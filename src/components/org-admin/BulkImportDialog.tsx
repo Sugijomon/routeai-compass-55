@@ -27,9 +27,11 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { useInviteUser } from "@/hooks/useOrgUsers";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
+import InviteEmailTemplateEditor, {
+  type InviteEmailTemplate,
+} from "./InviteEmailTemplateEditor";
 
 interface BulkImportDialogProps {
   open: boolean;
