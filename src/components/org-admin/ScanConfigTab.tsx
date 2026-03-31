@@ -60,7 +60,7 @@ export default function ScanConfigTab() {
       if (!profile?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, settings")
+        .select("id, settings, sector")
         .eq("id", profile.org_id)
         .maybeSingle();
       if (error) throw error;
@@ -81,8 +81,8 @@ export default function ScanConfigTab() {
 
   // Sync state from DB
   useEffect(() => {
-    if (settings) {
-      setSector(settings.shadow_survey_sector || "");
+    if (organization) {
+      setSector(organization.sector || settings.shadow_survey_sector || "");
       setOrgSize(settings.shadow_survey_org_size || "");
       setGoal(settings.shadow_survey_goal || "");
       setGoalOther(settings.shadow_survey_goal_other || "");
@@ -111,13 +111,33 @@ export default function ScanConfigTab() {
     },
   });
 
+  const saveContextMutation = useMutation({
+    mutationFn: async () => {
+      if (!profile?.org_id) throw new Error("Geen organisatie gevonden");
+      const newSettings = {
+        ...settings,
+        shadow_survey_org_size: orgSize,
+        shadow_survey_goal: goal,
+        shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
+      };
+      const { error } = await supabase
+        .from("organizations")
+        .update({ sector: sector || null, settings: newSettings as any })
+        .eq("id", profile.org_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      toast.success("Context opgeslagen");
+    },
+    onError: (err: Error) => {
+      toast.error(`Fout bij opslaan: ${err.message}`);
+    },
+  });
+
   const handleSaveContext = () => {
-    saveMutation.mutate({
-      shadow_survey_sector: sector,
-      shadow_survey_org_size: orgSize,
-      shadow_survey_goal: goal,
-      shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
-    });
+    saveContextMutation.mutate();
   };
 
   const handleSaveAmnesty = () => {
@@ -225,11 +245,11 @@ export default function ScanConfigTab() {
 
           <Button
             onClick={handleSaveContext}
-            disabled={saveMutation.isPending}
+            disabled={saveContextMutation.isPending}
             variant="outline"
             size="sm"
           >
-            {saveMutation.isPending ? (
+            {saveContextMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : null}
             Context opslaan
