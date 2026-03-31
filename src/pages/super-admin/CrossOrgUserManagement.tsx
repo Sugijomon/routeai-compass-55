@@ -25,7 +25,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, ArrowLeft, Loader2, Shield, Edit } from 'lucide-react';
+import { Users, ArrowLeft, Loader2, Shield, Edit, UserCheck, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppRole } from '@/hooks/useUserRole';
 import { AppLayout } from '@/components/layout/AppLayout';
