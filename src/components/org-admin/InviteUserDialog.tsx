@@ -18,10 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Mail } from "lucide-react";
-import { useInviteUser } from "@/hooks/useOrgUsers";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import InviteEmailTemplateEditor, {
+  type InviteEmailTemplate,
+} from "./InviteEmailTemplateEditor";
 
 interface InviteUserDialogProps {
   open: boolean;
@@ -32,7 +34,8 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("user");
   const [checking, setChecking] = useState(false);
-  const inviteUser = useInviteUser();
+  const [isInviting, setIsInviting] = useState(false);
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
   const { profile } = useUserProfile();
 
   const handleInvite = async () => {
@@ -61,11 +64,31 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
       setChecking(false);
     }
 
-    await inviteUser.mutateAsync({ email: email.trim(), role });
-    setEmail("");
-    setRole("user");
-    onOpenChange(false);
-  };
+    setIsInviting(true);
+    try {
+      const inviteBody: Record<string, unknown> = {
+        email: email.trim(),
+        role,
+        orgId: profile?.org_id,
+      };
+      if (emailTemplate) {
+        inviteBody.email_subject = emailTemplate.subject;
+        inviteBody.email_body = emailTemplate.body;
+      }
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: inviteBody,
+      });
+      if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || "Uitnodiging mislukt");
+      toast.success(`Uitnodiging verstuurd naar ${email.trim()}`);
+      setEmail("");
+      setRole("user");
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err.message || "Fout bij uitnodigen");
+    } finally {
+      setIsInviting(false);
+    }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,14 +137,16 @@ export default function InviteUserDialog({ open, onOpenChange }: InviteUserDialo
           <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
             <p>De gebruiker ontvangt een e-mail met instructies om een account aan te maken.</p>
           </div>
+
+          <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuleren
           </Button>
-          <Button onClick={handleInvite} disabled={!email.trim() || inviteUser.isPending || checking}>
-            {(inviteUser.isPending || checking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleInvite} disabled={!email.trim() || isInviting || checking}>
+            {(isInviting || checking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Uitnodigen
           </Button>
         </DialogFooter>

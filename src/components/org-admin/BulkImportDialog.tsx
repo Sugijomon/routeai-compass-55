@@ -27,9 +27,11 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { useInviteUser } from "@/hooks/useOrgUsers";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
+import InviteEmailTemplateEditor, {
+  type InviteEmailTemplate,
+} from "./InviteEmailTemplateEditor";
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -81,7 +83,7 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
   const [results, setResults] = useState<ImportResult[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inviteUser = useInviteUser();
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
   const { profile } = useUserProfile();
 
   const validRows = rows.filter((r) => !r.error);
@@ -223,10 +225,21 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
     for (let i = 0; i < validRows.length; i++) {
       const row = validRows[i];
       try {
-        await inviteUser.mutateAsync({
+        const inviteBody: Record<string, unknown> = {
           email: row.email,
           role: row.rol,
+          orgId: profile?.org_id,
+          name: [row.voornaam, row.achternaam].filter(Boolean).join(" ") || undefined,
+        };
+        if (emailTemplate) {
+          inviteBody.email_subject = emailTemplate.subject;
+          inviteBody.email_body = emailTemplate.body;
+        }
+        const { data, error } = await supabase.functions.invoke("invite-user", {
+          body: inviteBody,
         });
+        if (error) throw error;
+        if (data && !data.success) throw new Error(data.error || "Mislukt");
         importResults.push({ email: row.email, success: true });
       } catch (err: any) {
         importResults.push({
@@ -370,12 +383,17 @@ export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialo
               <Button variant="outline" onClick={reset}>
                 Terug
               </Button>
-              <Button
-                onClick={handleImport}
-                disabled={validRows.length === 0}
-              >
-                Importeer {validRows.length} medewerker{validRows.length !== 1 ? "s" : ""}
-              </Button>
+              <div className="w-full space-y-4">
+                <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleImport}
+                    disabled={validRows.length === 0}
+                  >
+                    Importeer {validRows.length} medewerker{validRows.length !== 1 ? "s" : ""}
+                  </Button>
+                </div>
+              </div>
             </DialogFooter>
           </div>
         )}
