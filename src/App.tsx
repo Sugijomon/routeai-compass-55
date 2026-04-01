@@ -63,6 +63,9 @@ export default function App() {
         <Route path="/auth/update-password" element={<UpdatePassword />} />
         <Route path="/scoreboard/:slug" element={<PublicScoreboardPage />} />
         
+        {/* Profiel */}
+        <Route path="/profiel" element={<AuthRoute><ProfilePage /></AuthRoute>} />
+        
         {/* User Dashboard - Protected with real auth */}
         <Route 
           path="/dashboard" 

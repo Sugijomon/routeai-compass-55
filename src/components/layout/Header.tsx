@@ -179,14 +179,12 @@ export function Header() {
               )}
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Mijn Profiel
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Instellingen
-              </DropdownMenuItem>
+              {!isShadowOnlyUser && (
+                <DropdownMenuItem onClick={() => navigate('/profiel')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Mijn Profiel
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
