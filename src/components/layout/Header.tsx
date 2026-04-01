@@ -1,8 +1,9 @@
-import { Shield, User, Settings, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
+import { Shield, User, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
 import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useOrgPlanType } from '@/hooks/useOrgPlanType';
 import {
   DropdownMenu,
   DropdownMenuContent,
