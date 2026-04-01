@@ -144,6 +144,7 @@ export default function ScanConfigTab() {
       toast.success("Context opgeslagen");
     },
     onError: (err: Error) => {
+      console.error('saveContextMutation error:', err);
       toast.error(`Fout bij opslaan: ${err.message}`);
     },
   });
