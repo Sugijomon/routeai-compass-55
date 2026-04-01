@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
+
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
 import OrientationStep from '@/components/shadow-survey/OrientationStep';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
@@ -46,18 +46,20 @@ export default function ShadowSurveyPage() {
   const orgId = profile?.org_id;
 
   // Haal org-settings op (amnesty config)
-  const { data: orgSettings, isLoading: orgLoading } = useQuery({
-    queryKey: ['org-amnesty-settings', orgId],
+  const { data: org, isLoading: orgLoading } = useQuery({
+    queryKey: ['org-scan-context', orgId],
     queryFn: async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('settings')
+        .select('name, settings')
         .eq('id', orgId!)
         .maybeSingle();
-      return (data?.settings as Record<string, unknown>) ?? {};
+      return data;
     },
     enabled: !!orgId,
   });
+
+  const orgSettings = (org?.settings as Record<string, unknown>) ?? {};
 
   // Check of gebruiker al een run heeft met amnesty_acknowledged
   const { data: existingRun, isLoading: runLoading } = useQuery({
@@ -155,10 +157,15 @@ export default function ShadowSurveyPage() {
   return (
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
-        <PageHeader
-          title="Shadow AI Scan"
-          subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
-        />
+        {/* Organisatiecontext */}
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground">
+            Je neemt deel aan de Shadow AI Scan van
+          </p>
+          <h2 className="text-xl font-medium text-foreground">
+            {org?.name}
+          </h2>
+        </div>
 
         {/* Stap 1: Amnesty */}
         {(!surveyRunId || step === 'amnesty') && !surveyRunId && (
