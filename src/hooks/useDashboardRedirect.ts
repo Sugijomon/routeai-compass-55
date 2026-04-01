@@ -33,7 +33,7 @@ export function useDashboardRedirect() {
   
   // DPO bij 'both' of 'routeai' org → naar shadow beheer
   if (isDpo && !isOrgAdmin) {
-    return { path: '/admin/shadow', isLoading };
+    return { path: '/admin/shadow/overzicht', isLoading };
   }
   
   if (isOrgAdmin || isManager) {
