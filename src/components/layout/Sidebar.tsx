@@ -17,6 +17,7 @@ import {
   Settings,
   FileText
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
 
