@@ -89,6 +89,9 @@ export default function ScanConfigTab() {
       setOrgSize(settings.shadow_survey_org_size || "");
       setGoal(settings.shadow_survey_goal || "");
       setGoalOther(settings.shadow_survey_goal_other || "");
+      setContactPerson(organization.contact_person || "");
+      setContactEmail(organization.contact_email || "");
+      setContactPhone((settings as any).contact_phone || "");
       setManagerName(settings.amnesty_manager_name || "");
       setValidDays(settings.amnesty_valid_days || 30);
       setAmnestyText(settings.amnesty_text || "");
