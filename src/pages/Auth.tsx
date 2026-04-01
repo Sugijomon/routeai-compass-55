@@ -377,6 +377,29 @@ export default function Auth() {
           Door in te loggen ga je akkoord met onze gebruiksvoorwaarden
         </p>
       </div>
+
+      <Dialog open={passwordModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              <DialogTitle>Sneller inloggen?</DialogTitle>
+            </div>
+            <DialogDescription>
+              Je bent ingelogd via een e-maillink. Wil je een wachtwoord
+              instellen zodat je de volgende keer direct kunt inloggen?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={handleSkipPassword}>
+              Misschien later
+            </Button>
+            <Button onClick={handleSetPassword}>
+              Wachtwoord instellen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
