@@ -38,7 +38,7 @@ import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
 import ScanInstellingenPage from "./pages/admin/ScanInstellingenPage";
-import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
+
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
 import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
@@ -403,7 +403,7 @@ export default function App() {
         <Route path="/admin/shadow/scoreboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanScoreboardPage /></AuthRoute>} />
         <Route path="/admin/shadow/instellingen" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanInstellingenPage /></AuthRoute>} />
         <Route path="/admin/shadow/rapportage" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
-        <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
+        
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
         

@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +49,7 @@ const STATUS_CONFIG: Record<EmployeeStatus, { label: string; className: string }
 };
 
 export default function ScanEmployeeTable() {
-  const navigate = useNavigate();
+  
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
   const orgId = profile?.org_id;
@@ -292,27 +291,7 @@ export default function ScanEmployeeTable() {
           <EmptyState
             icon={Users}
             title="Nog geen medewerkers"
-            description={
-              <span>
-                Nodig medewerkers uit via de{" "}
-                <button
-                  type="button"
-                  className="underline text-primary hover:text-primary/80 font-medium"
-                  onClick={() => navigate("/admin/shadow/setup")}
-                >
-                  configuratie-wizard
-                </button>
-                {" "}of{" "}
-                <button
-                  type="button"
-                  className="underline text-primary hover:text-primary/80 font-medium"
-                  onClick={() => setBulkImportOpen(true)}
-                >
-                  bulk-import
-                </button>
-                .
-              </span>
-            }
+            description="Nodig medewerkers uit via de bulk-import knop rechtsboven."
           />
         ) : (
           <div className="rounded-md border">
