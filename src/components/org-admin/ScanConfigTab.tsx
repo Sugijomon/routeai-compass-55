@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import KnownToolsStep from "./KnownToolsStep";
+import ToolCatalogPicker from "./ToolCatalogPicker";
 import ScanEmployeeTable from "./ScanEmployeeTable";
 
 interface ScanSettings {
