@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Mail, Loader2, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Shield, Mail, Loader2, Lock, Eye, EyeOff, ArrowLeft, KeyRound } from 'lucide-react';
 import { getDashboardPathFromRoles } from '@/hooks/useDashboardRedirect';
 
 async function fetchRolesAndGetPath(userId: string): Promise<string> {
