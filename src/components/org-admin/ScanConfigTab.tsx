@@ -125,10 +125,16 @@ export default function ScanConfigTab() {
         shadow_survey_org_size: orgSize,
         shadow_survey_goal: goal,
         shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
+        contact_phone: contactPhone || undefined,
       };
       const { error } = await supabase
         .from("organizations")
-        .update({ sector: sector || null, settings: newSettings as any })
+        .update({
+          sector: sector || null,
+          contact_person: contactPerson || null,
+          contact_email: contactEmail || null,
+          settings: newSettings as any,
+        })
         .eq("id", profile.org_id);
       if (error) throw error;
     },
