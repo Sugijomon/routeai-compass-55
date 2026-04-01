@@ -54,6 +54,64 @@ export default function Auth() {
   const [mode, setMode] = useState<'password' | 'magiclink' | 'reset'>('password');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
+  const [pendingRedirectPath, setPendingRedirectPath] = useState<string | null>(null);
+
+  const getPromptCount = () => {
+    try { return parseInt(localStorage.getItem('password_prompt_count') || '0', 10); } catch { return 0; }
+  };
+  const incrementPromptCount = () => {
+    const next = getPromptCount() + 1;
+    localStorage.setItem('password_prompt_count', String(next));
+    return next;
+  };
+
+  const handlePostLogin = useCallback(async (userId: string) => {
+    const path = await fetchRolesAndGetPath(userId);
+
+    // Check password prompt conditions
+    const count = getPromptCount();
+    if (count < 3) {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('has_set_password, banner_password_dismissed')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (data && !data.has_set_password && !data.banner_password_dismissed) {
+          setPendingRedirectPath(path);
+          setPasswordModal(true);
+          return;
+        }
+      } catch { /* continue redirect */ }
+    }
+
+    navigate(path, { replace: true });
+  }, [navigate]);
+
+  const handleSetPassword = () => {
+    incrementPromptCount();
+    setPasswordModal(false);
+    navigate('/auth/update-password');
+  };
+
+  const handleSkipPassword = async () => {
+    const newCount = incrementPromptCount();
+    if (newCount >= 3) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase
+          .from('profiles')
+          .update({ banner_password_dismissed: true } as any)
+          .eq('id', session.user.id);
+      }
+    }
+    setPasswordModal(false);
+    if (pendingRedirectPath) {
+      navigate(pendingRedirectPath, { replace: true });
+    }
+  };
 
   // Redirect als al ingelogd
   useEffect(() => {
@@ -71,13 +129,12 @@ export default function Auth() {
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           await new Promise(resolve => setTimeout(resolve, 500));
-          const path = await fetchRolesAndGetPath(session.user.id);
-          navigate(path, { replace: true });
+          await handlePostLogin(session.user.id);
         }
       }
     );
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, handlePostLogin]);
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
