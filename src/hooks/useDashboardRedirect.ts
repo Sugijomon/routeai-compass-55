@@ -20,7 +20,7 @@ export function useDashboardRedirect() {
   // shadow_only orgs: afwijkende routing
   if (planType === 'shadow_only') {
     if (isOrgAdmin || isDpo) {
-      return { path: '/admin/shadow', isLoading };
+      return { path: '/admin/shadow/overzicht', isLoading };
     }
     if (!isContentEditor && !isManager) {
       return { path: '/shadow-survey', isLoading };
