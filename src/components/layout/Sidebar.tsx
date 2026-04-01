@@ -12,7 +12,10 @@ import {
   BookOpen,
   Wrench,
   Library,
-  Rocket
+  Rocket,
+  Trophy,
+  Settings,
+  FileText
 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
