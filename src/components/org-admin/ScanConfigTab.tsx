@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import KnownToolsStep from "./KnownToolsStep";
+import ToolCatalogPicker from "./ToolCatalogPicker";
 import ScanEmployeeTable from "./ScanEmployeeTable";
 
 interface ScanSettings {
@@ -415,8 +415,8 @@ export default function ScanConfigTab() {
         </CardContent>
       </Card>
 
-      {/* Sectie 3 — Bekende tools */}
-      <KnownToolsStep />
+      {/* Sectie 3 — Tool catalogus */}
+      {profile?.org_id && <ToolCatalogPicker orgId={profile.org_id} />}
 
       {/* Sectie 4 — Medewerkers */}
       <ScanEmployeeTable />
