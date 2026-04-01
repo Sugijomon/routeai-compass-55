@@ -255,7 +255,7 @@ export default function ScanEmployeeTable() {
             Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
           </CardDescription>
         </div>
-        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
+        <Button size="sm" onClick={() => setInviteOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
           Medewerkers uitnodigen
         </Button>
