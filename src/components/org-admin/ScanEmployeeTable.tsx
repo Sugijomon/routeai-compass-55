@@ -380,6 +380,10 @@ export default function ScanEmployeeTable() {
         open={bulkImportOpen}
         onOpenChange={setBulkImportOpen}
       />
+      <InviteUserDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+      />
     </Card>
   );
 }
