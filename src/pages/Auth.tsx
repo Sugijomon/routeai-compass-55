@@ -140,11 +140,20 @@ export default function Auth() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
+
+      // Gebruiker logt in met wachtwoord — markeer als ingesteld, toon geen modal
+      if (data.user) {
+        await supabase
+          .from('profiles')
+          .update({ has_set_password: true } as any)
+          .eq('id', data.user.id);
+      }
+      // redirect happens via onAuthStateChange
     } catch (error: any) {
       toast.error(error.message || 'Inloggen mislukt. Controleer je e-mailadres en wachtwoord.');
     } finally {
