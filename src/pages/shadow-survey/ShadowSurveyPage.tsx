@@ -157,10 +157,15 @@ export default function ShadowSurveyPage() {
   return (
     <AppLayout>
       <div className="container mx-auto py-6 max-w-3xl">
-        <PageHeader
-          title="Shadow AI Scan"
-          subtitle="Inventariseer welke AI-tools er binnen je organisatie worden gebruikt."
-        />
+        {/* Organisatiecontext */}
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground">
+            Je neemt deel aan de Shadow AI Scan van
+          </p>
+          <h2 className="text-xl font-medium text-foreground">
+            {org?.name}
+          </h2>
+        </div>
 
         {/* Stap 1: Amnesty */}
         {(!surveyRunId || step === 'amnesty') && !surveyRunId && (
