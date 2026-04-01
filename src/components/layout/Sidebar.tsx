@@ -35,7 +35,19 @@ interface NavSection {
 
 export function Sidebar() {
   const location = useLocation();
-  const { isSuperAdmin, isContentEditor, canManageOrg, isDpo } = useUserRole();
+  const { isSuperAdmin, isContentEditor, canManageOrg, isDpo, isLoading } = useUserRole();
+
+  if (isLoading) {
+    return (
+      <aside className="hidden w-64 flex-shrink-0 border-r bg-card lg:block">
+        <div className="flex h-full flex-col gap-2 p-4 pt-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-8 rounded-md bg-muted animate-pulse mx-3" />
+          ))}
+        </div>
+      </aside>
+    );
+  }
 
   let sections: NavSection[] = [];
 
