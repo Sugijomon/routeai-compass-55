@@ -97,22 +97,15 @@ export default function Auth() {
   }, [navigate, shouldShowPasswordPrompt]);
 
   const handleSetPassword = () => {
-    incrementPromptCount();
+    // Wis de teller — nooit meer tonen
+    localStorage.removeItem('password_prompt_shown');
     setPasswordModal(false);
     navigate('/auth/update-password');
   };
 
-  const handleSkipPassword = async () => {
-    const newCount = incrementPromptCount();
-    if (newCount >= 3) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await supabase
-          .from('profiles')
-          .update({ banner_password_dismissed: true } as any)
-          .eq('id', session.user.id);
-      }
-    }
+  const handleSkipPassword = () => {
+    const count = parseInt(localStorage.getItem('password_prompt_shown') ?? '0', 10);
+    localStorage.setItem('password_prompt_shown', String(count + 1));
     setPasswordModal(false);
     if (pendingRedirectPath) {
       navigate(pendingRedirectPath, { replace: true });
