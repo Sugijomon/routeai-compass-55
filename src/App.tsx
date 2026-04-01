@@ -52,6 +52,7 @@ import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
 import TestChecklist from "./pages/super-admin/TestChecklist";
 import AuditLogPage from "./pages/super-admin/AuditLogPage";
 import PassportPage from "./pages/admin/PassportPage";
+import ProfilePage from "./pages/ProfilePage";
 export default function App() {
   return (
     <BrowserRouter>
@@ -61,6 +62,9 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/update-password" element={<UpdatePassword />} />
         <Route path="/scoreboard/:slug" element={<PublicScoreboardPage />} />
+        
+        {/* Profiel */}
+        <Route path="/profiel" element={<AuthRoute><ProfilePage /></AuthRoute>} />
         
         {/* User Dashboard - Protected with real auth */}
         <Route 

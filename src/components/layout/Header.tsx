@@ -1,8 +1,9 @@
-import { Shield, User, Settings, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
+import { Shield, User, ChevronDown, LogOut, Check, Eye } from 'lucide-react';
 import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useOrgPlanType } from '@/hooks/useOrgPlanType';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,10 @@ export function Header() {
 
   const roles = userRoles || [];
   const roleLabel = getRoleDisplayLabel(roles);
+  const { planType } = useOrgPlanType();
+
+  // Hide "Mijn Profiel" for shadow_only users with only 'user' role
+  const isShadowOnlyUser = planType === 'shadow_only' && roles.length > 0 && roles.every(r => r === 'user');
 
   // Determine if user can switch views
   const hasPrivilegedRole = roles.some(r => PRIVILEGED_ROLES.includes(r));
@@ -174,14 +179,12 @@ export function Header() {
               )}
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Mijn Profiel
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Instellingen
-              </DropdownMenuItem>
+              {!isShadowOnlyUser && (
+                <DropdownMenuItem onClick={() => navigate('/profiel')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Mijn Profiel
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
