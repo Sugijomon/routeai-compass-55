@@ -221,8 +221,8 @@ export default function InviteEmailTemplateEditor({
                   ref={textareaRef}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
-                  rows={10}
-                  className="font-mono text-sm"
+                  rows={6}
+                  className="font-mono text-sm resize-none"
                   placeholder="Schrijf hier je uitnodigingsbericht..."
                 />
               </div>
