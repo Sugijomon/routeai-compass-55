@@ -65,14 +65,24 @@ function normalizeRole(raw: string): string {
 function generateTemplateFile() {
   const wb = XLSX.utils.book_new();
   const data = [
-    ["voornaam", "achternaam", "email", "afdeling", "rol"],
-    ["Jan", "de Vries", "jan@voorbeeld.nl", "IT", "user"],
-    ["Maria", "Jansen", "maria@voorbeeld.nl", "HR", "manager"],
+    ["Voornaam", "Achternaam", "E-mail", "Afdeling"],
+    ["Jan", "de Vries", "jan@voorbeeld.nl", "IT"],
+    ["Maria", "Jansen", "maria@voorbeeld.nl", "HR"],
+    ["Pieter", "Bakker", "pieter@voorbeeld.nl", "Finance"],
   ];
   const ws = XLSX.utils.aoa_to_sheet(data);
-  ws["!cols"] = [{ wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }];
+  ws["!cols"] = [{ wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 15 }];
   XLSX.utils.book_append_sheet(wb, ws, "Medewerkers");
-  XLSX.writeFile(wb, "medewerkers_sjabloon.xlsx");
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "medewerkers_import_template.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export default function BulkImportDialog({ open, onOpenChange }: BulkImportDialogProps) {
