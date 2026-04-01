@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
+
 import AmnestyScreen from '@/components/shadow-survey/AmnestyScreen';
 import OrientationStep from '@/components/shadow-survey/OrientationStep';
 import ShadowToolInventory from '@/components/shadow-survey/ShadowToolInventory';
