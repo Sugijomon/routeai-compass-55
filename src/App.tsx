@@ -52,6 +52,7 @@ import ModelLibraryPage from "./pages/super-admin/ModelLibraryPage";
 import TestChecklist from "./pages/super-admin/TestChecklist";
 import AuditLogPage from "./pages/super-admin/AuditLogPage";
 import PassportPage from "./pages/admin/PassportPage";
+import ProfilePage from "./pages/ProfilePage";
 export default function App() {
   return (
     <BrowserRouter>
