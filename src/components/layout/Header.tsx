@@ -72,6 +72,10 @@ export function Header() {
 
   const roles = userRoles || [];
   const roleLabel = getRoleDisplayLabel(roles);
+  const { planType } = useOrgPlanType();
+
+  // Hide "Mijn Profiel" for shadow_only users with only 'user' role
+  const isShadowOnlyUser = planType === 'shadow_only' && roles.length > 0 && roles.every(r => r === 'user');
 
   // Determine if user can switch views
   const hasPrivilegedRole = roles.some(r => PRIVILEGED_ROLES.includes(r));
