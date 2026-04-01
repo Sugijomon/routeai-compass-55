@@ -255,6 +255,47 @@ export default function ScanConfigTab() {
             )}
           </div>
 
+          {/* DPO contactgegevens */}
+          <div className="space-y-3 border-t pt-5">
+            <Label className="text-base font-semibold">AI-verantwoordelijke (DPO)</Label>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactPerson">Naam</Label>
+                <Input
+                  id="contactPerson"
+                  placeholder="Bijv. Jan de Vries"
+                  value={contactPerson}
+                  onChange={(e) => setContactPerson(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail">E-mailadres</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  placeholder="dpo@organisatie.nl"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactPhone">Telefoonnummer (optioneel)</Label>
+                <Input
+                  id="contactPhone"
+                  type="tel"
+                  placeholder="+31 6 1234 5678"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Deze gegevens zijn zichtbaar voor RouteAI en worden gebruikt als contactpersoon bij uw organisatie. U kunt ze wijzigen als de verantwoordelijke persoon wijzigt.
+            </p>
+          </div>
+
           <Button
             onClick={handleSaveContext}
             disabled={saveContextMutation.isPending}
