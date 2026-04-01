@@ -46,18 +46,20 @@ export default function ShadowSurveyPage() {
   const orgId = profile?.org_id;
 
   // Haal org-settings op (amnesty config)
-  const { data: orgSettings, isLoading: orgLoading } = useQuery({
-    queryKey: ['org-amnesty-settings', orgId],
+  const { data: org, isLoading: orgLoading } = useQuery({
+    queryKey: ['org-scan-context', orgId],
     queryFn: async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('settings')
+        .select('name, settings')
         .eq('id', orgId!)
         .maybeSingle();
-      return (data?.settings as Record<string, unknown>) ?? {};
+      return data;
     },
     enabled: !!orgId,
   });
+
+  const orgSettings = (org?.settings as Record<string, unknown>) ?? {};
 
   // Check of gebruiker al een run heeft met amnesty_acknowledged
   const { data: existingRun, isLoading: runLoading } = useQuery({
