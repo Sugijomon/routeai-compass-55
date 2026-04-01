@@ -57,44 +57,44 @@ export default function Auth() {
   const [passwordModal, setPasswordModal] = useState(false);
   const [pendingRedirectPath, setPendingRedirectPath] = useState<string | null>(null);
 
-  const getPromptCount = () => {
-    try { return parseInt(localStorage.getItem('password_prompt_count') || '0', 10); } catch { return 0; }
-  };
-  const incrementPromptCount = () => {
-    const next = getPromptCount() + 1;
-    localStorage.setItem('password_prompt_count', String(next));
-    return next;
-  };
+  const shouldShowPasswordPrompt = useCallback(async (): Promise<boolean> => {
+    // 1. Is de huidige sessie OTP-gebaseerd (magic link)?
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return false;
+
+    const amr = (session as any).amr as { method: string }[] | undefined;
+    const isOTPSession = amr?.some(a => a.method === 'otp');
+    const provider = session.user?.app_metadata?.provider;
+
+    if (provider !== 'email' && !isOTPSession) return false;
+    // Wachtwoord-login → nooit prompt tonen
+    if (provider === 'email' && !isOTPSession) return false;
+
+    // 2. Heeft de gebruiker al een wachtwoord-identity?
+    const hasPasswordIdentity = session.user?.identities?.some(
+      id => id.provider === 'email' && id.identity_data?.email_verified
+    );
+    if (hasPasswordIdentity && !isOTPSession) return false;
+
+    // 3. Hoe vaak al getoond?
+    const shownCount = parseInt(localStorage.getItem('password_prompt_shown') ?? '0', 10);
+    if (shownCount >= 3) return false;
+
+    return true;
+  }, []);
 
   const handlePostLogin = useCallback(async (userId: string) => {
     const path = await fetchRolesAndGetPath(userId);
 
-    // Check password prompt conditions
-    const count = getPromptCount();
-    if (count < 3) {
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('has_set_password, banner_password_dismissed')
-          .eq('id', userId)
-          .maybeSingle();
-
-        // Extra check: als gebruiker een echte password-identity heeft, skip modal
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        const hasPassword = currentUser?.identities?.some(
-          id => id.provider === 'email' && id.identity_data?.email_verified
-        ) && currentUser?.app_metadata?.provider !== 'email_otp';
-
-        if (data && !data.has_set_password && !data.banner_password_dismissed && !hasPassword) {
-          setPendingRedirectPath(path);
-          setPasswordModal(true);
-          return;
-        }
-      } catch { /* continue redirect */ }
+    const showPrompt = await shouldShowPasswordPrompt();
+    if (showPrompt) {
+      setPendingRedirectPath(path);
+      setPasswordModal(true);
+      return;
     }
 
     navigate(path, { replace: true });
-  }, [navigate]);
+  }, [navigate, shouldShowPasswordPrompt]);
 
   const handleSetPassword = () => {
     incrementPromptCount();
