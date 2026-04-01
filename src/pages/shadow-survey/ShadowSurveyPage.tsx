@@ -140,7 +140,7 @@ export default function ShadowSurveyPage() {
     navigate('/dashboard');
   };
 
-  const isLoading = orgLoading || runLoading;
+  const isLoading = profileLoading || orgLoading || runLoading || !orgId;
 
   if (isLoading) {
     return (
