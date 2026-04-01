@@ -38,7 +38,7 @@ import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
 import ScanInstellingenPage from "./pages/admin/ScanInstellingenPage";
-import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
+
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
 import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
