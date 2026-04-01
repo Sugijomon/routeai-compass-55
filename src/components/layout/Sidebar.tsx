@@ -64,8 +64,10 @@ export function Sidebar() {
       {
         title: 'Shadow AI Scan',
         items: [
-          { label: 'Scan beheer', href: '/admin/shadow', icon: Shield },
-          { label: 'Passport', href: '/admin/passport', icon: BookOpen },
+          { label: 'Overzicht', href: '/admin/shadow/overzicht', icon: BarChart3 },
+          { label: 'Scoreboard', href: '/admin/shadow/scoreboard', icon: Trophy },
+          { label: 'Instellingen', href: '/admin/shadow/instellingen', icon: Settings },
+          { label: 'Rapportage', href: '/admin/shadow/rapportage', icon: FileText },
         ],
       },
     ];

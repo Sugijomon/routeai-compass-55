@@ -394,7 +394,11 @@ export default function App() {
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
         
-        <Route path="/admin/shadow" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanDashboard /></AuthRoute>} />
+        <Route path="/admin/shadow" element={<Navigate to="/admin/shadow/overzicht" replace />} />
+        <Route path="/admin/shadow/overzicht" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanOverzichtPage /></AuthRoute>} />
+        <Route path="/admin/shadow/scoreboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanScoreboardPage /></AuthRoute>} />
+        <Route path="/admin/shadow/instellingen" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanInstellingenPage /></AuthRoute>} />
+        <Route path="/admin/shadow/rapportage" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
         <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
