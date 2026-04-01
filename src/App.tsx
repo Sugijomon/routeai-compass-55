@@ -403,7 +403,7 @@ export default function App() {
         <Route path="/admin/shadow/scoreboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanScoreboardPage /></AuthRoute>} />
         <Route path="/admin/shadow/instellingen" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanInstellingenPage /></AuthRoute>} />
         <Route path="/admin/shadow/rapportage" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
-        <Route path="/admin/shadow/setup" element={<AuthRoute requireAdmin skipRijbewijsCheck><ShadowSetupWizard /></AuthRoute>} />
+        
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
         

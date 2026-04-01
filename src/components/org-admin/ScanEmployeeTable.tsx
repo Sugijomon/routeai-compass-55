@@ -292,27 +292,7 @@ export default function ScanEmployeeTable() {
           <EmptyState
             icon={Users}
             title="Nog geen medewerkers"
-            description={
-              <span>
-                Nodig medewerkers uit via de{" "}
-                <button
-                  type="button"
-                  className="underline text-primary hover:text-primary/80 font-medium"
-                  onClick={() => navigate("/admin/shadow/setup")}
-                >
-                  configuratie-wizard
-                </button>
-                {" "}of{" "}
-                <button
-                  type="button"
-                  className="underline text-primary hover:text-primary/80 font-medium"
-                  onClick={() => setBulkImportOpen(true)}
-                >
-                  bulk-import
-                </button>
-                .
-              </span>
-            }
+            description="Nodig medewerkers uit via de bulk-import knop rechtsboven."
           />
         ) : (
           <div className="rounded-md border">
