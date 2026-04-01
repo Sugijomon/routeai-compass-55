@@ -60,7 +60,7 @@ export default function ScanConfigTab() {
       if (!profile?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, settings, sector")
+        .select("id, settings, sector, contact_person, contact_email")
         .eq("id", profile.org_id)
         .maybeSingle();
       if (error) throw error;
@@ -75,6 +75,9 @@ export default function ScanConfigTab() {
   const [orgSize, setOrgSize] = useState("");
   const [goal, setGoal] = useState("");
   const [goalOther, setGoalOther] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [managerName, setManagerName] = useState("");
   const [validDays, setValidDays] = useState(30);
   const [amnestyText, setAmnestyText] = useState("");
@@ -86,6 +89,9 @@ export default function ScanConfigTab() {
       setOrgSize(settings.shadow_survey_org_size || "");
       setGoal(settings.shadow_survey_goal || "");
       setGoalOther(settings.shadow_survey_goal_other || "");
+      setContactPerson(organization.contact_person || "");
+      setContactEmail(organization.contact_email || "");
+      setContactPhone((settings as any).contact_phone || "");
       setManagerName(settings.amnesty_manager_name || "");
       setValidDays(settings.amnesty_valid_days || 30);
       setAmnestyText(settings.amnesty_text || "");
@@ -119,10 +125,16 @@ export default function ScanConfigTab() {
         shadow_survey_org_size: orgSize,
         shadow_survey_goal: goal,
         shadow_survey_goal_other: goal === "anders" ? goalOther : undefined,
+        contact_phone: contactPhone || undefined,
       };
       const { error } = await supabase
         .from("organizations")
-        .update({ sector: sector || null, settings: newSettings as any })
+        .update({
+          sector: sector || null,
+          contact_person: contactPerson || null,
+          contact_email: contactEmail || null,
+          settings: newSettings as any,
+        })
         .eq("id", profile.org_id);
       if (error) throw error;
     },
@@ -241,6 +253,47 @@ export default function ScanConfigTab() {
                 className="mt-2"
               />
             )}
+          </div>
+
+          {/* DPO contactgegevens */}
+          <div className="space-y-3 border-t pt-5">
+            <Label className="text-base font-semibold">AI-verantwoordelijke (DPO)</Label>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactPerson">Naam</Label>
+                <Input
+                  id="contactPerson"
+                  placeholder="Bijv. Jan de Vries"
+                  value={contactPerson}
+                  onChange={(e) => setContactPerson(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail">E-mailadres</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  placeholder="dpo@organisatie.nl"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactPhone">Telefoonnummer (optioneel)</Label>
+                <Input
+                  id="contactPhone"
+                  type="tel"
+                  placeholder="+31 6 1234 5678"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Deze gegevens zijn zichtbaar voor RouteAI en worden gebruikt als contactpersoon bij uw organisatie. U kunt ze wijzigen als de verantwoordelijke persoon wijzigt.
+            </p>
           </div>
 
           <Button
