@@ -75,6 +75,9 @@ export default function ScanConfigTab() {
   const [orgSize, setOrgSize] = useState("");
   const [goal, setGoal] = useState("");
   const [goalOther, setGoalOther] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [managerName, setManagerName] = useState("");
   const [validDays, setValidDays] = useState(30);
   const [amnestyText, setAmnestyText] = useState("");
