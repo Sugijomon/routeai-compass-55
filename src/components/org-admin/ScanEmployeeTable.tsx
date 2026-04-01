@@ -50,7 +50,7 @@ const STATUS_CONFIG: Record<EmployeeStatus, { label: string; className: string }
 };
 
 export default function ScanEmployeeTable() {
-  const navigate = useNavigate();
+  
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
   const orgId = profile?.org_id;
