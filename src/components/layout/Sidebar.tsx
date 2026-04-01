@@ -36,7 +36,13 @@ interface NavSection {
 
 export function Sidebar() {
   const location = useLocation();
-  const { isSuperAdmin, isContentEditor, canManageOrg, isDpo, isLoading } = useUserRole();
+  const { user, isLoading: authLoading } = useAuth();
+  const { isSuperAdmin, isContentEditor, canManageOrg, isDpo, isLoading: roleLoading } = useUserRole();
+
+  // Toon skeleton zolang auth nog niet klaar is OF rollen nog niet geladen zijn.
+  // Zonder deze check rendert de else-branch (gebruikersmenu) kort
+  // voordat userId beschikbaar is en de roles-query start.
+  const isLoading = authLoading || !user || roleLoading;
 
   if (isLoading) {
     return (
