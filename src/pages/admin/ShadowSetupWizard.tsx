@@ -383,6 +383,18 @@ export default function ShadowSetupWizard() {
         { label: 'Setup' },
       ]}
     >
+      <div className="flex items-center justify-between mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-muted-foreground"
+          onClick={() => navigate('/admin/shadow')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Terug naar dashboard
+        </Button>
+      </div>
+
       <StepIndicator current={step} />
 
       {/* ─── STAP 1: Organisatie-context ─────────────────────── */}
