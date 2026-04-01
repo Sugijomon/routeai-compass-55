@@ -36,6 +36,7 @@ import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
 
 import ScanDashboard from "./pages/admin/ScanDashboard";
+import ShadowSetupWizard from "./pages/admin/ShadowSetupWizard";
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
 import PublicScoreboardPage from "./pages/public/PublicScoreboardPage";
