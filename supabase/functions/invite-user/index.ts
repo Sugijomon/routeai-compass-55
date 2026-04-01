@@ -282,7 +282,7 @@ Deno.serve(async (req) => {
     // ──────────────────────────────────────────────────
     const emailHtml = buildEmailHtml(resolvedBody, inviteUrl, orgName);
     const emailSubject = resolvedSubject ?? `Je bent uitgenodigd voor ${orgName}`;
-    const fromAddress = `${orgName} <noreply@routeai.nl>`;
+    const fromAddress = `${orgName} <noreply@digidactics.nl>`;
 
     await sendEmailViaResend(email, emailSubject, emailHtml, fromAddress);
 
