@@ -20,7 +20,7 @@ export function useDashboardRedirect() {
   // shadow_only orgs: afwijkende routing
   if (planType === 'shadow_only') {
     if (isOrgAdmin || isDpo) {
-      return { path: '/admin/shadow', isLoading };
+      return { path: '/admin/shadow/overzicht', isLoading };
     }
     if (!isContentEditor && !isManager) {
       return { path: '/shadow-survey', isLoading };
@@ -33,7 +33,7 @@ export function useDashboardRedirect() {
   
   // DPO bij 'both' of 'routeai' org → naar shadow beheer
   if (isDpo && !isOrgAdmin) {
-    return { path: '/admin/shadow', isLoading };
+    return { path: '/admin/shadow/overzicht', isLoading };
   }
   
   if (isOrgAdmin || isManager) {
@@ -55,7 +55,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   
   if (planType === 'shadow_only') {
     if (roles.includes('org_admin') || roles.includes('dpo')) {
-      return '/admin/shadow';
+      return '/admin/shadow/overzicht';
     }
     if (!roles.includes('content_editor') && !roles.includes('manager')) {
       return '/shadow-survey';
@@ -66,7 +66,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
     return '/editor/cursussen';
   }
   if (roles.includes('dpo')) {
-    return '/admin/shadow';
+    return '/admin/shadow/overzicht';
   }
   if (roles.some(r => ['org_admin', 'manager'].includes(r))) {
     return '/admin';
