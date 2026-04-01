@@ -79,7 +79,13 @@ export default function Auth() {
           .eq('id', userId)
           .maybeSingle();
 
-        if (data && !data.has_set_password && !data.banner_password_dismissed) {
+        // Extra check: als gebruiker een echte password-identity heeft, skip modal
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const hasPassword = currentUser?.identities?.some(
+          id => id.provider === 'email' && id.identity_data?.email_verified
+        ) && currentUser?.app_metadata?.provider !== 'email_otp';
+
+        if (data && !data.has_set_password && !data.banner_password_dismissed && !hasPassword) {
           setPendingRedirectPath(path);
           setPasswordModal(true);
           return;
