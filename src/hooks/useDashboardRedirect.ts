@@ -55,7 +55,7 @@ export function getDashboardPathFromRoles(roles: string[], planType?: string): s
   
   if (planType === 'shadow_only') {
     if (roles.includes('org_admin') || roles.includes('dpo')) {
-      return '/admin/shadow';
+      return '/admin/shadow/overzicht';
     }
     if (!roles.includes('content_editor') && !roles.includes('manager')) {
       return '/shadow-survey';
