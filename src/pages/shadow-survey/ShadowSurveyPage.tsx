@@ -30,7 +30,7 @@ export default function ShadowSurveyPage() {
   const [selectedToolNames, setSelectedToolNames] = useState<string[]>([]);
 
   // Haal org_id op
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['own-profile', user?.id],
     queryFn: async () => {
       const { data } = await supabase
@@ -140,7 +140,7 @@ export default function ShadowSurveyPage() {
     navigate('/dashboard');
   };
 
-  const isLoading = orgLoading || runLoading;
+  const isLoading = profileLoading || orgLoading || runLoading || !orgId;
 
   if (isLoading) {
     return (
