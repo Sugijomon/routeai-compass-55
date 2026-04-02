@@ -408,7 +408,7 @@ export default function ScanConfigTab() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* E-mail template — altijd zichtbaar */}
-          <InviteEmailTemplateEditor />
+          <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
 
           {/* Separator */}
           <div className="border-t" />
