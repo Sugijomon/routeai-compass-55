@@ -48,6 +48,8 @@ const ORG_SIZE_OPTIONS = [
 export default function ScanConfigTab() {
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
+  const [isSendingInvites, setIsSendingInvites] = useState(false);
 
   const { data: organization, isLoading } = useQuery({
     queryKey: ["organization-settings", profile?.org_id],
