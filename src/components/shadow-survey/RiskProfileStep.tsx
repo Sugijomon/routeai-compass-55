@@ -173,12 +173,11 @@ export default function RiskProfileStep({
       .eq('survey_run_id', surveyRunId);
 
     if (toolCount && toolCount >= 1) {
-      await supabase
-        .from('user_badges' as any)
-        .upsert(
-          { user_id: user.id, org_id: orgId, badge_type: 'ai_scout' },
-          { onConflict: 'user_id,badge_type' }
-        );
+      await supabase.rpc('award_badge', {
+        _user_id: user.id,
+        _org_id: orgId,
+        _badge_type: 'ai_scout'
+      });
     }
 
     // Badge: early_adopter — binnen 7 dagen na amnesty-activatie
