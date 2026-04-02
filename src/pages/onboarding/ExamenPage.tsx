@@ -157,7 +157,7 @@ export default function ExamenPage() {
           maxPoints,
           timeSpent,
           hasQuizzes: maxPoints > 0,
-          passingScore,
+          passingScore: lesson?.passing_score ?? 80,
           attemptNumber: currentAttemptNumber,
         });
         setShowCompletionModal(true);
