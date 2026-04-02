@@ -82,7 +82,7 @@ export function useSubmitAnswer() {
       questionId: string;
       lessonId: string;
       answer: QuestionAnswer;
-      _question: LearningQuestion;
+      question: LearningQuestion;
       timeSpent?: number;
     }) => {
       const { data, error } = await supabase
