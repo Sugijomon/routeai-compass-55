@@ -98,4 +98,17 @@ Bestanden zijn genummerd per categorie (boekhoudsysteem — decade-gaps voor inv
 
 ---
 
-*Laatste update: 2026-03-16*
+*Laatste update: 2026-04-02*
+
+---
+
+## Bekende issues — nog op te pakken
+
+### Storage buckets — signed URLs (prioriteit: middel)
+- lesson-images en lesson-files buckets zijn momenteel publiek
+- Impact vóór aanpak: inventariseer alle plaatsen waar bucket-URLs direct geladen worden
+  (img src, download links, lesson player components)
+- Fix vereist: buckets privé maken + alle URL-generatie omzetten naar signed URLs
+  via supabase.storage.from(...).createSignedUrl()
+- Risico: bestaande publieke links in opgeslagen lessen werken niet meer na de switch
+- Aanpak in aparte sessie met volledige impact-analyse eerst
