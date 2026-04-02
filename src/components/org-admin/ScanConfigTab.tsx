@@ -389,6 +389,20 @@ export default function ScanConfigTab() {
               {amnestyActivatedAt ? "Heractiveer amnestievenster" : "Activeer amnestievenster"}
             </Button>
           </div>
+
+          {/* E-mailtemplate editor */}
+          <Collapsible defaultOpen={false} className="mt-4">
+            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border border-border bg-muted/50 px-4 py-3 text-sm font-medium hover:bg-muted transition-colors [&[data-state=open]>svg.chevron]:rotate-180">
+              <span className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                Bekijk en pas de uitnodigingsmail aan
+              </span>
+              <ChevronDown className="chevron h-4 w-4 text-muted-foreground transition-transform duration-200" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="border border-border border-t-0 rounded-b-md bg-background p-4">
+              <InviteEmailTemplateEditor />
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
