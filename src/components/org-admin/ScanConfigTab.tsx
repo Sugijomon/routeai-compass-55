@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Shield, CalendarDays, Check, Loader2 } from "lucide-react";
@@ -43,12 +43,6 @@ const ORG_SIZE_OPTIONS = [
   { value: "101-250", label: "101–250 medewerkers" },
 ];
 
-const GOAL_OPTIONS = [
-  { value: "eu_ai_act_compliance", label: "EU AI Act compliance" },
-  { value: "inzicht_beleid", label: "Inzicht in AI-gebruik voor beleidsontwikkeling" },
-  { value: "voorbereiding_routeai", label: "Voorbereiding op RouteAI-platform" },
-  { value: "anders", label: "Anders" },
-];
 
 export default function ScanConfigTab() {
   const { profile } = useUserProfile();
@@ -60,7 +54,7 @@ export default function ScanConfigTab() {
       if (!profile?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, settings, sector, contact_person, contact_email")
+        .select("id, name, settings, sector, contact_person, contact_email")
         .eq("id", profile.org_id)
         .maybeSingle();
       if (error) throw error;
@@ -200,6 +194,10 @@ export default function ScanConfigTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground mb-1">Organisatie</p>
+            <p className="text-base font-medium">{organization?.name}</p>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="sector">Sector</Label>
@@ -232,28 +230,6 @@ export default function ScanConfigTab() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="space-y-3">
-            <Label>Doel van de scan</Label>
-            <RadioGroup value={goal} onValueChange={setGoal} className="space-y-2">
-              {GOAL_OPTIONS.map((opt) => (
-                <div key={opt.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={opt.value} id={`goal-${opt.value}`} />
-                  <Label htmlFor={`goal-${opt.value}`} className="font-normal cursor-pointer">
-                    {opt.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            {goal === "anders" && (
-              <Input
-                placeholder="Beschrijf het doel..."
-                value={goalOther}
-                onChange={(e) => setGoalOther(e.target.value)}
-                className="mt-2"
-              />
-            )}
           </div>
 
           {/* DPO contactgegevens */}
