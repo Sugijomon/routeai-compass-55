@@ -96,7 +96,6 @@ export default function ExamenPage() {
   const {
     currentAttemptNumber,
     completeCurrentAttempt,
-    startNewAttempt,
     isLoading: attemptsLoading,
     isBlocked,
     failedAttempts,
