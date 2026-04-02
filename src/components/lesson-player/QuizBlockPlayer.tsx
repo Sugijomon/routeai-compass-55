@@ -57,17 +57,17 @@ export function QuizBlockPlayer({
     if (selectedOption === null) return;
 
     onAttempt();
+    // Rapporteer raw antwoord voor server-side validatie
+    onQuizAnswer?.(block.id, selectedOption);
 
     if (selectedOption === block.correct_answer) {
       setQuizState('correct');
       setHasAnsweredCorrectly(true);
       onCanProceed(true);
-      // Report quiz result with points earned
       onQuizResult?.(block.id, true, block.points);
     } else {
       if (remainingAttempts <= 1) {
         setQuizState('failed');
-        // Allow proceeding even on fail, but record the failure with 0 points
         onCanProceed(true);
         onQuizResult?.(block.id, false, 0);
       } else {
