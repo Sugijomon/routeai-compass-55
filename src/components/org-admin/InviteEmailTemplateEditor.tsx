@@ -1,22 +1,16 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, ChevronDown, RotateCcw, Mail } from "lucide-react";
+import { Eye, RotateCcw, Mail } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +56,6 @@ export default function InviteEmailTemplateEditor({
   const orgId = profile?.org_id;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [isOpen, setIsOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [body, setBody] = useState(DEFAULT_BODY);
@@ -177,98 +170,81 @@ export default function InviteEmailTemplateEditor({
 
   return (
     <>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between">
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-              <Eye className="h-4 w-4" />
-              Bekijk en pas de uitnodigingsmail aan
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-              />
-            </Button>
-          </CollapsibleTrigger>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowPreview(true)}
-            className="gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            Preview
-          </Button>
+      <div className="space-y-4">
+        {/* Onderwerpregel */}
+        <div className="space-y-2">
+          <Label htmlFor="invite-subject">Onderwerpregel</Label>
+          <Input
+            id="invite-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Onderwerp van de uitnodigingsmail"
+          />
         </div>
 
-        <CollapsibleContent className="mt-3">
-          <Card>
-            <CardContent className="pt-5 space-y-4">
-              {/* Onderwerpregel */}
-              <div className="space-y-2">
-                <Label htmlFor="invite-subject">Onderwerpregel</Label>
-                <Input
-                  id="invite-subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Onderwerp van de uitnodigingsmail"
-                />
-              </div>
+        {/* Berichttekst */}
+        <div className="space-y-2">
+          <Label htmlFor="invite-body">Berichttekst</Label>
+          <Textarea
+            id="invite-body"
+            ref={textareaRef}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={6}
+            className="font-mono text-sm resize-none"
+            placeholder="Schrijf hier je uitnodigingsbericht..."
+          />
+        </div>
 
-              {/* Berichttekst */}
-              <div className="space-y-2">
-                <Label htmlFor="invite-body">Berichttekst</Label>
-                <Textarea
-                  id="invite-body"
-                  ref={textareaRef}
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={6}
-                  className="font-mono text-sm resize-none"
-                  placeholder="Schrijf hier je uitnodigingsbericht..."
-                />
-              </div>
+        {/* Variabele-chips */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {VARIABLES.map((v) => (
+              <Badge
+                key={v.key}
+                variant="secondary"
+                className="cursor-pointer hover:bg-primary/10 transition-colors select-none"
+                onClick={() => insertVariable(v.key)}
+              >
+                {v.key}
+              </Badge>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            De magic link en startknop worden automatisch toegevoegd.
+          </p>
+        </div>
 
-              {/* Variabele-chips */}
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {VARIABLES.map((v) => (
-                    <Badge
-                      key={v.key}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-primary/10 transition-colors select-none"
-                      onClick={() => insertVariable(v.key)}
-                    >
-                      {v.key}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  De knop &apos;Start de inventarisatie&apos; en de magic link worden automatisch
-                  toegevoegd aan de mail — je hoeft die niet zelf in te voegen.
-                </p>
-              </div>
-
-              {/* Acties */}
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Herstel standaard
-                </button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={saveMutation.isPending}
-                >
-                  Template opslaan
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
+        {/* Acties */}
+        <div className="flex items-center justify-between pt-2">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Herstel standaard
+          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview(true)}
+              className="gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              Preview
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={saveMutation.isPending}
+            >
+              Template opslaan
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Preview modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
