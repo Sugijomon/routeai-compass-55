@@ -53,8 +53,8 @@ export function QuizTrueFalsePlayer({
 
   const handleSubmit = () => {
     if (selectedAnswer === null) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, selectedAnswer);
 
     if (selectedAnswer === block.correct_answer) {
       setQuizState('correct');
