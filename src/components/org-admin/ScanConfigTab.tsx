@@ -43,12 +43,6 @@ const ORG_SIZE_OPTIONS = [
   { value: "101-250", label: "101–250 medewerkers" },
 ];
 
-const GOAL_OPTIONS = [
-  { value: "eu_ai_act_compliance", label: "EU AI Act compliance" },
-  { value: "inzicht_beleid", label: "Inzicht in AI-gebruik voor beleidsontwikkeling" },
-  { value: "voorbereiding_routeai", label: "Voorbereiding op RouteAI-platform" },
-  { value: "anders", label: "Anders" },
-];
 
 export default function ScanConfigTab() {
   const { profile } = useUserProfile();
