@@ -573,6 +573,25 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
                   ))}
                 </div>
               </LibraryDropZone>
+
+              {/* Handmatig tool toevoegen */}
+              <div className="border-t border-border mt-4 pt-4">
+                <p className="text-xs text-muted-foreground mb-2">
+                  Tool niet gevonden? Voeg handmatig toe aan de catalogus:
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Naam van de tool"
+                    value={customToolInput}
+                    onChange={(e) => setCustomToolInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddCustomTool()}
+                    className="text-sm"
+                  />
+                  <Button variant="outline" size="sm" onClick={handleAddCustomTool}>
+                    Toevoegen
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
