@@ -16,7 +16,7 @@ import { nl } from "date-fns/locale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import BulkImportDialog from "./BulkImportDialog";
-import InviteUserDialog from "./InviteUserDialog";
+
 
 type EmployeeStatus = "uitgenodigd" | "ingelogd" | "scan_voltooid" | "heeft_al_account";
 
@@ -57,7 +57,7 @@ export default function ScanEmployeeTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
+  
 
   // Haal profielen op voor deze organisatie (alleen user-rollen)
   const { data: profiles, isLoading: profilesLoading } = useQuery({
@@ -254,9 +254,9 @@ export default function ScanEmployeeTable() {
             Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
           </CardDescription>
         </div>
-        <Button size="sm" onClick={() => setInviteOpen(true)}>
+        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
-          Medewerkers uitnodigen
+          Medewerker toevoegen
         </Button>
       </CardHeader>
       <CardContent>
@@ -358,10 +358,6 @@ export default function ScanEmployeeTable() {
       <BulkImportDialog
         open={bulkImportOpen}
         onOpenChange={setBulkImportOpen}
-      />
-      <InviteUserDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
       />
     </Card>
   );
