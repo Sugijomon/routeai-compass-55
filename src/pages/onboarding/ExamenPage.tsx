@@ -86,12 +86,10 @@ export default function ExamenPage() {
     progressPercentage,
     quizAttempts,
     quizResults,
-    startedAt,
     isLoading: progressLoading,
     markBlockCompleted,
     incrementQuizAttempt,
     recordQuizResult,
-    calculateFinalScore,
     blocksCompleted,
   } = useLessonProgress({ lessonId, topics });
 
