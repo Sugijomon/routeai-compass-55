@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, Send, Loader2, UserPlus } from "lucide-react";
+import { Users, Send, Loader2, UserPlus, Plus, Download } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ import { nl } from "date-fns/locale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import BulkImportDialog from "./BulkImportDialog";
+import InviteUserDialog from "./InviteUserDialog";
 
 
 type EmployeeStatus = "uitgenodigd" | "ingelogd" | "scan_voltooid" | "heeft_al_account";
@@ -57,6 +58,7 @@ export default function ScanEmployeeTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   
 
   // Haal profielen op voor deze organisatie (alleen user-rollen)
@@ -244,20 +246,27 @@ export default function ScanEmployeeTable() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+      <CardHeader>
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
             Medewerkers
           </CardTitle>
           <CardDescription>
-            Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
+            Toevoegen losstaat van uitnodigen — beheer je lijst eerst
           </CardDescription>
         </div>
-        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Medewerker toevoegen
-        </Button>
+        <div className="flex items-center gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Medewerker toevoegen
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Bulk uploaden
+            <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0 h-4 font-medium">nieuw</Badge>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Actiebalk bij selectie */}
@@ -358,6 +367,11 @@ export default function ScanEmployeeTable() {
       <BulkImportDialog
         open={bulkImportOpen}
         onOpenChange={setBulkImportOpen}
+      />
+
+      <InviteUserDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
       />
     </Card>
   );
