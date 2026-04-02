@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LearningQuestion, LearningAnswer, QuestionAnswer } from '@/types/learning';
+import { Json } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 // Fetch questions for a lesson — student-safe (no correct_answer/explanation)
