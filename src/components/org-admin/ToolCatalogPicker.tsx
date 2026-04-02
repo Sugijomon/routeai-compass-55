@@ -475,7 +475,7 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
     setCustomToolInput("");
   }, [customToolInput, gridSlots, orgId, queryClient]);
 
-
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
