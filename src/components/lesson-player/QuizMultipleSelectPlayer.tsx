@@ -25,6 +25,7 @@ export function QuizMultipleSelectPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizMultipleSelectPlayerProps) {
