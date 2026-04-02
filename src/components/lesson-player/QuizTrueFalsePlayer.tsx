@@ -12,6 +12,7 @@ interface QuizTrueFalsePlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  onQuizAnswer?: (blockId: string, answer: unknown) => void;
   alreadyCompleted?: boolean;
   previousResult?: { correct: boolean; points: number };
 }
