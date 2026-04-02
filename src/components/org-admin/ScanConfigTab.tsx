@@ -5,10 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Shield, CalendarDays, Check, Loader2, Mail, ChevronDown, Send } from "lucide-react";
+import { Settings, Shield, CalendarDays, Check, Loader2, Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -394,64 +393,65 @@ export default function ScanConfigTab() {
             </Button>
           </div>
 
-          {/* E-mailtemplate editor */}
-          <Collapsible defaultOpen={false} className="mt-4">
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border border-border bg-muted/50 px-4 py-3 text-sm font-medium hover:bg-muted transition-colors [&[data-state=open]>svg.chevron]:rotate-180">
-              <span className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                Bekijk en pas de uitnodigingsmail aan
-              </span>
-              <ChevronDown className="chevron h-4 w-4 text-muted-foreground transition-transform duration-200" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="border border-border border-t-0 rounded-b-md bg-background p-4">
-              <InviteEmailTemplateEditor />
-            </CollapsibleContent>
-          </Collapsible>
         </CardContent>
       </Card>
 
-      {/* Sectie 4 — Uitnodigingen versturen */}
+      {/* Sectie 4 — Uitnodigingen maken & versturen */}
       <Card>
-        <CardContent className="space-y-5 pt-6">
-          <p className="text-base font-semibold flex items-center gap-2">
-            <Send className="h-5 w-5 text-primary" />
-            Uitnodigingen versturen
-          </p>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Mail className="h-5 w-5 text-primary" />
+            Uitnodigingen maken & versturen
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* E-mail template — altijd zichtbaar */}
+          <InviteEmailTemplateEditor />
 
-          <Tabs defaultValue="iedereen" className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="iedereen">Iedereen</TabsTrigger>
-              <TabsTrigger value="selectie">Selectie</TabsTrigger>
-              <TabsTrigger value="herinnering">Herinnering</TabsTrigger>
-            </TabsList>
+          {/* Separator */}
+          <div className="border-t" />
 
-            <TabsContent value="iedereen">
-              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
-                Alle medewerkers zonder voltooide scan ontvangen een uitnodiging met magic link.
-              </div>
-            </TabsContent>
-
-            <TabsContent value="selectie">
-              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
-                Stuur uitnodiging naar geselecteerde medewerkers. Gebruik de checkboxes in de medewerkerstabel hieronder.
-              </div>
-            </TabsContent>
-
-            <TabsContent value="herinnering">
-              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
-                Stuur een herinnering naar uitgenodigden die de scan nog niet hebben voltooid.
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <Button onClick={() => {}}>
-              <Send className="h-4 w-4 mr-2" />
+          {/* Uitnodigingen versturen */}
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-muted-foreground">
               Uitnodigingen versturen
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Amnestievenster wordt geactiveerd bij eerste verzending
-            </span>
+            </p>
+
+            <Tabs defaultValue="iedereen" className="w-full">
+              <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger value="iedereen">Iedereen</TabsTrigger>
+                <TabsTrigger value="selectie">Selectie</TabsTrigger>
+                <TabsTrigger value="herinnering">Herinnering</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="iedereen">
+                <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                  Alle medewerkers zonder voltooide scan ontvangen een uitnodiging met magic link.
+                </div>
+              </TabsContent>
+
+              <TabsContent value="selectie">
+                <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                  Stuur uitnodiging naar geselecteerde medewerkers. Gebruik de checkboxes in de medewerkerstabel hieronder.
+                </div>
+              </TabsContent>
+
+              <TabsContent value="herinnering">
+                <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                  Stuur een herinnering naar uitgenodigden die de scan nog niet hebben voltooid.
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button onClick={() => {}}>
+                <Send className="h-4 w-4 mr-2" />
+                Uitnodigingen versturen
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Amnestievenster wordt geactiveerd bij eerste verzending
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
