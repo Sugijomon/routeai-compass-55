@@ -93,7 +93,7 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
       const { data, error } = await supabase
         .rpc('finalize_lesson_attempt', {
           p_attempt_id: params.attemptId,
-          p_quiz_answers: params.quizAnswers,
+          p_quiz_answers: params.quizAnswers as unknown as Json,
         });
 
       if (error) throw error;
