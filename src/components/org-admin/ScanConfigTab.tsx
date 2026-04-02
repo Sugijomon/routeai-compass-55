@@ -60,7 +60,7 @@ export default function ScanConfigTab() {
       if (!profile?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, settings, sector, contact_person, contact_email")
+        .select("id, name, settings, sector, contact_person, contact_email")
         .eq("id", profile.org_id)
         .maybeSingle();
       if (error) throw error;
