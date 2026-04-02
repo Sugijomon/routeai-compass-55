@@ -436,7 +436,46 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
     dbToggle(placed.tool, enabled);
   };
 
-  if (isLoading) {
+  const handleAddCustomTool = useCallback(async () => {
+    const name = customToolInput.trim();
+    if (!name) return;
+
+    // Zoek eerste lege slot
+    const emptyIndex = gridSlots.findIndex((s) => s === null);
+    const customTool: ToolDefinition = {
+      id: `custom-${name.toLowerCase().replace(/\s+/g, "-")}`,
+      name,
+      category: "custom",
+      emoji: "🔧",
+      color: "#6b7280",
+    };
+
+    if (emptyIndex !== -1) {
+      setGridSlots((prev) => {
+        const next = [...prev];
+        next[emptyIndex] = { tool: customTool, status: "approved" };
+        return next;
+      });
+    }
+
+    const { error } = await supabase
+      .from("org_tools_catalog")
+      .upsert(
+        { org_id: orgId, tool_name: name, status: "approved" },
+        { onConflict: "org_id,tool_name" }
+      );
+
+    if (error) {
+      toast.error(`Fout: ${error.message}`);
+    } else {
+      toast.success(`${name} toegevoegd aan catalogus`);
+      queryClient.invalidateQueries({ queryKey: ["org-tools-catalog", orgId] });
+    }
+
+    setCustomToolInput("");
+  }, [customToolInput, gridSlots, orgId, queryClient]);
+
+
     return (
       <Card>
         <CardHeader>
