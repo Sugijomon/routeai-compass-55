@@ -25,6 +25,7 @@ export function QuizFillInPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizFillInPlayerProps) {

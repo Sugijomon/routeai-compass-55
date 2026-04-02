@@ -66,8 +66,8 @@ export function QuizMultipleSelectPlayer({
 
   const handleSubmit = () => {
     if (selectedOptions.length === 0) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, selectedOptions);
 
     // Check if arrays have same elements (order doesn't matter)
     const isCorrect = 
