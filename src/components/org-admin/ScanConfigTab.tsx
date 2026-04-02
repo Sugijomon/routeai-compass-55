@@ -16,6 +16,7 @@ import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
 import ToolCatalogPicker from "./ToolCatalogPicker";
 import ScanEmployeeTable from "./ScanEmployeeTable";
+import InviteEmailTemplateEditor from "./InviteEmailTemplateEditor";
 
 interface ScanSettings {
   shadow_survey_sector?: string;
