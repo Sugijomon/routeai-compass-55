@@ -34,6 +34,7 @@ export default function ExamenPage() {
   const userId = user?.id ?? null;
   const [_canProceedFromBlock, setCanProceedFromBlock] = useState(true);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, unknown>>({});
   const [completionData, setCompletionData] = useState<{
     score: number;
     earnedPoints: number;
