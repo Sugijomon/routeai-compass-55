@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LearningQuestion, LearningAnswer, QuestionAnswer } from '@/types/learning';
-import { validateAnswer } from '@/lib/questionValidation';
 import { toast } from 'sonner';
 
-// Fetch questions for a lesson
+// Fetch questions for a lesson — student-safe (no correct_answer/explanation)
 export function useLessonQuestions(lessonId: string | undefined) {
   return useQuery({
     queryKey: ['lesson-questions', lessonId],
@@ -12,18 +11,30 @@ export function useLessonQuestions(lessonId: string | undefined) {
       if (!lessonId) return [];
       
       const { data, error } = await supabase
-        .from('learning_questions')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .order('order_index');
+        .rpc('get_lesson_questions_for_student', { p_lesson_id: lessonId });
 
       if (error) throw error;
       
-      // Type cast the JSONB fields properly
-      return (data || []).map(q => ({
+      // RPC returns jsonb array — parse into typed objects
+      const questions = (data || []) as Array<{
+        id: string;
+        lesson_id: string;
+        question_type: string;
+        question_text: string;
+        question_config: unknown;
+        points: number;
+        order_index: number;
+        is_required: boolean;
+        org_id: string | null;
+        created_at: string;
+        updated_at: string;
+      }>;
+
+      return questions.map(q => ({
         ...q,
         question_config: q.question_config as unknown as LearningQuestion['question_config'],
-        correct_answer: q.correct_answer as unknown as LearningQuestion['correct_answer'],
+        // correct_answer is intentionally omitted by the RPC
+        correct_answer: undefined as unknown as LearningQuestion['correct_answer'],
       })) as LearningQuestion[];
     },
     enabled: !!lessonId,
@@ -55,7 +66,7 @@ export function useUserAnswers(lessonId: string | undefined, userId: string | nu
   });
 }
 
-// Submit an answer
+// Submit an answer — server-side validation via RPC
 export function useSubmitAnswer() {
   const queryClient = useQueryClient();
 
@@ -73,48 +84,36 @@ export function useSubmitAnswer() {
       question: LearningQuestion;
       timeSpent?: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Niet ingelogd');
-
-      // Validate answer (except essays which need manual grading)
-      const { isCorrect, pointsEarned } = validateAnswer(question, answer);
-
-      // Get attempt number for this question
-      const { data: existingAnswers } = await supabase
-        .from('learning_answers')
-        .select('attempt_number')
-        .eq('question_id', questionId)
-        .eq('user_id', user.id)
-        .order('attempt_number', { ascending: false })
-        .limit(1);
-
-      const attemptNumber = existingAnswers?.[0]?.attempt_number 
-        ? existingAnswers[0].attempt_number + 1 
-        : 1;
-
-      // Insert answer - use type assertion for insert
-      const insertData = {
-        user_id: user.id,
-        question_id: questionId,
-        lesson_id: lessonId,
-        user_answer: answer as unknown as Record<string, unknown>,
-        is_correct: question.question_type === 'essay' ? null : isCorrect,
-        points_earned: pointsEarned,
-        time_spent_seconds: timeSpent,
-        attempt_number: attemptNumber
-      };
-
       const { data, error } = await supabase
-        .from('learning_answers')
-        .insert(insertData as never)
-        .select()
-        .single();
+        .rpc('check_quiz_answer', {
+          p_question_id: questionId,
+          p_lesson_id: lessonId,
+          p_user_answer: answer as unknown as Record<string, unknown>,
+          p_time_spent: timeSpent ?? null,
+        });
 
       if (error) throw error;
       
+      // RPC returns: { is_correct, points_earned, correct_answer, explanation, attempt_number }
+      const result = data as {
+        is_correct: boolean | null;
+        points_earned: number;
+        correct_answer: unknown;
+        explanation: string | null;
+        attempt_number: number;
+      };
+
       return {
-        ...data,
-        user_answer: data.user_answer as unknown as QuestionAnswer,
+        id: crypto.randomUUID(), // placeholder — actual ID created server-side
+        user_id: '',
+        question_id: questionId,
+        lesson_id: lessonId,
+        user_answer: answer,
+        is_correct: result.is_correct,
+        points_earned: result.points_earned,
+        time_spent_seconds: timeSpent,
+        attempt_number: result.attempt_number,
+        answered_at: new Date().toISOString(),
       } as LearningAnswer;
     },
     onSuccess: (data, variables) => {
