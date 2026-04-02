@@ -14,6 +14,8 @@ import {
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GripVertical, Wrench } from "lucide-react";
@@ -248,6 +250,7 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
   );
   const [activeItem, setActiveItem] = useState<ToolDefinition | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
+  const [customToolInput, setCustomToolInput] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -433,7 +436,46 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
     dbToggle(placed.tool, enabled);
   };
 
-  if (isLoading) {
+  const handleAddCustomTool = useCallback(async () => {
+    const name = customToolInput.trim();
+    if (!name) return;
+
+    // Zoek eerste lege slot
+    const emptyIndex = gridSlots.findIndex((s) => s === null);
+    const customTool: ToolDefinition = {
+      id: `custom-${name.toLowerCase().replace(/\s+/g, "-")}`,
+      name,
+      category: "custom",
+      emoji: "🔧",
+      color: "#6b7280",
+    };
+
+    if (emptyIndex !== -1) {
+      setGridSlots((prev) => {
+        const next = [...prev];
+        next[emptyIndex] = { tool: customTool, status: "approved" };
+        return next;
+      });
+    }
+
+    const { error } = await supabase
+      .from("org_tools_catalog")
+      .upsert(
+        { org_id: orgId, tool_name: name, status: "approved" },
+        { onConflict: "org_id,tool_name" }
+      );
+
+    if (error) {
+      toast.error(`Fout: ${error.message}`);
+    } else {
+      toast.success(`${name} toegevoegd aan catalogus`);
+      queryClient.invalidateQueries({ queryKey: ["org-tools-catalog", orgId] });
+    }
+
+    setCustomToolInput("");
+  }, [customToolInput, gridSlots, orgId, queryClient]);
+
+
     return (
       <Card>
         <CardHeader>
@@ -531,6 +573,25 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
                   ))}
                 </div>
               </LibraryDropZone>
+
+              {/* Handmatig tool toevoegen */}
+              <div className="border-t border-border mt-4 pt-4">
+                <p className="text-xs text-muted-foreground mb-2">
+                  Tool niet gevonden? Voeg handmatig toe aan de catalogus:
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Naam van de tool"
+                    value={customToolInput}
+                    onChange={(e) => setCustomToolInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddCustomTool()}
+                    className="text-sm"
+                  />
+                  <Button variant="outline" size="sm" onClick={handleAddCustomTool}>
+                    Toevoegen
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
