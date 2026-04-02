@@ -246,20 +246,27 @@ export default function ScanEmployeeTable() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+      <CardHeader>
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
             Medewerkers
           </CardTitle>
           <CardDescription>
-            Overzicht van uitgenodigde medewerkers en hun scanstatus. Selecteer medewerkers om een herinnering te sturen.
+            Toevoegen losstaat van uitnodigen — beheer je lijst eerst
           </CardDescription>
         </div>
-        <Button size="sm" onClick={() => setBulkImportOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Medewerker toevoegen
-        </Button>
+        <div className="flex items-center gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Medewerker toevoegen
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Bulk uploaden
+            <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0 h-4 font-medium">nieuw</Badge>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Actiebalk bij selectie */}
