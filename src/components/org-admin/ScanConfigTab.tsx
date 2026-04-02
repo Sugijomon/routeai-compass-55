@@ -16,7 +16,7 @@ import { format, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
 import ToolCatalogPicker from "./ToolCatalogPicker";
 import ScanEmployeeTable from "./ScanEmployeeTable";
-import InviteEmailTemplateEditor from "./InviteEmailTemplateEditor";
+import InviteEmailTemplateEditor, { type InviteEmailTemplate } from "./InviteEmailTemplateEditor";
 
 interface ScanSettings {
   shadow_survey_sector?: string;
@@ -48,6 +48,8 @@ const ORG_SIZE_OPTIONS = [
 export default function ScanConfigTab() {
   const { profile } = useUserProfile();
   const queryClient = useQueryClient();
+  const [emailTemplate, setEmailTemplate] = useState<InviteEmailTemplate | null>(null);
+  const [isSendingInvites, setIsSendingInvites] = useState(false);
 
   const { data: organization, isLoading } = useQuery({
     queryKey: ["organization-settings", profile?.org_id],
@@ -172,6 +174,101 @@ export default function ScanConfigTab() {
     ? addDays(amnestyActivatedAt, settings.amnesty_valid_days || 30)
     : null;
   const amnestyActive = amnestyExpiry ? new Date() < amnestyExpiry : false;
+
+  const handleSendInvitations = async () => {
+    if (!profile?.org_id) return;
+    setIsSendingInvites(true);
+
+    try {
+      // Haal alle user-profielen op zonder voltooide survey run
+      const { data: allProfiles, error: profilesErr } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("org_id", profile.org_id)
+        .eq("is_active", true);
+      if (profilesErr) throw profilesErr;
+
+      // Haal user_ids met admin/dpo rollen op — die slaan we over
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("org_id", profile.org_id)
+        .in("role", ["org_admin", "super_admin", "dpo"]);
+      const adminSet = new Set((adminRoles || []).map((r) => r.user_id));
+
+      // Haal voltooide survey runs op
+      const { data: completedRuns } = await supabase
+        .from("shadow_survey_runs")
+        .select("user_id")
+        .eq("org_id", profile.org_id)
+        .not("survey_completed_at", "is", null);
+      const completedSet = new Set((completedRuns || []).map((r) => r.user_id).filter(Boolean));
+
+      // Filter: alleen reguliere users zonder voltooide scan
+      const eligibleUsers = (allProfiles || []).filter(
+        (p) => p.email && !adminSet.has(p.id) && !completedSet.has(p.id)
+      );
+
+      if (eligibleUsers.length === 0) {
+        toast.info("Geen medewerkers gevonden die nog uitgenodigd moeten worden.");
+        setIsSendingInvites(false);
+        return;
+      }
+
+      // Activeer amnestievenster als dat nog niet is gebeurd
+      if (!settings.amnesty_activated_at) {
+        await supabase
+          .from("organizations")
+          .update({
+            settings: {
+              ...settings,
+              amnesty_activated_at: new Date().toISOString(),
+            } as any,
+          })
+          .eq("id", profile.org_id);
+      }
+
+      let sentCount = 0;
+      for (const user of eligibleUsers) {
+        try {
+          const { data, error } = await supabase.functions.invoke("invite-user", {
+            body: {
+              email: user.email,
+              role: "user",
+              orgId: profile.org_id,
+              ...(emailTemplate?.subject && { email_subject: emailTemplate.subject }),
+              ...(emailTemplate?.body && { email_body: emailTemplate.body }),
+            },
+          });
+          if (error) {
+            console.error(`Fout bij uitnodiging voor ${user.email}:`, error);
+            continue;
+          }
+          if (data && !data.success) {
+            console.error(`Fout bij uitnodiging voor ${user.email}:`, data.error);
+            continue;
+          }
+          sentCount++;
+        } catch (err) {
+          console.error(`Fout bij uitnodiging voor ${user.email}:`, err);
+        }
+      }
+
+      if (sentCount > 0) {
+        toast.success(`Uitnodiging verstuurd naar ${sentCount} medewerker${sentCount > 1 ? "s" : ""}`);
+      } else {
+        toast.warning("Geen uitnodigingen verstuurd — controleer de foutmeldingen in de console.");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["organization-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["scan-employees-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["scan-employees-runs"] });
+    } catch (err: any) {
+      toast.error(`Fout bij versturen: ${err.message}`);
+    } finally {
+      setIsSendingInvites(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -406,7 +503,7 @@ export default function ScanConfigTab() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* E-mail template — altijd zichtbaar */}
-          <InviteEmailTemplateEditor />
+          <InviteEmailTemplateEditor onTemplateChange={setEmailTemplate} />
 
           {/* Separator */}
           <div className="border-t" />
@@ -444,8 +541,15 @@ export default function ScanConfigTab() {
             </Tabs>
 
             <div className="flex items-center gap-3 flex-wrap">
-              <Button onClick={() => {}}>
-                <Send className="h-4 w-4 mr-2" />
+              <Button
+                onClick={handleSendInvitations}
+                disabled={isSendingInvites}
+              >
+                {isSendingInvites ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
                 Uitnodigingen versturen
               </Button>
               <span className="text-sm text-muted-foreground">

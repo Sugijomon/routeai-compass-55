@@ -169,6 +169,24 @@ export default function ScanEmployeeTable() {
     if (!orgId || selectedIds.size === 0) return;
     setIsSending(true);
 
+    // Haal opgeslagen e-mailtemplate op uit organizations.settings
+    let emailSubject: string | undefined;
+    let emailBody: string | undefined;
+    try {
+      const { data: orgData } = await supabase
+        .from("organizations")
+        .select("settings")
+        .eq("id", orgId)
+        .maybeSingle();
+      const tpl = (orgData?.settings as any)?.invite_email_template;
+      if (tpl) {
+        emailSubject = tpl.subject || undefined;
+        emailBody = tpl.body || undefined;
+      }
+    } catch (err) {
+      console.error("Kon e-mailtemplate niet ophalen:", err);
+    }
+
     const selected = employees.filter((e) => selectedIds.has(e.id) && e.email);
     let sentCount = 0;
     const alreadyExisting: { name: string; email: string; date: string }[] = [];
@@ -180,11 +198,12 @@ export default function ScanEmployeeTable() {
             email: emp.email,
             role: "user",
             orgId,
+            ...(emailSubject && { email_subject: emailSubject }),
+            ...(emailBody && { email_body: emailBody }),
           },
         });
 
         if (error) {
-          // Als de fout aangeeft dat het account al bestaat
           const errMsg = error.message || "";
           if (errMsg.includes("already") || errMsg.includes("exists") || errMsg.includes("already been registered")) {
             alreadyExisting.push({
@@ -198,7 +217,6 @@ export default function ScanEmployeeTable() {
           continue;
         }
 
-        // Check response body voor "already registered" fout
         if (data && !data.success) {
           const msg = data.error || "";
           if (msg.includes("already") || msg.includes("exists") || msg.includes("already been registered")) {
@@ -235,7 +253,6 @@ export default function ScanEmployeeTable() {
       });
     }
 
-    // Invalideer queries en reset selectie
     queryClient.invalidateQueries({ queryKey: ["scan-employees-profiles"] });
     queryClient.invalidateQueries({ queryKey: ["scan-employees-runs"] });
     setSelectedIds(new Set());
