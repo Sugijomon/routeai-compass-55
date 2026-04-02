@@ -1699,6 +1699,13 @@ export type Database = {
             referencedRelation: "shadow_survey_runs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tool_discoveries_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_participation"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tools_library: {
@@ -2049,7 +2056,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      survey_participation: {
+        Row: {
+          amnesty_acknowledged: boolean | null
+          assigned_tier: string | null
+          id: string | null
+          org_id: string | null
+          submitted_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amnesty_acknowledged?: boolean | null
+          assigned_tier?: string | null
+          id?: string | null
+          org_id?: string | null
+          submitted_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amnesty_acknowledged?: boolean | null
+          assigned_tier?: string | null
+          id?: string | null
+          org_id?: string | null
+          submitted_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shadow_survey_runs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
