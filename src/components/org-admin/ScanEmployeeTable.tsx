@@ -58,6 +58,7 @@ export default function ScanEmployeeTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   
 
   // Haal profielen op voor deze organisatie (alleen user-rollen)
