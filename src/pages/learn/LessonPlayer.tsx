@@ -176,24 +176,24 @@ export default function LessonPlayer() {
       if (currentTopic) {
         currentTopic.blocks.forEach(b => markBlockCompleted(b.id));
       }
-      const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
-      let timeSpent = 0;
-      if (startedAt) {
-        const startTime = new Date(startedAt).getTime();
-        timeSpent = Math.round((Date.now() - startTime) / 1000);
+
+      // Collect raw quiz answers from quizResults for server-side validation
+      // For regular lessons, we send an empty object — the RPC handles scoring
+      const rawAnswers: Record<string, unknown> = {};
+
+      // Server-side score berekening via RPC
+      const result = await completeCurrentAttempt({ quizAnswers: rawAnswers });
+
+      if (!result) {
+        toast.error('Kon les niet afronden');
+        return;
       }
+
+      const percentage = result.percentage;
+      const earnedPoints = result.earned_points;
+      const maxPoints = result.max_points;
+      const timeSpent = result.time_spent;
       const lessonPassingScore = lesson?.passing_score ?? 0;
-      const passed = maxPoints === 0 || percentage >= lessonPassingScore;
-
-      await completeCurrentAttempt({ score: earnedPoints, maxScore: maxPoints, percentage, passed, timeSpent });
-
-      const { error } = await supabase
-        .from('user_lesson_completions')
-        .upsert({
-          user_id: userId, lesson_id: lessonId, score: percentage,
-          time_spent: timeSpent, completed_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,lesson_id' });
-      if (error) throw error;
 
       // Als dit een micro-learning is voor een assessment, registreer voltooiing
       if (assessmentId && assignment?.learning_library) {
