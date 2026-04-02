@@ -25,6 +25,7 @@ export function QuizBlockPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizBlockPlayerProps) {
