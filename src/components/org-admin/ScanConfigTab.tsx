@@ -200,6 +200,10 @@ export default function ScanConfigTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground mb-1">Organisatie</p>
+            <p className="text-base font-medium">{organization?.name}</p>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="sector">Sector</Label>
