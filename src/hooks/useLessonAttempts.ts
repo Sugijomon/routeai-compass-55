@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 export interface LessonAttempt {
   id: string;
@@ -81,34 +82,30 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
     },
   });
 
-  // Complete current attempt
+  // Complete current attempt via server-side RPC (finalize_lesson_attempt)
   const completeAttemptMutation = useMutation({
     mutationFn: async (params: {
       attemptId: string;
-      score: number;
-      maxScore: number;
-      percentage: number;
-      passed: boolean;
-      timeSpent: number;
+      quizAnswers: Record<string, unknown>;
     }) => {
-      console.log('Completing attempt:', params);
+      console.log('Finalizing attempt via server RPC:', params.attemptId);
 
       const { data, error } = await supabase
-        .from('lesson_attempts')
-        .update({
-          score: params.score,
-          max_score: params.maxScore,
-          percentage: params.percentage,
-          passed: params.passed,
-          time_spent: params.timeSpent,
-          completed_at: new Date().toISOString(),
-        })
-        .eq('id', params.attemptId)
-        .select()
-        .single();
+        .rpc('finalize_lesson_attempt', {
+          p_attempt_id: params.attemptId,
+          p_quiz_answers: params.quizAnswers as unknown as Json,
+        });
 
       if (error) throw error;
-      return data as LessonAttempt;
+      
+      // RPC returns: { earned_points, max_points, percentage, passed, time_spent }
+      return data as {
+        earned_points: number;
+        max_points: number;
+        percentage: number;
+        passed: boolean;
+        time_spent: number;
+      };
     },
     onSuccess: () => {
       setCurrentAttemptId(null);
@@ -122,13 +119,9 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
     return result;
   }, [startAttemptMutation]);
 
-  // Complete current attempt
+  // Complete current attempt — now sends raw quiz answers for server-side validation
   const completeCurrentAttempt = useCallback(async (params: {
-    score: number;
-    maxScore: number;
-    percentage: number;
-    passed: boolean;
-    timeSpent: number;
+    quizAnswers: Record<string, unknown>;
   }) => {
     const attemptId = currentAttemptId || activeAttempt?.id;
     if (!attemptId) {
@@ -138,7 +131,7 @@ export function useLessonAttempts({ lessonId, userId }: UseLessonAttemptsProps) 
 
     const result = await completeAttemptMutation.mutateAsync({
       attemptId,
-      ...params,
+      quizAnswers: params.quizAnswers,
     });
     return result;
   }, [currentAttemptId, activeAttempt, completeAttemptMutation]);

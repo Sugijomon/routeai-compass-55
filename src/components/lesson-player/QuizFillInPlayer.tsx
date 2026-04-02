@@ -12,6 +12,7 @@ interface QuizFillInPlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  onQuizAnswer?: (blockId: string, answer: unknown) => void;
   alreadyCompleted?: boolean;
   previousResult?: { correct: boolean; points: number };
 }
@@ -24,6 +25,7 @@ export function QuizFillInPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizFillInPlayerProps) {
@@ -78,8 +80,8 @@ export function QuizFillInPlayer({
 
   const handleSubmit = () => {
     if (!userAnswer.trim()) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, userAnswer.trim());
 
     if (checkAnswer(userAnswer)) {
       setQuizState('correct');

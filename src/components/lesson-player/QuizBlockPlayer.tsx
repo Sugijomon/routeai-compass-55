@@ -12,6 +12,7 @@ interface QuizBlockPlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  onQuizAnswer?: (blockId: string, answer: unknown) => void;
   alreadyCompleted?: boolean;
   previousResult?: { correct: boolean; points: number };
 }
@@ -24,6 +25,7 @@ export function QuizBlockPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizBlockPlayerProps) {
@@ -55,17 +57,17 @@ export function QuizBlockPlayer({
     if (selectedOption === null) return;
 
     onAttempt();
+    // Rapporteer raw antwoord voor server-side validatie
+    onQuizAnswer?.(block.id, selectedOption);
 
     if (selectedOption === block.correct_answer) {
       setQuizState('correct');
       setHasAnsweredCorrectly(true);
       onCanProceed(true);
-      // Report quiz result with points earned
       onQuizResult?.(block.id, true, block.points);
     } else {
       if (remainingAttempts <= 1) {
         setQuizState('failed');
-        // Allow proceeding even on fail, but record the failure with 0 points
         onCanProceed(true);
         onQuizResult?.(block.id, false, 0);
       } else {

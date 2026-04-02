@@ -12,6 +12,7 @@ interface QuizTrueFalsePlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  onQuizAnswer?: (blockId: string, answer: unknown) => void;
   alreadyCompleted?: boolean;
   previousResult?: { correct: boolean; points: number };
 }
@@ -24,6 +25,7 @@ export function QuizTrueFalsePlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizTrueFalsePlayerProps) {
@@ -51,8 +53,8 @@ export function QuizTrueFalsePlayer({
 
   const handleSubmit = () => {
     if (selectedAnswer === null) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, selectedAnswer);
 
     if (selectedAnswer === block.correct_answer) {
       setQuizState('correct');

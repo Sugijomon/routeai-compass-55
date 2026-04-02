@@ -12,6 +12,7 @@ interface QuizMultipleSelectPlayerProps {
   onAttempt: () => void;
   onCanProceed: (canProceed: boolean) => void;
   onQuizResult?: (blockId: string, correct: boolean, points: number) => void;
+  onQuizAnswer?: (blockId: string, answer: unknown) => void;
   alreadyCompleted?: boolean;
   previousResult?: { correct: boolean; points: number };
 }
@@ -24,6 +25,7 @@ export function QuizMultipleSelectPlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizMultipleSelectPlayerProps) {
@@ -64,8 +66,8 @@ export function QuizMultipleSelectPlayer({
 
   const handleSubmit = () => {
     if (selectedOptions.length === 0) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, selectedOptions);
 
     // Check if arrays have same elements (order doesn't matter)
     const isCorrect = 

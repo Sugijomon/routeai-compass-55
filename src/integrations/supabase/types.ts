@@ -2093,6 +2093,23 @@ export type Database = {
       }
     }
     Functions: {
+      check_quiz_answer: {
+        Args: {
+          p_lesson_id: string
+          p_question_id: string
+          p_time_spent?: number
+          p_user_answer: Json
+        }
+        Returns: Json
+      }
+      finalize_lesson_attempt: {
+        Args: { p_attempt_id: string; p_quiz_answers: Json }
+        Returns: Json
+      }
+      get_lesson_questions_for_student: {
+        Args: { p_lesson_id: string }
+        Returns: Json
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {

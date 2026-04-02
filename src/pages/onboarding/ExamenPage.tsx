@@ -34,6 +34,7 @@ export default function ExamenPage() {
   const userId = user?.id ?? null;
   const [_canProceedFromBlock, setCanProceedFromBlock] = useState(true);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, unknown>>({});
   const [completionData, setCompletionData] = useState<{
     score: number;
     earnedPoints: number;
@@ -85,19 +86,16 @@ export default function ExamenPage() {
     progressPercentage,
     quizAttempts,
     quizResults,
-    startedAt,
     isLoading: progressLoading,
     markBlockCompleted,
     incrementQuizAttempt,
     recordQuizResult,
-    calculateFinalScore,
     blocksCompleted,
   } = useLessonProgress({ lessonId, topics });
 
   const {
     currentAttemptNumber,
     completeCurrentAttempt,
-    startNewAttempt,
     isLoading: attemptsLoading,
     isBlocked,
     failedAttempts,
@@ -114,30 +112,21 @@ export default function ExamenPage() {
       const currentBlock = blocks[blocks.length - 1];
       if (currentBlock) markBlockCompleted(currentBlock.id);
 
-      const { earnedPoints, maxPoints, percentage } = calculateFinalScore();
-      let timeSpent = 0;
-      if (startedAt) {
-        timeSpent = Math.round((Date.now() - new Date(startedAt).getTime()) / 1000);
-      }
-      const passingScore = lesson?.passing_score ?? 80;
-      const passed = maxPoints === 0 || percentage >= passingScore;
-
-      await completeCurrentAttempt({
-        score: earnedPoints,
-        maxScore: maxPoints,
-        percentage,
-        passed,
-        timeSpent,
+      // Server-side score berekening via RPC
+      const result = await completeCurrentAttempt({
+        quizAnswers,
       });
 
-      // Also write to user_lesson_completions
-      await supabase.from('user_lesson_completions').upsert({
-        user_id: userId,
-        lesson_id: lessonId,
-        score: percentage,
-        time_spent: timeSpent,
-        completed_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,lesson_id' });
+      if (!result) {
+        toast.error('Er ging iets mis bij het afronden van het examen.');
+        return;
+      }
+
+      const passed = result.passed;
+      const percentage = result.percentage;
+      const earnedPoints = result.earned_points;
+      const maxPoints = result.max_points;
+      const timeSpent = result.time_spent;
 
     if (passed) {
         // The trigger will handle granting the rijbewijs — just refetch the profile
@@ -162,7 +151,7 @@ export default function ExamenPage() {
           maxPoints,
           timeSpent,
           hasQuizzes: maxPoints > 0,
-          passingScore,
+          passingScore: lesson?.passing_score ?? 80,
           attemptNumber: currentAttemptNumber,
         });
         setShowCompletionModal(true);
@@ -194,7 +183,12 @@ export default function ExamenPage() {
       attempts: quizAttempts[block.id] ?? 0,
       onAttempt: () => incrementQuizAttempt(block.id),
       onCanProceed: handleCanProceed,
-      onQuizResult: recordQuizResult,
+      onQuizResult: (blockId: string, correct: boolean, points: number) => {
+        recordQuizResult(blockId, correct, points);
+      },
+      onQuizAnswer: (blockId: string, answer: unknown) => {
+        setQuizAnswers(prev => ({ ...prev, [blockId]: answer }));
+      },
       alreadyCompleted: blockCompleted,
       previousResult: existingResult,
     };
