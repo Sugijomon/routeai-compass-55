@@ -250,6 +250,7 @@ export default function ToolCatalogPicker({ orgId }: ToolCatalogPickerProps) {
   );
   const [activeItem, setActiveItem] = useState<ToolDefinition | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
+  const [customToolInput, setCustomToolInput] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
