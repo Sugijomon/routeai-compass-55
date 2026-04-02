@@ -409,9 +409,6 @@ export default function ScanConfigTab() {
         </CardContent>
       </Card>
 
-      {/* Sectie 3 — Tool catalogus */}
-      {profile?.org_id && <ToolCatalogPicker orgId={profile.org_id} />}
-
       {/* Sectie 4 — Medewerkers */}
       <ScanEmployeeTable />
     </div>
