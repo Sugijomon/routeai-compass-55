@@ -288,7 +288,10 @@ export default function ScanConfigTab() {
         </CardContent>
       </Card>
 
-      {/* Sectie 2 — Amnestievenster */}
+      {/* Sectie 2 — Tool catalogus */}
+      {profile?.org_id && <ToolCatalogPicker orgId={profile.org_id} />}
+
+      {/* Sectie 3 — Amnestievenster */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -405,9 +408,6 @@ export default function ScanConfigTab() {
           </Collapsible>
         </CardContent>
       </Card>
-
-      {/* Sectie 3 — Tool catalogus */}
-      {profile?.org_id && <ToolCatalogPicker orgId={profile.org_id} />}
 
       {/* Sectie 4 — Medewerkers */}
       <ScanEmployeeTable />
