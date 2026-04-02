@@ -446,8 +446,15 @@ export default function ScanConfigTab() {
             </Tabs>
 
             <div className="flex items-center gap-3 flex-wrap">
-              <Button onClick={() => {}}>
-                <Send className="h-4 w-4 mr-2" />
+              <Button
+                onClick={handleSendInvitations}
+                disabled={isSendingInvites}
+              >
+                {isSendingInvites ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
                 Uitnodigingen versturen
               </Button>
               <span className="text-sm text-muted-foreground">
