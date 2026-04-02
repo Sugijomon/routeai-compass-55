@@ -16,7 +16,7 @@ import { nl } from "date-fns/locale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import BulkImportDialog from "./BulkImportDialog";
-import InviteUserDialog from "./InviteUserDialog";
+
 
 type EmployeeStatus = "uitgenodigd" | "ingelogd" | "scan_voltooid" | "heeft_al_account";
 
