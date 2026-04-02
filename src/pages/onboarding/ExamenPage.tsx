@@ -108,6 +108,11 @@ export default function ExamenPage() {
   
 
   const handleCanProceed = (canProceed: boolean) => setCanProceedFromBlock(canProceed);
+  
+  // Callback voor quiz block players om hun antwoord te rapporteren
+  const handleQuizAnswer = (blockId: string, answer: unknown) => {
+    setQuizAnswers(prev => ({ ...prev, [blockId]: answer }));
+  };
 
   const handleComplete = async () => {
     if (!lessonId || !userId) return;
