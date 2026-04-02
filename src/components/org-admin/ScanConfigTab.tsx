@@ -238,28 +238,6 @@ export default function ScanConfigTab() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Label>Doel van de scan</Label>
-            <RadioGroup value={goal} onValueChange={setGoal} className="space-y-2">
-              {GOAL_OPTIONS.map((opt) => (
-                <div key={opt.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={opt.value} id={`goal-${opt.value}`} />
-                  <Label htmlFor={`goal-${opt.value}`} className="font-normal cursor-pointer">
-                    {opt.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            {goal === "anders" && (
-              <Input
-                placeholder="Beschrijf het doel..."
-                value={goalOther}
-                onChange={(e) => setGoalOther(e.target.value)}
-                className="mt-2"
-              />
-            )}
-          </div>
-
           {/* DPO contactgegevens */}
           <div className="space-y-3 border-t pt-5">
             <Label className="text-base font-semibold">AI-verantwoordelijke (DPO)</Label>
