@@ -112,3 +112,10 @@ Bestanden zijn genummerd per categorie (boekhoudsysteem — decade-gaps voor inv
   via supabase.storage.from(...).createSignedUrl()
 - Risico: bestaande publieke links in opgeslagen lessen werken niet meer na de switch
 - Aanpak in aparte sessie met volledige impact-analyse eerst
+
+### Organizations tabel — gevoelige velden (prioriteit: middel)
+- Reguliere gebruikers kunnen bank_account, bank_name, contact_phone, street_address zien van eigen org
+- Geen cross-org risico (RLS scoped op eigen org), maar financiële gegevens hoeven niet zichtbaar
+- Fix vereist: database view of function die gevoelige kolommen uitsluit + code refactoring (~28 bestanden)
+- Postgres RLS werkt op rijniveau, niet kolomniveau — view/function is enige route
+- Aanpak in aparte sessie vanwege omvang code-aanpassingen
