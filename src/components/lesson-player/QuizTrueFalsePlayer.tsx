@@ -25,6 +25,7 @@ export function QuizTrueFalsePlayer({
   onAttempt, 
   onCanProceed,
   onQuizResult,
+  onQuizAnswer,
   alreadyCompleted,
   previousResult,
 }: QuizTrueFalsePlayerProps) {
