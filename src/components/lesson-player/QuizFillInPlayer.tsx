@@ -80,8 +80,8 @@ export function QuizFillInPlayer({
 
   const handleSubmit = () => {
     if (!userAnswer.trim()) return;
-
     onAttempt();
+    onQuizAnswer?.(block.id, userAnswer.trim());
 
     if (checkAnswer(userAnswer)) {
       setQuizState('correct');
