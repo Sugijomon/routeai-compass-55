@@ -410,7 +410,53 @@ export default function ScanConfigTab() {
         </CardContent>
       </Card>
 
-      {/* Sectie 4 — Medewerkers */}
+      {/* Sectie 4 — Uitnodigingen versturen */}
+      <Card>
+        <CardContent className="space-y-5 pt-6">
+          <p className="text-base font-semibold flex items-center gap-2">
+            <Send className="h-5 w-5 text-primary" />
+            Uitnodigingen versturen
+          </p>
+
+          <Tabs defaultValue="iedereen" className="w-full">
+            <TabsList className="w-full grid grid-cols-3">
+              <TabsTrigger value="iedereen">Iedereen</TabsTrigger>
+              <TabsTrigger value="selectie">Selectie</TabsTrigger>
+              <TabsTrigger value="herinnering">Herinnering</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="iedereen">
+              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                Alle medewerkers zonder voltooide scan ontvangen een uitnodiging met magic link.
+              </div>
+            </TabsContent>
+
+            <TabsContent value="selectie">
+              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                Stuur uitnodiging naar geselecteerde medewerkers. Gebruik de checkboxes in de medewerkerstabel hieronder.
+              </div>
+            </TabsContent>
+
+            <TabsContent value="herinnering">
+              <div className="bg-muted rounded-md p-3 text-sm text-muted-foreground">
+                Stuur een herinnering naar uitgenodigden die de scan nog niet hebben voltooid.
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button onClick={() => {}}>
+              <Send className="h-4 w-4 mr-2" />
+              Uitnodigingen versturen
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Amnestievenster wordt geactiveerd bij eerste verzending
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sectie 5 — Medewerkers */}
       <ScanEmployeeTable />
     </div>
   );
