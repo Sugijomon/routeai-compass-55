@@ -88,7 +88,7 @@ export function useSubmitAnswer() {
         .rpc('check_quiz_answer', {
           p_question_id: questionId,
           p_lesson_id: lessonId,
-          p_user_answer: answer as unknown as Record<string, unknown>,
+          p_user_answer: answer as unknown as Json,
           p_time_spent: timeSpent ?? null,
         });
 
