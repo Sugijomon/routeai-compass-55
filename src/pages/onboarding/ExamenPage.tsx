@@ -189,7 +189,12 @@ export default function ExamenPage() {
       attempts: quizAttempts[block.id] ?? 0,
       onAttempt: () => incrementQuizAttempt(block.id),
       onCanProceed: handleCanProceed,
-      onQuizResult: recordQuizResult,
+      onQuizResult: (blockId: string, correct: boolean, points: number) => {
+        recordQuizResult(blockId, correct, points);
+      },
+      onQuizAnswer: (blockId: string, answer: unknown) => {
+        setQuizAnswers(prev => ({ ...prev, [blockId]: answer }));
+      },
       alreadyCompleted: blockCompleted,
       previousResult: existingResult,
     };
