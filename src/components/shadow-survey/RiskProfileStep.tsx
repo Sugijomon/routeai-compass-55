@@ -194,12 +194,11 @@ export default function RiskProfileStep({
       const activatedDate = new Date(amnestyActivatedAt);
       const sevenDaysLater = new Date(activatedDate.getTime() + 7 * 24 * 60 * 60 * 1000);
       if (new Date() < sevenDaysLater) {
-        await supabase
-          .from('user_badges' as any)
-          .upsert(
-            { user_id: user.id, org_id: orgId, badge_type: 'early_adopter' },
-            { onConflict: 'user_id,badge_type' }
-          );
+        await supabase.rpc('award_badge', {
+          _user_id: user.id,
+          _org_id: orgId,
+          _badge_type: 'early_adopter'
+        });
       }
     }
   };
