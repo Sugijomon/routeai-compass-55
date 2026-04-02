@@ -2093,6 +2093,10 @@ export type Database = {
       }
     }
     Functions: {
+      award_badge: {
+        Args: { _badge_type: string; _org_id: string; _user_id: string }
+        Returns: undefined
+      }
       check_quiz_answer: {
         Args: {
           p_lesson_id: string
