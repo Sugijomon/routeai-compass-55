@@ -31,7 +31,7 @@ export function useUserRole(): UserRoleData {
   const { user } = useAuth();
   const userId = user?.id;
 
-  const { data: rolesData, isLoading, error } = useQuery({
+  const { data: rolesData, isLoading: queryLoading, error } = useQuery({
     queryKey: ['user-roles', userId],
     queryFn: async () => {
       if (!userId) return [];
@@ -42,12 +42,16 @@ export function useUserRole(): UserRoleData {
         .eq('user_id', userId);
 
       if (error) throw error;
-      return (data || []).map(r => r.role as AppRole);
+      // Guard: altijd een array teruggeven, ook bij null/empty
+      return (data ?? []).map(r => r.role as AppRole);
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,   // 5 minuten — rollen veranderen niet tijdens een sessie
-    gcTime: 10 * 60 * 1000,     // cache 10 minuten bewaren
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
+
+  // isLoading is false als er geen userId is (query disabled) of als query settled
+  const isLoading = !!userId && queryLoading;
 
   const roles = rolesData ?? [];
 
