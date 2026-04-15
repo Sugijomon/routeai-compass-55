@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -39,12 +40,19 @@ export function Sidebar() {
   const { user, isLoading: authLoading } = useAuth();
   const { isSuperAdmin, isContentEditor, canManageOrg, isDpo, isLoading: roleLoading } = useUserRole();
 
-  // Toon skeleton zolang auth nog niet klaar is OF rollen nog niet geladen zijn.
-  // Zonder deze check rendert de else-branch (gebruikersmenu) kort
-  // voordat userId beschikbaar is en de roles-query start.
+  // Veiligheidstimeout: na 3s forceer render met beschikbare data
+  const [forceRender, setForceRender] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setForceRender(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isLoading = authLoading || !user || roleLoading;
 
-  if (isLoading) {
+  // DPO early-render: als isDpo al bekend is en user bestaat, niet wachten op volledige load
+  const canRenderEarly = isDpo && !!user;
+
+  if (isLoading && !forceRender && !canRenderEarly) {
     return (
       <aside className="hidden w-64 flex-shrink-0 border-r bg-card lg:block">
         <div className="flex h-full flex-col gap-2 p-4 pt-6">
