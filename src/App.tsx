@@ -34,6 +34,7 @@ import OrganisatieOnboarding from "./pages/onboarding/OrganisatieOnboarding";
 import ShadowSurveyPage from "./pages/shadow-survey/ShadowSurveyPage";
 import ShadowToolInventory from "./pages/shadow-survey/ShadowToolInventory";
 import ShadowSurveyResults from "./pages/shadow-survey/ShadowSurveyResults";
+import ShadowSurveyV8Page from "./pages/shadow-survey-v8/ShadowSurveyV8Page";
 
 import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
@@ -397,6 +398,9 @@ export default function App() {
         <Route path="/shadow-survey" element={<AuthRoute><ShadowSurveyPage /></AuthRoute>} />
         <Route path="/shadow-survey/tools" element={<AuthRoute><ShadowToolInventory /></AuthRoute>} />
         <Route path="/admin/shadow-survey/results" element={<AuthRoute requireAdmin><ShadowSurveyResults /></AuthRoute>} />
+
+        {/* Shadow AI Scan V8.1 — publieke uitnodigingslink met ?org=... */}
+        <Route path="/shadow-survey-v8" element={<ShadowSurveyV8Page />} />
         
         <Route path="/admin/shadow" element={<Navigate to="/admin/shadow/overzicht" replace />} />
         <Route path="/admin/shadow/overzicht" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanOverzichtPage /></AuthRoute>} />
