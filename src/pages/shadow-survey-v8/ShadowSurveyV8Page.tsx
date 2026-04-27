@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Step01Intro } from "@/components/shadow-survey-v8/Step01Intro";
 import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
 import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie";
