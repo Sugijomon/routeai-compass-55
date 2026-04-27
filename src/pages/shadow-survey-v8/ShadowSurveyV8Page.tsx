@@ -205,11 +205,13 @@ function ToolsRecovery({ surveyRunId, onRecovered, onBackToPicker }: ToolsRecove
     let cancelled = false;
     (async () => {
       try {
+        // survey_tool heeft geen created_at — order stabiel op id zodat refresh
+        // dezelfde volgorde teruggeeft als de oorspronkelijke selectie.
         const { data, error } = await supabase
           .from("survey_tool")
-          .select("id, created_at")
+          .select("id")
           .eq("survey_run_id", surveyRunId)
-          .order("created_at", { ascending: true });
+          .order("id", { ascending: true });
         if (cancelled) return;
         if (error) {
           setStatus("error");
