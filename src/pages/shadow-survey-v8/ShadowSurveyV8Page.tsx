@@ -185,3 +185,90 @@ export default function ShadowSurveyV8Page() {
     </div>
   );
 }
+
+// ============================================================================
+// ToolsRecovery — herstel savedToolIds uit survey_tool wanneer de wizard-state
+// na een refresh op stap 6+ leeg is. Voorkomt setState-tijdens-render door de
+// recovery in een eigen component met useEffect te plaatsen.
+// ============================================================================
+
+interface ToolsRecoveryProps {
+  surveyRunId: string;
+  onRecovered: (ids: string[]) => void;
+  onBackToPicker: () => void;
+}
+
+function ToolsRecovery({ surveyRunId, onRecovered, onBackToPicker }: ToolsRecoveryProps) {
+  const [status, setStatus] = useState<"loading" | "empty" | "error">("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("survey_tool")
+          .select("id, created_at")
+          .eq("survey_run_id", surveyRunId)
+          .order("created_at", { ascending: true });
+        if (cancelled) return;
+        if (error) {
+          setStatus("error");
+          return;
+        }
+        const ids = (data ?? []).map((row) => row.id as string);
+        if (ids.length === 0) {
+          setStatus("empty");
+          return;
+        }
+        onRecovered(ids);
+      } catch {
+        if (!cancelled) setStatus("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [surveyRunId, onRecovered]);
+
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center px-6"
+      style={{
+        background:
+          "radial-gradient(ellipse at 10% 0%, #c4e7ff 0%, #f7fafc 55%), radial-gradient(ellipse at 90% 100%, #e5e9eb 0%, transparent 50%)",
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}
+    >
+      <div
+        className="max-w-md rounded-[1.25rem] bg-white/85 p-8 text-center shadow-sm"
+        style={{ border: "1px solid rgba(255,255,255,0.8)", backdropFilter: "blur(16px)" }}
+      >
+        {status === "loading" ? (
+          <p style={{ color: "#40484e", fontSize: 14 }}>Eerder geselecteerde tools laden…</p>
+        ) : (
+          <>
+            <h2
+              className="mb-2 text-xl"
+              style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, color: "#00658b" }}
+            >
+              Geen tools gevonden
+            </h2>
+            <p className="mb-4" style={{ color: "#40484e", fontSize: 14 }}>
+              {status === "error"
+                ? "We konden je eerdere toolselectie niet ophalen. Ga terug naar de toolselectie om opnieuw te beginnen."
+                : "We konden geen eerder geselecteerde tools vinden. Ga terug naar de toolselectie om opnieuw te beginnen."}
+            </p>
+            <button
+              type="button"
+              onClick={onBackToPicker}
+              className="rounded-full px-5 py-2 text-sm font-semibold text-white"
+              style={{ background: "#00658b" }}
+            >
+              Terug naar toolselectie
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
