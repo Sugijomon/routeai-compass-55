@@ -211,7 +211,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 <Icon name="visibility_off" style={{ fontSize: 18, color: "#40484e" }} />
               </span>
               <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 14, color: "#181c1e" }}>
-                Jouw privacy is 100% gewaarborgd
+                Jouw privacy is gewaarborgd
               </span>
             </span>
             <Icon
