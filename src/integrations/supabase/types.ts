@@ -1769,6 +1769,243 @@ export type Database = {
           },
         ]
       }
+      risk_result: {
+        Row: {
+          assigned_tier: string
+          created_at: string
+          dpo_review_required: boolean
+          hard_override: boolean
+          highest_priority_score: number | null
+          highest_risk_context: string | null
+          highest_risk_tool: string | null
+          highest_risk_use_case: string | null
+          override_reason: string | null
+          person_score: number
+          person_score_raw: number | null
+          review_trigger_codes: string[] | null
+          shadow_tool_count: number
+          survey_run_id: string
+          toxic_combination: boolean
+        }
+        Insert: {
+          assigned_tier?: string
+          created_at?: string
+          dpo_review_required?: boolean
+          hard_override?: boolean
+          highest_priority_score?: number | null
+          highest_risk_context?: string | null
+          highest_risk_tool?: string | null
+          highest_risk_use_case?: string | null
+          override_reason?: string | null
+          person_score?: number
+          person_score_raw?: number | null
+          review_trigger_codes?: string[] | null
+          shadow_tool_count?: number
+          survey_run_id: string
+          toxic_combination?: boolean
+        }
+        Update: {
+          assigned_tier?: string
+          created_at?: string
+          dpo_review_required?: boolean
+          hard_override?: boolean
+          highest_priority_score?: number | null
+          highest_risk_context?: string | null
+          highest_risk_tool?: string | null
+          highest_risk_use_case?: string | null
+          override_reason?: string | null
+          person_score?: number
+          person_score_raw?: number | null
+          review_trigger_codes?: string[] | null
+          shadow_tool_count?: number
+          survey_run_id?: string
+          toxic_combination?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_result_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: true
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_result_tool: {
+        Row: {
+          account_multiplier: number
+          agentic_boost: number
+          automation_boost: number
+          context_multiplier: number
+          data_boost: number
+          dpo_review_required: boolean
+          exposure_score: number
+          extension_boost: number
+          frequency_boost: number
+          hard_override: boolean
+          override_reason: string | null
+          priority_review_threshold_used: number | null
+          priority_score: number
+          priority_score_raw: number
+          raw_exposure_score: number
+          review_boost: number
+          review_trigger_codes: string[] | null
+          scoring_config_id: string | null
+          shadow_base: number
+          shadow_score: number
+          survey_run_id: string
+          survey_tool_id: string
+          toxic_boost: number
+          toxic_exposure_threshold_used: number | null
+          toxic_shadow_threshold_used: number | null
+          use_case_base: number
+        }
+        Insert: {
+          account_multiplier?: number
+          agentic_boost?: number
+          automation_boost?: number
+          context_multiplier?: number
+          data_boost?: number
+          dpo_review_required?: boolean
+          exposure_score?: number
+          extension_boost?: number
+          frequency_boost?: number
+          hard_override?: boolean
+          override_reason?: string | null
+          priority_review_threshold_used?: number | null
+          priority_score?: number
+          priority_score_raw?: number
+          raw_exposure_score?: number
+          review_boost?: number
+          review_trigger_codes?: string[] | null
+          scoring_config_id?: string | null
+          shadow_base?: number
+          shadow_score?: number
+          survey_run_id: string
+          survey_tool_id: string
+          toxic_boost?: number
+          toxic_exposure_threshold_used?: number | null
+          toxic_shadow_threshold_used?: number | null
+          use_case_base?: number
+        }
+        Update: {
+          account_multiplier?: number
+          agentic_boost?: number
+          automation_boost?: number
+          context_multiplier?: number
+          data_boost?: number
+          dpo_review_required?: boolean
+          exposure_score?: number
+          extension_boost?: number
+          frequency_boost?: number
+          hard_override?: boolean
+          override_reason?: string | null
+          priority_review_threshold_used?: number | null
+          priority_score?: number
+          priority_score_raw?: number
+          raw_exposure_score?: number
+          review_boost?: number
+          review_trigger_codes?: string[] | null
+          scoring_config_id?: string | null
+          shadow_base?: number
+          shadow_score?: number
+          survey_run_id?: string
+          survey_tool_id?: string
+          toxic_boost?: number
+          toxic_exposure_threshold_used?: number | null
+          toxic_shadow_threshold_used?: number | null
+          use_case_base?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_result_tool_scoring_config_id_fkey"
+            columns: ["scoring_config_id"]
+            isOneToOne: false
+            referencedRelation: "scan_scoring_config"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_result_tool_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_result_tool_survey_tool_id_fkey"
+            columns: ["survey_tool_id"]
+            isOneToOne: false
+            referencedRelation: "survey_tool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scan_scoring_config: {
+        Row: {
+          active_from: string
+          active_until: string | null
+          created_at: string
+          created_by: string | null
+          dashboard_min_cell_size: number
+          id: string
+          notes: string | null
+          org_id: string
+          priority_review_threshold: number
+          public_scoreboard_enabled: boolean
+          scoring_version: string
+          toxic_exposure_threshold: number
+          toxic_shadow_threshold: number
+          wave_id: string | null
+        }
+        Insert: {
+          active_from?: string
+          active_until?: string | null
+          created_at?: string
+          created_by?: string | null
+          dashboard_min_cell_size?: number
+          id?: string
+          notes?: string | null
+          org_id: string
+          priority_review_threshold?: number
+          public_scoreboard_enabled?: boolean
+          scoring_version?: string
+          toxic_exposure_threshold?: number
+          toxic_shadow_threshold?: number
+          wave_id?: string | null
+        }
+        Update: {
+          active_from?: string
+          active_until?: string | null
+          created_at?: string
+          created_by?: string | null
+          dashboard_min_cell_size?: number
+          id?: string
+          notes?: string | null
+          org_id?: string
+          priority_review_threshold?: number
+          public_scoreboard_enabled?: boolean
+          scoring_version?: string
+          toxic_exposure_threshold?: number
+          toxic_shadow_threshold?: number
+          wave_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_scoring_config_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scan_scoring_config_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "survey_wave"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shadow_survey_runs: {
         Row: {
           ai_maturity_score: number | null
