@@ -133,6 +133,17 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
+  // Stap 7: Vaardigheid & Spelregels
+  if (currentStep === 7) {
+    return (
+      <Step07VaardigheidSpelregels
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(8)}
+        onBack={() => setCurrentStep(6)}
+      />
+    );
+  }
+
   // Tijdelijke placeholder voor vervolgstappen (worden later gebouwd).
   return (
     <div
