@@ -6,7 +6,7 @@
  *   - survey_profile (upsert: data_awareness_code, anonymization_behavior_code)
  *
  * Gebruikt direct de canonieke ref_data_type-codes (geen tussenliggende
- * mapping). De opties "nietsin" en "onzeker" zijn exclusief.
+ * mapping). De opties "niets" en "onzeker" zijn exclusief.
  */
 
 import { useMemo, useState } from "react";
