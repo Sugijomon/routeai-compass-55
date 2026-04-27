@@ -14,6 +14,7 @@ import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie
 import { Step04Toolpicker } from "@/components/shadow-survey-v8/Step04Toolpicker";
 import { Step05Datatype } from "@/components/shadow-survey-v8/Step05Datatype";
 import { Step06AccountMatrix } from "@/components/shadow-survey-v8/Step06AccountMatrix";
+import { Step07VaardigheidSpelregels } from "@/components/shadow-survey-v8/Step07VaardigheidSpelregels";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -128,6 +129,17 @@ export default function ShadowSurveyV8Page() {
         savedToolIds={savedToolIds}
         onContinue={() => setCurrentStep(7)}
         onBack={() => setCurrentStep(5)}
+      />
+    );
+  }
+
+  // Stap 7: Vaardigheid & Spelregels
+  if (currentStep === 7) {
+    return (
+      <Step07VaardigheidSpelregels
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(8)}
+        onBack={() => setCurrentStep(6)}
       />
     );
   }
