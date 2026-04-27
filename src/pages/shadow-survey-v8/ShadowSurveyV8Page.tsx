@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 import { Step01Intro } from "@/components/shadow-survey-v8/Step01Intro";
 import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
 import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie";
+import { Step04Toolpicker } from "@/components/shadow-survey-v8/Step04Toolpicker";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -25,6 +26,7 @@ export default function ShadowSurveyV8Page() {
 
   const [surveyRunId, setSurveyRunId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [savedToolIds, setSavedToolIds] = useState<string[]>([]);
 
   // Hervat bestaande run uit sessionStorage als org/wave matchen.
   useEffect(() => {
@@ -85,6 +87,21 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
+  // Stap 4: Toolpicker
+  if (currentStep === 4) {
+    return (
+      <Step04Toolpicker
+        surveyRunId={surveyRunId}
+        orgId={orgId}
+        onContinue={(ids) => {
+          setSavedToolIds(ids);
+          setCurrentStep(5);
+        }}
+        onBack={() => setCurrentStep(3)}
+      />
+    );
+  }
+
   // Tijdelijke placeholder voor vervolgstappen (worden later gebouwd).
   return (
     <div
@@ -111,6 +128,11 @@ export default function ShadowSurveyV8Page() {
         <p className="mt-3 text-xs" style={{ color: "#6993aa" }}>
           Run-ID: <code>{surveyRunId}</code>
         </p>
+        {savedToolIds.length > 0 && (
+          <p className="mt-2 text-xs" style={{ color: "#6993aa" }}>
+            Tools opgeslagen: {savedToolIds.length}
+          </p>
+        )}
       </div>
     </div>
   );
