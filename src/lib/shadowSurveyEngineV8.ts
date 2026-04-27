@@ -61,6 +61,8 @@ export async function createSurveyRun(
     .insert({
       org_id: orgId,
       wave_id: waveId ?? null,
+      locale: "nl",
+      source: "web",
     })
     .select("id")
     .single();
@@ -78,18 +80,21 @@ export async function saveSurveyProfile(
   surveyRunId: string,
   data: SurveyProfileData,
 ): Promise<void> {
+  // Bouw payload dynamisch: alleen velden die expliciet zijn meegegeven
+  // (inclusief expliciet null) worden opgenomen. Ontbrekende (undefined)
+  // velden blijven onaangeroerd in de database.
+  const payload: Record<string, unknown> = {
+    survey_run_id: surveyRunId,
+  };
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined) {
+      payload[key] = value;
+    }
+  }
+
   const { error } = await supabase
     .from("survey_profile")
-    .upsert(
-      {
-        survey_run_id: surveyRunId,
-        department_code: data.department_code ?? null,
-        department_other_text: data.department_other_text ?? null,
-        ai_frequency_code: data.ai_frequency_code ?? null,
-        no_ai_reason_code: data.no_ai_reason_code ?? null,
-      },
-      { onConflict: "survey_run_id" },
-    );
+    .upsert(payload as never, { onConflict: "survey_run_id" });
 
   if (error) failOn("saveSurveyProfile", error);
 }
