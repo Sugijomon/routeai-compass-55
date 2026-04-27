@@ -24,6 +24,8 @@ export interface SurveyProfileData {
   ai_policy_awareness_code?: string | null;
   ai_skill_level_code?: string | null;
   processing_output_code?: string | null;
+  top_concern_other_text?: string | null;
+  future_usecases_text?: string | null;
 }
 
 export interface SelectedToolState {
