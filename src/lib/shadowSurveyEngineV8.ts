@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface SurveyProfileData {
   department_code?: string | null;
+  department_other_text?: string | null;
   ai_frequency_code?: string | null;
   no_ai_reason_code?: string | null;
 }
@@ -83,6 +84,7 @@ export async function saveSurveyProfile(
       {
         survey_run_id: surveyRunId,
         department_code: data.department_code ?? null,
+        department_other_text: data.department_other_text ?? null,
         ai_frequency_code: data.ai_frequency_code ?? null,
         no_ai_reason_code: data.no_ai_reason_code ?? null,
       },
