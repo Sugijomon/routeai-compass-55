@@ -6,7 +6,7 @@
  *   - survey_profile (upsert: data_awareness_code, anonymization_behavior_code)
  *
  * Gebruikt direct de canonieke ref_data_type-codes (geen tussenliggende
- * mapping). De opties "nietsin" en "onzeker" zijn exclusief.
+ * mapping). De opties "niets" en "onzeker" zijn exclusief.
  */
 
 import { useMemo, useState } from "react";
@@ -40,7 +40,7 @@ interface DataTypeOption {
 const DATA_TYPE_OPTIONS: DataTypeOption[] = [
   { code: "publiek", label: "Publieke informatie", risk: "neutral" },
   { code: "namen", label: "Namen van personen", risk: "mid" },
-  { code: "interne_emails", label: "Interne e-mails", risk: "mid" },
+  { code: "interne_email", label: "Interne e-mails", risk: "mid" },
   { code: "interne_documenten", label: "Interne documenten", risk: "mid" },
   { code: "notulen", label: "Notulen van vergaderingen", risk: "mid" },
   { code: "broncode_logica", label: "Broncode & logica", risk: "mid" },
@@ -49,7 +49,7 @@ const DATA_TYPE_OPTIONS: DataTypeOption[] = [
   { code: "gevoelig_persoonsgegeven", label: "Gevoelige persoonsgegevens", risk: "high" },
   { code: "excel_sheets", label: "Excel sheets", risk: "mid" },
   { code: "juridische_documenten", label: "Juridische documenten", risk: "high" },
-  { code: "nietsin", label: "Ik voer dit niet in", risk: "neutral", exclusive: true },
+  { code: "niets", label: "Ik voer dit niet in", risk: "neutral", exclusive: true },
   { code: "onzeker", label: "Weet ik niet zeker", risk: "neutral", exclusive: true, fullWidth: true },
 ];
 
