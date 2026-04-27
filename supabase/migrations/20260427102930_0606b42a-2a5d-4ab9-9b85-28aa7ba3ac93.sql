@@ -1,0 +1,1 @@
+ALTER VIEW public.survey_participation RENAME TO legacy_survey_participation_view;
