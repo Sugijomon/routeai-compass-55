@@ -15,7 +15,6 @@ type RunRow = {
   id: string;
   org_id: string;
   completed_at: string | null;
-  created_at: string;
 };
 
 type RunReport = {
