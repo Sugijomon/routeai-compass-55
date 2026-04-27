@@ -64,16 +64,23 @@ export default function ShadowSurveyV8Page() {
 
   // Stap 2: Werkplek (afdeling)
   if (currentStep === 2) {
-    if (!surveyRunId) {
-      // Defensief: geen run-id → terug naar stap 1.
-      setCurrentStep(1);
-      return null;
-    }
     return (
       <Step02Werkplek
         surveyRunId={surveyRunId}
         onContinue={() => setCurrentStep(3)}
         onBack={() => setCurrentStep(1)}
+      />
+    );
+  }
+
+  // Stap 3: Gebruik & frequentie (kan vertakken naar exitpad → stap 9)
+  if (currentStep === 3) {
+    return (
+      <Step03Frequentie
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(4)}
+        onBack={() => setCurrentStep(2)}
+        onExit={() => setCurrentStep(9)}
       />
     );
   }
