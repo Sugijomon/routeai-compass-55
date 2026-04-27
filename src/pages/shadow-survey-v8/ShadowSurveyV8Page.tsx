@@ -13,6 +13,7 @@ import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
 import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie";
 import { Step04Toolpicker } from "@/components/shadow-survey-v8/Step04Toolpicker";
 import { Step05Datatype } from "@/components/shadow-survey-v8/Step05Datatype";
+import { Step06AccountMatrix } from "@/components/shadow-survey-v8/Step06AccountMatrix";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -110,6 +111,23 @@ export default function ShadowSurveyV8Page() {
         surveyRunId={surveyRunId}
         onContinue={() => setCurrentStep(6)}
         onBack={() => setCurrentStep(4)}
+      />
+    );
+  }
+
+  // Stap 6: Account-matrix + browserextensies + automatisering
+  if (currentStep === 6) {
+    if (savedToolIds.length === 0) {
+      // Tools-state ging verloren (refresh op stap 6) — terug naar tool-picker.
+      setCurrentStep(4);
+      return null;
+    }
+    return (
+      <Step06AccountMatrix
+        surveyRunId={surveyRunId}
+        savedToolIds={savedToolIds}
+        onContinue={() => setCurrentStep(7)}
+        onBack={() => setCurrentStep(5)}
       />
     );
   }
