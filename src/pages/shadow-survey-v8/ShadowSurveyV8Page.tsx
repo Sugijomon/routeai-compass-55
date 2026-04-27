@@ -17,6 +17,7 @@ import { Step05Datatype } from "@/components/shadow-survey-v8/Step05Datatype";
 import { Step06AccountMatrix } from "@/components/shadow-survey-v8/Step06AccountMatrix";
 import { Step07VaardigheidSpelregels } from "@/components/shadow-survey-v8/Step07VaardigheidSpelregels";
 import { Step08Toekomst } from "@/components/shadow-survey-v8/Step08Toekomst";
+import { Step09Afronding } from "@/components/shadow-survey-v8/Step09Afronding";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
