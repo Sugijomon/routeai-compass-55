@@ -307,7 +307,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
             color: "#bfc7cf",
           }}
         >
-          Powered by Projectgroep AI
+          Powered by RouteAI
         </div>
       </main>
     </div>
