@@ -1696,14 +1696,14 @@ export type Database = {
             foreignKeyName: "tool_discoveries_survey_run_id_fkey"
             columns: ["survey_run_id"]
             isOneToOne: false
-            referencedRelation: "shadow_survey_runs"
+            referencedRelation: "legacy_survey_participation_view"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "tool_discoveries_survey_run_id_fkey"
             columns: ["survey_run_id"]
             isOneToOne: false
-            referencedRelation: "survey_participation"
+            referencedRelation: "shadow_survey_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -2056,7 +2056,7 @@ export type Database = {
       }
     }
     Views: {
-      survey_participation: {
+      legacy_survey_participation_view: {
         Row: {
           amnesty_acknowledged: boolean | null
           assigned_tier: string | null
