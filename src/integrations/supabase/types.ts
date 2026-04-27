@@ -1247,10 +1247,52 @@ export type Database = {
           },
         ]
       }
+      org_tool_policy: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          eu_ai_act_flag_code: string
+          first_seen_at: string | null
+          notes: string | null
+          org_id: string
+          org_policy_status_code: string
+          tool_code: string
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          eu_ai_act_flag_code?: string
+          first_seen_at?: string | null
+          notes?: string | null
+          org_id: string
+          org_policy_status_code?: string
+          tool_code: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          eu_ai_act_flag_code?: string
+          first_seen_at?: string | null
+          notes?: string | null
+          org_id?: string
+          org_policy_status_code?: string
+          tool_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_tool_policy_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_tools_catalog: {
         Row: {
           added_at: string | null
           added_by: string | null
+          first_seen_at: string | null
           id: string
           notes: string | null
           org_id: string
@@ -1265,6 +1307,7 @@ export type Database = {
         Insert: {
           added_at?: string | null
           added_by?: string | null
+          first_seen_at?: string | null
           id?: string
           notes?: string | null
           org_id: string
@@ -1279,6 +1322,7 @@ export type Database = {
         Update: {
           added_at?: string | null
           added_by?: string | null
+          first_seen_at?: string | null
           id?: string
           notes?: string | null
           org_id?: string
