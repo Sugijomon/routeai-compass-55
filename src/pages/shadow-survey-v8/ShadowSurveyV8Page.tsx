@@ -87,6 +87,21 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
+  // Stap 4: Toolpicker
+  if (currentStep === 4) {
+    return (
+      <Step04Toolpicker
+        surveyRunId={surveyRunId}
+        orgId={orgId}
+        onContinue={(ids) => {
+          setSavedToolIds(ids);
+          setCurrentStep(5);
+        }}
+        onBack={() => setCurrentStep(3)}
+      />
+    );
+  }
+
   // Tijdelijke placeholder voor vervolgstappen (worden later gebouwd).
   return (
     <div
