@@ -39,6 +39,7 @@ import ShadowSurveyV8Page from "./pages/shadow-survey-v8/ShadowSurveyV8Page";
 import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
 import ScanInstellingenPage from "./pages/admin/ScanInstellingenPage";
+import ScanV8DebugPage from "./pages/admin/ScanV8DebugPage";
 
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
@@ -410,7 +411,9 @@ export default function App() {
         
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
-        
+
+        {/* Scan V8.1 — debug-/verificatiepagina (geen scoring, geen dashboard) */}
+        <Route path="/admin/scan-v8-debug" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanV8DebugPage /></AuthRoute>} />
         {/* TODO: debug-only — niet opnemen in productie
         <Route path="/debug-quiz" element={<DebugQuiz />} />
         */}
