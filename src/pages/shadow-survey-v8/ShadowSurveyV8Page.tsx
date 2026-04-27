@@ -151,6 +151,17 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
+  // Stap 8: Toekomst & ambities
+  if (currentStep === 8) {
+    return (
+      <Step08Toekomst
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(9)}
+        onBack={() => setCurrentStep(7)}
+      />
+    );
+  }
+
   // Tijdelijke placeholder voor vervolgstappen (worden later gebouwd).
   return (
     <div
