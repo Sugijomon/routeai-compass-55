@@ -291,7 +291,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 </div>
               )}
               <p className="mt-1 text-center text-xs" style={{ color: "#6993aa" }}>
-                Duurt ca. 8-10 minuten · Anoniem · Geen verplichte velden
+                Duurt ca. 8-10 minuten · Antwoorden anoniem verwerkt · Je kunt stoppen wanneer je wilt
               </p>
             </>
           )}
