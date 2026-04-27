@@ -40,7 +40,7 @@ interface DataTypeOption {
 const DATA_TYPE_OPTIONS: DataTypeOption[] = [
   { code: "publiek", label: "Publieke informatie", risk: "neutral" },
   { code: "namen", label: "Namen van personen", risk: "mid" },
-  { code: "interne_emails", label: "Interne e-mails", risk: "mid" },
+  { code: "interne_email", label: "Interne e-mails", risk: "mid" },
   { code: "interne_documenten", label: "Interne documenten", risk: "mid" },
   { code: "notulen", label: "Notulen van vergaderingen", risk: "mid" },
   { code: "broncode_logica", label: "Broncode & logica", risk: "mid" },
