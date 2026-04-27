@@ -98,9 +98,14 @@ export async function saveSurveyProfile(
 // 3. saveMotivations
 // ============================================================================
 
+export interface MotivationInput {
+  code: string;
+  other_text?: string | null;
+}
+
 export async function saveMotivations(
   surveyRunId: string,
-  codes: string[],
+  motivations: Array<MotivationInput | string>,
 ): Promise<void> {
   const { error: deleteError } = await supabase
     .from("survey_motivation")
@@ -109,12 +114,22 @@ export async function saveMotivations(
 
   if (deleteError) failOn("saveMotivations.delete", deleteError);
 
-  if (codes.length === 0) return;
+  if (motivations.length === 0) return;
 
-  const rows = codes.map((code) => ({
-    survey_run_id: surveyRunId,
-    motivation_code: code,
-  }));
+  const rows = motivations.map((m) => {
+    const code = typeof m === "string" ? m : m.code;
+    const other =
+      typeof m === "string"
+        ? null
+        : m.other_text !== undefined && m.other_text !== null && m.other_text !== ""
+          ? m.other_text
+          : null;
+    return {
+      survey_run_id: surveyRunId,
+      motivation_code: code,
+      motivation_other_text: other,
+    };
+  });
 
   const { error: insertError } = await supabase
     .from("survey_motivation")
