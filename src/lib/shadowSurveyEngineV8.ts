@@ -21,6 +21,9 @@ export interface SurveyProfileData {
   anonymization_behavior_code?: string | null;
   browser_extension_usage_code?: string | null;
   automation_usage_code?: string | null;
+  ai_policy_awareness_code?: string | null;
+  ai_skill_level_code?: string | null;
+  processing_output_code?: string | null;
 }
 
 export interface SelectedToolState {
