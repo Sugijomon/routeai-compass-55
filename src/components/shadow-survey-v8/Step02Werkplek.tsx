@@ -355,7 +355,7 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
               type="button"
               onClick={handleSubmit}
               disabled={submitDisabled}
-              className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:-translate-y-0.5"
+              className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:-translate-y-0.5"
               style={{
                 fontFamily: "'Manrope', sans-serif",
                 background: submitDisabled ? "#7aa3b6" : "#00658b",
@@ -378,7 +378,11 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
               ) : (
                 <>
                   Volgende
-                  <Icon name="arrow_forward" style={{ fontSize: 20 }} />
+                  <Icon
+                    name="arrow_forward"
+                    style={{ fontSize: 20, transition: "transform .2s ease" }}
+                    className="group-hover:translate-x-0.5"
+                  />
                 </>
               )}
             </button>
