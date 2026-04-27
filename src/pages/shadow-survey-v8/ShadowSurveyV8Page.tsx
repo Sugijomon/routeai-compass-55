@@ -26,6 +26,7 @@ export default function ShadowSurveyV8Page() {
 
   const [surveyRunId, setSurveyRunId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [savedToolIds, setSavedToolIds] = useState<string[]>([]);
 
   // Hervat bestaande run uit sessionStorage als org/wave matchen.
   useEffect(() => {
