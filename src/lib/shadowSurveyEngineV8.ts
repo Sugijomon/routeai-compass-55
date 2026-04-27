@@ -94,7 +94,7 @@ export async function saveSurveyProfile(
 
   const { error } = await supabase
     .from("survey_profile")
-    .upsert(payload, { onConflict: "survey_run_id" });
+    .upsert(payload as never, { onConflict: "survey_run_id" });
 
   if (error) failOn("saveSurveyProfile", error);
 }
