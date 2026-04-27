@@ -211,7 +211,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 <Icon name="visibility_off" style={{ fontSize: 18, color: "#40484e" }} />
               </span>
               <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 14, color: "#181c1e" }}>
-                Jouw privacy is gewaarborgd
+                Jouw privacy is 100% gewaarborgd
               </span>
             </span>
             <Icon
@@ -231,8 +231,9 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 maar om te begrijpen wat we als organisatie nodig hebben.
               </p>
               <p>
-                Jouw antwoorden worden losgekoppeld van je naam en alleen op geaggregeerd niveau geanalyseerd door de
-                DPO en het management.
+                We begrijpen dat je voorzichtig bent met het delen van je werkwijze. Daarom wordt jouw input technisch
+                volledig losgekoppeld van je naam. De resultaten zijn 100% anoniem en worden alleen op groepsniveau
+                geanalyseerd door de DPO en het management.
               </p>
               <p>
                 Aan het einde van de survey kun je er vrijwillig voor kiezen om je naam achter te laten als je wilt
@@ -291,7 +292,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 </div>
               )}
               <p className="mt-1 text-center text-xs" style={{ color: "#6993aa" }}>
-                Duurt ca. 8-10 minuten · Antwoorden anoniem verwerkt · Je kunt stoppen wanneer je wilt
+                Duurt ca. 8-10 minuten · Anoniem · Geen verplichte velden
               </p>
             </>
           )}
@@ -307,7 +308,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
             color: "#bfc7cf",
           }}
         >
-          Powered by RouteAI
+          Powered by Projectgroep AI
         </div>
       </main>
     </div>
