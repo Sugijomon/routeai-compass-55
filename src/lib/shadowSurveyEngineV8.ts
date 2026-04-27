@@ -147,10 +147,44 @@ export async function saveMotivations(
 // 4. saveTool
 // ============================================================================
 
+export interface SaveToolInput {
+  toolCode: string | null;
+  toolName: string;
+  isCustom: boolean;
+  catalogBeheerstatusCode?: string | null;
+}
+
+/**
+ * Schrijft één survey_tool-rij. Voor catalogus-tools (isCustom=false) wordt
+ * tegelijk de org_tool_policy snapshot opgezocht. Voor custom tools (of
+ * tools zonder code) wordt aanvullend een tool_catalog_discovery-rij
+ * aangemaakt zodat de DPO de inzending kan reviewen.
+ */
 export async function saveTool(
   surveyRunId: string,
-  tool: { toolCode?: string; toolName: string; isCustom: boolean },
+  orgId: string,
+  tool: SaveToolInput,
 ): Promise<string> {
+  // Snapshot van org_tool_policy: alleen voor catalogustools met code.
+  let policyStatus: string = "newly_discovered";
+  let euFlag: string = "none";
+
+  if (!tool.isCustom && tool.toolCode) {
+    const { data: policy, error: policyError } = await supabase
+      .from("org_tool_policy")
+      .select("org_policy_status_code, eu_ai_act_flag_code")
+      .eq("org_id", orgId)
+      .eq("tool_code", tool.toolCode)
+      .maybeSingle();
+
+    if (policyError) failOn("saveTool.policyLookup", policyError);
+
+    if (policy) {
+      policyStatus = policy.org_policy_status_code ?? "newly_discovered";
+      euFlag = policy.eu_ai_act_flag_code ?? "none";
+    }
+  }
+
   const { data, error } = await supabase
     .from("survey_tool")
     .insert({
@@ -158,6 +192,9 @@ export async function saveTool(
       tool_code: tool.toolCode ?? null,
       tool_name: tool.toolName,
       is_custom: tool.isCustom,
+      catalog_beheerstatus_code: tool.catalogBeheerstatusCode ?? null,
+      org_policy_status_code_snapshot: policyStatus,
+      eu_ai_act_flag_code_snapshot: euFlag,
     })
     .select("id")
     .single();
@@ -167,25 +204,17 @@ export async function saveTool(
 
   const surveyToolId = data.id;
 
-  // Custom of catalog-loze tools → registreer als discovery.
+  // Custom of catalog-loze tools → registreer als discovery zodat DPO ze kan reviewen.
   if (tool.isCustom || !tool.toolCode) {
-    const { data: runRow, error: runError } = await supabase
-      .from("survey_run")
-      .select("org_id")
-      .eq("id", surveyRunId)
-      .single();
-
-    if (runError) failOn("saveTool.discovery.lookupOrg", runError);
-    if (!runRow?.org_id) failOn("saveTool.discovery.lookupOrg", "no org_id");
-
     const { error: discoveryError } = await supabase
       .from("tool_catalog_discovery")
       .insert({
-        org_id: runRow.org_id,
+        org_id: orgId,
         survey_run_id: surveyRunId,
         survey_tool_id: surveyToolId,
         raw_tool_name: tool.toolName,
         discovery_source: "survey",
+        review_status: "pending",
       });
 
     if (discoveryError) failOn("saveTool.discovery", discoveryError);
