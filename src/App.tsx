@@ -410,7 +410,9 @@ export default function App() {
         
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
-        
+
+        {/* Scan V8.1 — debug-/verificatiepagina (geen scoring, geen dashboard) */}
+        <Route path="/admin/scan-v8-debug" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanV8DebugPage /></AuthRoute>} />
         {/* TODO: debug-only — niet opnemen in productie
         <Route path="/debug-quiz" element={<DebugQuiz />} />
         */}
