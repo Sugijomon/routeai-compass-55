@@ -120,9 +120,14 @@ export default function ShadowSurveyV8Page() {
   // Stap 6: Account-matrix + browserextensies + automatisering
   if (currentStep === 6) {
     if (savedToolIds.length === 0) {
-      // Tools-state ging verloren (refresh op stap 6) — terug naar tool-picker.
-      setCurrentStep(4);
-      return null;
+      // Tools-state ging verloren (refresh op stap 6) — probeer te herstellen uit DB.
+      return (
+        <ToolsRecovery
+          surveyRunId={surveyRunId}
+          onRecovered={(ids) => setSavedToolIds(ids)}
+          onBackToPicker={() => setCurrentStep(4)}
+        />
+      );
     }
     return (
       <Step06AccountMatrix
