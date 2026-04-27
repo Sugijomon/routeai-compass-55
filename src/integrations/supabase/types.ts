@@ -1940,7 +1940,7 @@ export type Database = {
           consent_ambassador: boolean | null
           id: string
           locale: string | null
-          org_id: string | null
+          org_id: string
           source: string | null
           started_at: string
           wave_id: string | null
@@ -1951,7 +1951,7 @@ export type Database = {
           consent_ambassador?: boolean | null
           id?: string
           locale?: string | null
-          org_id?: string | null
+          org_id: string
           source?: string | null
           started_at?: string
           wave_id?: string | null
@@ -1962,7 +1962,7 @@ export type Database = {
           consent_ambassador?: boolean | null
           id?: string
           locale?: string | null
-          org_id?: string | null
+          org_id?: string
           source?: string | null
           started_at?: string
           wave_id?: string | null
