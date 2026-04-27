@@ -106,18 +106,20 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      {/* Decoratieve blobs — zelfde als scherm 01 */}
+      {/* Decoratieve nebula-blobs — exact zoals HTML-referentie */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full opacity-40 blur-3xl"
-        style={{ background: "radial-gradient(circle, #c4e7ff 0%, transparent 70%)" }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full opacity-30 blur-3xl"
-        style={{ background: "radial-gradient(circle, #6993aa 0%, transparent 70%)" }}
-      />
-
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <div
+          className="absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full"
+          style={{ background: "#7dd0ff", filter: "blur(80px)", opacity: 0.25 }}
+        />
+        <div
+          className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full"
+          style={{ background: "#bae6ff", filter: "blur(80px)", opacity: 0.25 }}
+        />
+      </div>
       <div className="relative mx-auto max-w-2xl px-6">
         {/* Header */}
         <header className="flex items-start justify-between pb-4 pt-[30px]">
@@ -165,7 +167,7 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
 
         {/* Card */}
         <section
-          className="mb-10"
+          className="mb-10 p-8 md:p-10"
           style={{
             background: "rgba(255,255,255,0.85)",
             backdropFilter: "blur(16px)",
@@ -173,7 +175,6 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
             border: "1px solid rgba(255,255,255,0.70)",
             borderRadius: "2rem",
             boxShadow: "0 8px 40px rgba(0,101,139,0.06)",
-            padding: "2rem 2.5rem",
           }}
         >
           {/* Card header */}
