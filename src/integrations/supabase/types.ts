@@ -1625,6 +1625,24 @@ export type Database = {
         }
         Relationships: []
       }
+      ref_department: {
+        Row: {
+          code: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          label: string
+          sort_order: number
+        }
+        Update: {
+          code?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       ref_eu_ai_act_flag: {
         Row: {
           code: string
