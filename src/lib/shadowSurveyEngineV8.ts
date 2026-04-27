@@ -360,6 +360,9 @@ export async function saveConcerns(
   if (insertError) failOn("saveConcerns.insert", insertError);
 }
 
+// Alias — Step08Toekomst gebruikt deze naam, mapt 1-op-1 op saveConcerns.
+export const saveTopConcerns = saveConcerns;
+
 // ============================================================================
 // 10. saveSupportNeeds
 // ============================================================================
