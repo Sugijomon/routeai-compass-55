@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Step01Intro } from "@/components/shadow-survey-v8/Step01Intro";
+import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -56,6 +57,22 @@ export default function ShadowSurveyV8Page() {
         waveId={waveId}
         waveClosesAt={waveClosesAt}
         onStart={handleStart}
+      />
+    );
+  }
+
+  // Stap 2: Werkplek (afdeling)
+  if (currentStep === 2) {
+    if (!surveyRunId) {
+      // Defensief: geen run-id → terug naar stap 1.
+      setCurrentStep(1);
+      return null;
+    }
+    return (
+      <Step02Werkplek
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(3)}
+        onBack={() => setCurrentStep(1)}
       />
     );
   }
