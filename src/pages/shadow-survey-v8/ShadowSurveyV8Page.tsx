@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Step01Intro } from "@/components/shadow-survey-v8/Step01Intro";
 import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
+import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
