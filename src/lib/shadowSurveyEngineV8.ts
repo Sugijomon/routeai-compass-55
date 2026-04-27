@@ -147,9 +147,19 @@ export async function saveTool(
 
   // Custom of catalog-loze tools → registreer als discovery.
   if (tool.isCustom || !tool.toolCode) {
+    const { data: runRow, error: runError } = await supabase
+      .from("survey_run")
+      .select("org_id")
+      .eq("id", surveyRunId)
+      .single();
+
+    if (runError) failOn("saveTool.discovery.lookupOrg", runError);
+    if (!runRow?.org_id) failOn("saveTool.discovery.lookupOrg", "no org_id");
+
     const { error: discoveryError } = await supabase
       .from("tool_catalog_discovery")
       .insert({
+        org_id: runRow.org_id,
         survey_run_id: surveyRunId,
         survey_tool_id: surveyToolId,
         raw_tool_name: tool.toolName,
