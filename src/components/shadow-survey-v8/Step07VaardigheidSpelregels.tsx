@@ -310,7 +310,7 @@ export function Step07VaardigheidSpelregels({
     >
       <div className="mx-auto max-w-3xl">
         <div className="mb-6">
-          <SurveyProgressBar currentStep={4} totalSteps={5} />
+          <SurveyProgressBar currentStep={5} totalSteps={5} />
         </div>
 
         <div
