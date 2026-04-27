@@ -231,9 +231,8 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
                 maar om te begrijpen wat we als organisatie nodig hebben.
               </p>
               <p>
-                We begrijpen dat je voorzichtig bent met het delen van je werkwijze. Daarom wordt jouw input technisch
-                volledig losgekoppeld van je naam. De resultaten zijn 100% anoniem en worden alleen op groepsniveau
-                geanalyseerd door de DPO en het management.
+                Jouw antwoorden worden losgekoppeld van je naam en alleen op geaggregeerd niveau geanalyseerd door de
+                DPO en het management.
               </p>
               <p>
                 Aan het einde van de survey kun je er vrijwillig voor kiezen om je naam achter te laten als je wilt
