@@ -12,6 +12,7 @@ import { Step01Intro } from "@/components/shadow-survey-v8/Step01Intro";
 import { Step02Werkplek } from "@/components/shadow-survey-v8/Step02Werkplek";
 import { Step03Frequentie } from "@/components/shadow-survey-v8/Step03Frequentie";
 import { Step04Toolpicker } from "@/components/shadow-survey-v8/Step04Toolpicker";
+import { Step05Datatype } from "@/components/shadow-survey-v8/Step05Datatype";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -98,6 +99,17 @@ export default function ShadowSurveyV8Page() {
           setCurrentStep(5);
         }}
         onBack={() => setCurrentStep(3)}
+      />
+    );
+  }
+
+  // Stap 5: Datatype + awareness + anonimisering
+  if (currentStep === 5) {
+    return (
+      <Step05Datatype
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(6)}
+        onBack={() => setCurrentStep(4)}
       />
     );
   }
