@@ -16,6 +16,7 @@ import { Step04Toolpicker } from "@/components/shadow-survey-v8/Step04Toolpicker
 import { Step05Datatype } from "@/components/shadow-survey-v8/Step05Datatype";
 import { Step06AccountMatrix } from "@/components/shadow-survey-v8/Step06AccountMatrix";
 import { Step07VaardigheidSpelregels } from "@/components/shadow-survey-v8/Step07VaardigheidSpelregels";
+import { Step08Toekomst } from "@/components/shadow-survey-v8/Step08Toekomst";
 
 function storageKey(orgId: string, waveId: string | undefined) {
   return `sai_v8_run_id:${orgId}:${waveId ?? "default"}`;
@@ -146,6 +147,17 @@ export default function ShadowSurveyV8Page() {
         surveyRunId={surveyRunId}
         onContinue={() => setCurrentStep(8)}
         onBack={() => setCurrentStep(6)}
+      />
+    );
+  }
+
+  // Stap 8: Toekomst & ambities
+  if (currentStep === 8) {
+    return (
+      <Step08Toekomst
+        surveyRunId={surveyRunId}
+        onContinue={() => setCurrentStep(9)}
+        onBack={() => setCurrentStep(7)}
       />
     );
   }

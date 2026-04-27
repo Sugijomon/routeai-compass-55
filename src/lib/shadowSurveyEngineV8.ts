@@ -24,6 +24,8 @@ export interface SurveyProfileData {
   ai_policy_awareness_code?: string | null;
   ai_skill_level_code?: string | null;
   processing_output_code?: string | null;
+  top_concern_other_text?: string | null;
+  future_usecases_text?: string | null;
 }
 
 export interface SelectedToolState {
@@ -357,6 +359,9 @@ export async function saveConcerns(
 
   if (insertError) failOn("saveConcerns.insert", insertError);
 }
+
+// Alias — Step08Toekomst gebruikt deze naam, mapt 1-op-1 op saveConcerns.
+export const saveTopConcerns = saveConcerns;
 
 // ============================================================================
 // 10. saveSupportNeeds
