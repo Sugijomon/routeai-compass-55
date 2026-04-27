@@ -17,6 +17,8 @@ export interface SurveyProfileData {
   department_other_text?: string | null;
   ai_frequency_code?: string | null;
   no_ai_reason_code?: string | null;
+  data_awareness_code?: string | null;
+  anonymization_behavior_code?: string | null;
 }
 
 export interface SelectedToolState {
