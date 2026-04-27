@@ -49,7 +49,7 @@ const DATA_TYPE_OPTIONS: DataTypeOption[] = [
   { code: "gevoelig_persoonsgegeven", label: "Gevoelige persoonsgegevens", risk: "high" },
   { code: "excel_sheets", label: "Excel sheets", risk: "mid" },
   { code: "juridische_documenten", label: "Juridische documenten", risk: "high" },
-  { code: "nietsin", label: "Ik voer dit niet in", risk: "neutral", exclusive: true },
+  { code: "niets", label: "Ik voer dit niet in", risk: "neutral", exclusive: true },
   { code: "onzeker", label: "Weet ik niet zeker", risk: "neutral", exclusive: true, fullWidth: true },
 ];
 
