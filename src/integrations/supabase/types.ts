@@ -1843,6 +1843,29 @@ export type Database = {
           },
         ]
       }
+      survey_data_type: {
+        Row: {
+          data_type_code: string
+          survey_run_id: string
+        }
+        Insert: {
+          data_type_code: string
+          survey_run_id: string
+        }
+        Update: {
+          data_type_code?: string
+          survey_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_data_type_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_invite: {
         Row: {
           department_label: string | null
@@ -1894,6 +1917,32 @@ export type Database = {
           },
         ]
       }
+      survey_motivation: {
+        Row: {
+          motivation_code: string
+          motivation_other_text: string | null
+          survey_run_id: string
+        }
+        Insert: {
+          motivation_code: string
+          motivation_other_text?: string | null
+          survey_run_id: string
+        }
+        Update: {
+          motivation_code?: string
+          motivation_other_text?: string | null
+          survey_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_motivation_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_participation: {
         Row: {
           completed_at: string | null
@@ -1928,6 +1977,71 @@ export type Database = {
             foreignKeyName: "survey_participation_survey_run_id_fkey"
             columns: ["survey_run_id"]
             isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_profile: {
+        Row: {
+          ai_frequency_code: string | null
+          ai_policy_awareness_code: string | null
+          ai_skill_level_code: string | null
+          anonymization_behavior_code: string | null
+          automation_awareness_code: string | null
+          automation_usage_code: string | null
+          browser_extension_usage_code: string | null
+          data_awareness_code: string | null
+          department_code: string | null
+          department_other_text: string | null
+          extension_awareness_code: string | null
+          future_usecases_text: string | null
+          no_ai_reason_code: string | null
+          processing_output_code: string | null
+          survey_run_id: string
+          top_concern_other_text: string | null
+        }
+        Insert: {
+          ai_frequency_code?: string | null
+          ai_policy_awareness_code?: string | null
+          ai_skill_level_code?: string | null
+          anonymization_behavior_code?: string | null
+          automation_awareness_code?: string | null
+          automation_usage_code?: string | null
+          browser_extension_usage_code?: string | null
+          data_awareness_code?: string | null
+          department_code?: string | null
+          department_other_text?: string | null
+          extension_awareness_code?: string | null
+          future_usecases_text?: string | null
+          no_ai_reason_code?: string | null
+          processing_output_code?: string | null
+          survey_run_id: string
+          top_concern_other_text?: string | null
+        }
+        Update: {
+          ai_frequency_code?: string | null
+          ai_policy_awareness_code?: string | null
+          ai_skill_level_code?: string | null
+          anonymization_behavior_code?: string | null
+          automation_awareness_code?: string | null
+          automation_usage_code?: string | null
+          browser_extension_usage_code?: string | null
+          data_awareness_code?: string | null
+          department_code?: string | null
+          department_other_text?: string | null
+          extension_awareness_code?: string | null
+          future_usecases_text?: string | null
+          no_ai_reason_code?: string | null
+          processing_output_code?: string | null
+          survey_run_id?: string
+          top_concern_other_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_profile_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: true
             referencedRelation: "survey_run"
             referencedColumns: ["id"]
           },
@@ -1984,6 +2098,232 @@ export type Database = {
           },
         ]
       }
+      survey_support_need: {
+        Row: {
+          support_need_code: string
+          survey_run_id: string
+        }
+        Insert: {
+          support_need_code: string
+          survey_run_id: string
+        }
+        Update: {
+          support_need_code?: string
+          survey_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_support_need_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_tool: {
+        Row: {
+          catalog_beheerstatus_code: string | null
+          eu_ai_act_flag_code_snapshot: string | null
+          id: string
+          is_custom: boolean
+          org_policy_status_code_snapshot: string | null
+          survey_run_id: string
+          tool_code: string | null
+          tool_name: string
+        }
+        Insert: {
+          catalog_beheerstatus_code?: string | null
+          eu_ai_act_flag_code_snapshot?: string | null
+          id?: string
+          is_custom?: boolean
+          org_policy_status_code_snapshot?: string | null
+          survey_run_id: string
+          tool_code?: string | null
+          tool_name: string
+        }
+        Update: {
+          catalog_beheerstatus_code?: string | null
+          eu_ai_act_flag_code_snapshot?: string | null
+          id?: string
+          is_custom?: boolean
+          org_policy_status_code_snapshot?: string | null
+          survey_run_id?: string
+          tool_code?: string | null
+          tool_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_tool_account: {
+        Row: {
+          account_type_code: string
+          survey_tool_id: string
+        }
+        Insert: {
+          account_type_code: string
+          survey_tool_id: string
+        }
+        Update: {
+          account_type_code?: string
+          survey_tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_account_survey_tool_id_fkey"
+            columns: ["survey_tool_id"]
+            isOneToOne: true
+            referencedRelation: "survey_tool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_tool_preference_reason: {
+        Row: {
+          preference_reason_code: string
+          survey_run_id: string
+        }
+        Insert: {
+          preference_reason_code: string
+          survey_run_id: string
+        }
+        Update: {
+          preference_reason_code?: string
+          survey_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_preference_reason_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_tool_use_case: {
+        Row: {
+          id: string
+          survey_tool_id: string
+          use_case_code: string
+        }
+        Insert: {
+          id?: string
+          survey_tool_id: string
+          use_case_code: string
+        }
+        Update: {
+          id?: string
+          survey_tool_id?: string
+          use_case_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_use_case_survey_tool_id_fkey"
+            columns: ["survey_tool_id"]
+            isOneToOne: false
+            referencedRelation: "survey_tool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_tool_use_case_use_case_code_fkey"
+            columns: ["use_case_code"]
+            isOneToOne: false
+            referencedRelation: "ref_use_case"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      survey_tool_use_case_context: {
+        Row: {
+          context_code: string
+          survey_tool_use_case_id: string
+        }
+        Insert: {
+          context_code: string
+          survey_tool_use_case_id: string
+        }
+        Update: {
+          context_code?: string
+          survey_tool_use_case_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_use_case_context_context_code_fkey"
+            columns: ["context_code"]
+            isOneToOne: false
+            referencedRelation: "ref_context"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "survey_tool_use_case_context_survey_tool_use_case_id_fkey"
+            columns: ["survey_tool_use_case_id"]
+            isOneToOne: false
+            referencedRelation: "survey_tool_use_case"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_tool_use_case_flag: {
+        Row: {
+          governance_flag_code: string
+          survey_tool_use_case_id: string
+        }
+        Insert: {
+          governance_flag_code: string
+          survey_tool_use_case_id: string
+        }
+        Update: {
+          governance_flag_code?: string
+          survey_tool_use_case_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tool_use_case_flag_governance_flag_code_fkey"
+            columns: ["governance_flag_code"]
+            isOneToOne: false
+            referencedRelation: "ref_governance_flag"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "survey_tool_use_case_flag_survey_tool_use_case_id_fkey"
+            columns: ["survey_tool_use_case_id"]
+            isOneToOne: false
+            referencedRelation: "survey_tool_use_case"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_top_concern: {
+        Row: {
+          survey_run_id: string
+          top_concern_code: string
+        }
+        Insert: {
+          survey_run_id: string
+          top_concern_code: string
+        }
+        Update: {
+          survey_run_id?: string
+          top_concern_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_top_concern_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_wave: {
         Row: {
           closes_at: string | null
@@ -2033,6 +2373,76 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_catalog_discovery: {
+        Row: {
+          created_at: string
+          discovery_source: string
+          id: string
+          normalized_tool_name: string | null
+          notes: string | null
+          org_id: string
+          promoted_tool_code: string | null
+          raw_tool_name: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          survey_run_id: string | null
+          survey_tool_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          discovery_source?: string
+          id?: string
+          normalized_tool_name?: string | null
+          notes?: string | null
+          org_id: string
+          promoted_tool_code?: string | null
+          raw_tool_name: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          survey_run_id?: string | null
+          survey_tool_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          discovery_source?: string
+          id?: string
+          normalized_tool_name?: string | null
+          notes?: string | null
+          org_id?: string
+          promoted_tool_code?: string | null
+          raw_tool_name?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          survey_run_id?: string | null
+          survey_tool_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_catalog_discovery_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_catalog_discovery_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_catalog_discovery_survey_tool_id_fkey"
+            columns: ["survey_tool_id"]
+            isOneToOne: false
+            referencedRelation: "survey_tool"
             referencedColumns: ["id"]
           },
         ]
