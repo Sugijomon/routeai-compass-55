@@ -1843,6 +1843,200 @@ export type Database = {
           },
         ]
       }
+      survey_invite: {
+        Row: {
+          department_label: string | null
+          display_name: string | null
+          email: string
+          id: string
+          invited_at: string
+          org_id: string
+          participation_status: string
+          reminder_sent_at: string | null
+          wave_id: string | null
+        }
+        Insert: {
+          department_label?: string | null
+          display_name?: string | null
+          email: string
+          id?: string
+          invited_at?: string
+          org_id: string
+          participation_status?: string
+          reminder_sent_at?: string | null
+          wave_id?: string | null
+        }
+        Update: {
+          department_label?: string | null
+          display_name?: string | null
+          email?: string
+          id?: string
+          invited_at?: string
+          org_id?: string
+          participation_status?: string
+          reminder_sent_at?: string | null
+          wave_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_invite_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_invite_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "survey_wave"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_participation: {
+        Row: {
+          completed_at: string | null
+          invite_id: string
+          last_reminder_at: string | null
+          opened_at: string | null
+          survey_run_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          invite_id: string
+          last_reminder_at?: string | null
+          opened_at?: string | null
+          survey_run_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          invite_id?: string
+          last_reminder_at?: string | null
+          opened_at?: string | null
+          survey_run_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_participation_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: true
+            referencedRelation: "survey_invite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_participation_survey_run_id_fkey"
+            columns: ["survey_run_id"]
+            isOneToOne: false
+            referencedRelation: "survey_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_run: {
+        Row: {
+          ambassador_email: string | null
+          completed_at: string | null
+          consent_ambassador: boolean | null
+          id: string
+          locale: string | null
+          org_id: string | null
+          source: string | null
+          started_at: string
+          wave_id: string | null
+        }
+        Insert: {
+          ambassador_email?: string | null
+          completed_at?: string | null
+          consent_ambassador?: boolean | null
+          id?: string
+          locale?: string | null
+          org_id?: string | null
+          source?: string | null
+          started_at?: string
+          wave_id?: string | null
+        }
+        Update: {
+          ambassador_email?: string | null
+          completed_at?: string | null
+          consent_ambassador?: boolean | null
+          id?: string
+          locale?: string | null
+          org_id?: string | null
+          source?: string | null
+          started_at?: string
+          wave_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_run_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_run_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "survey_wave"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_wave: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          opens_at: string | null
+          org_id: string
+          policy_snapshot_date: string | null
+          scoring_version: string | null
+          status: string
+          survey_version: string | null
+          wave_name: string
+          wave_type: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opens_at?: string | null
+          org_id: string
+          policy_snapshot_date?: string | null
+          scoring_version?: string | null
+          status?: string
+          survey_version?: string | null
+          wave_name: string
+          wave_type?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opens_at?: string | null
+          org_id?: string
+          policy_snapshot_date?: string | null
+          scoring_version?: string | null
+          status?: string
+          survey_version?: string | null
+          wave_name?: string
+          wave_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_wave_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tool_discoveries: {
         Row: {
           application_risk_class: string | null
