@@ -128,6 +128,11 @@ export default function ShadowSurveyV8Page() {
         <p className="mt-3 text-xs" style={{ color: "#6993aa" }}>
           Run-ID: <code>{surveyRunId}</code>
         </p>
+        {savedToolIds.length > 0 && (
+          <p className="mt-2 text-xs" style={{ color: "#6993aa" }}>
+            Tools opgeslagen: {savedToolIds.length}
+          </p>
+        )}
       </div>
     </div>
   );
