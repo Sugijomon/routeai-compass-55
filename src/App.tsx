@@ -39,6 +39,7 @@ import ShadowSurveyV8Page from "./pages/shadow-survey-v8/ShadowSurveyV8Page";
 import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
 import ScanInstellingenPage from "./pages/admin/ScanInstellingenPage";
+import ScanV8DebugPage from "./pages/admin/ScanV8DebugPage";
 
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
