@@ -61,6 +61,8 @@ export async function createSurveyRun(
     .insert({
       org_id: orgId,
       wave_id: waveId ?? null,
+      locale: "nl",
+      source: "web",
     })
     .select("id")
     .single();
