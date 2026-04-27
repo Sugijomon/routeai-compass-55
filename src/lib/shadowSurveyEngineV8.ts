@@ -416,3 +416,32 @@ export async function completeSurveyRun(
 
   if (error) failOn("completeSurveyRun", error);
 }
+
+// ============================================================================
+// 12. saveToolPreferenceReasons
+// ============================================================================
+
+export async function saveToolPreferenceReasons(
+  surveyRunId: string,
+  codes: string[],
+): Promise<void> {
+  const { error: deleteError } = await supabase
+    .from("survey_tool_preference_reason")
+    .delete()
+    .eq("survey_run_id", surveyRunId);
+
+  if (deleteError) failOn("saveToolPreferenceReasons.delete", deleteError);
+
+  if (codes.length === 0) return;
+
+  const rows = codes.map((code) => ({
+    survey_run_id: surveyRunId,
+    preference_reason_code: code,
+  }));
+
+  const { error: insertError } = await supabase
+    .from("survey_tool_preference_reason")
+    .insert(rows);
+
+  if (insertError) failOn("saveToolPreferenceReasons.insert", insertError);
+}
