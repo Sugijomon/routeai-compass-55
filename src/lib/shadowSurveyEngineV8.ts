@@ -393,33 +393,45 @@ export async function saveSupportNeeds(
 }
 
 // ============================================================================
-// 11. completeSurveyRun
+// 11. completeSurveyRun — zet alleen completed_at, raakt ambassador-velden
+// niet aan. Die blijven null totdat de respondent expliciet kiest.
 // ============================================================================
 
-export async function completeSurveyRun(
+export async function completeSurveyRun(surveyRunId: string): Promise<void> {
+  const { error } = await supabase
+    .from("survey_run")
+    .update({ completed_at: new Date().toISOString() })
+    .eq("id", surveyRunId);
+
+  if (error) failOn("completeSurveyRun", error);
+}
+
+// ============================================================================
+// 11b. updateAmbassador — schrijft consent_ambassador (+ optioneel email).
+// CHECK constraint op survey_run vereist: consent_ambassador=true ⇒ email
+// aanwezig. Daarom valideren we hier ook in code.
+// ============================================================================
+
+export async function updateAmbassador(
   surveyRunId: string,
   consentAmbassador: boolean,
-  ambassadorEmail?: string,
+  ambassadorEmail: string | null,
 ): Promise<void> {
-  const payload: {
-    completed_at: string;
-    consent_ambassador: boolean;
-    ambassador_email?: string | null;
-  } = {
-    completed_at: new Date().toISOString(),
-    consent_ambassador: consentAmbassador,
-  };
-
-  if (consentAmbassador && ambassadorEmail) {
-    payload.ambassador_email = ambassadorEmail;
+  if (consentAmbassador && (!ambassadorEmail || ambassadorEmail.trim().length === 0)) {
+    failOn("updateAmbassador", "ambassadorEmail is verplicht als consentAmbassador=true");
   }
+
+  const payload: { consent_ambassador: boolean; ambassador_email: string | null } = {
+    consent_ambassador: consentAmbassador,
+    ambassador_email: consentAmbassador ? (ambassadorEmail as string).trim() : null,
+  };
 
   const { error } = await supabase
     .from("survey_run")
     .update(payload)
     .eq("id", surveyRunId);
 
-  if (error) failOn("completeSurveyRun", error);
+  if (error) failOn("updateAmbassador", error);
 }
 
 // ============================================================================
