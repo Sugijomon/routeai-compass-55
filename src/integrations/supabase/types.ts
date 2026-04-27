@@ -1541,6 +1541,189 @@ export type Database = {
           },
         ]
       }
+      ref_account_type: {
+        Row: {
+          code: string
+          label: string
+        }
+        Insert: {
+          code: string
+          label: string
+        }
+        Update: {
+          code?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_ai_frequency: {
+        Row: {
+          code: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          label: string
+          sort_order: number
+        }
+        Update: {
+          code?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      ref_catalog_beheerstatus: {
+        Row: {
+          code: string
+          label: string
+        }
+        Insert: {
+          code: string
+          label: string
+        }
+        Update: {
+          code?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_context: {
+        Row: {
+          code: string
+          context_multiplier: number
+          label: string
+        }
+        Insert: {
+          code: string
+          context_multiplier?: number
+          label: string
+        }
+        Update: {
+          code?: string
+          context_multiplier?: number
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_data_type: {
+        Row: {
+          code: string
+          label: string
+          risk_level: string
+        }
+        Insert: {
+          code: string
+          label: string
+          risk_level?: string
+        }
+        Update: {
+          code?: string
+          label?: string
+          risk_level?: string
+        }
+        Relationships: []
+      }
+      ref_eu_ai_act_flag: {
+        Row: {
+          code: string
+          label: string
+        }
+        Insert: {
+          code: string
+          label: string
+        }
+        Update: {
+          code?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_governance_flag: {
+        Row: {
+          code: string
+          label: string
+        }
+        Insert: {
+          code: string
+          label: string
+        }
+        Update: {
+          code?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_no_ai_reason: {
+        Row: {
+          code: string
+          label: string
+        }
+        Insert: {
+          code: string
+          label: string
+        }
+        Update: {
+          code?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_org_policy_status: {
+        Row: {
+          code: string
+          label: string
+          shadow_base: number
+        }
+        Insert: {
+          code: string
+          label: string
+          shadow_base: number
+        }
+        Update: {
+          code?: string
+          label?: string
+          shadow_base?: number
+        }
+        Relationships: []
+      }
+      ref_review_trigger: {
+        Row: {
+          code: string
+          description: string | null
+          label: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          label: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          label?: string
+        }
+        Relationships: []
+      }
+      ref_use_case: {
+        Row: {
+          code: string
+          label: string
+          use_case_base: number
+        }
+        Insert: {
+          code: string
+          label: string
+          use_case_base?: number
+        }
+        Update: {
+          code?: string
+          label?: string
+          use_case_base?: number
+        }
+        Relationships: []
+      }
       rijbewijs_records: {
         Row: {
           earned_at: string | null
