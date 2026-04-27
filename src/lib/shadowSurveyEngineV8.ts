@@ -171,6 +171,9 @@ export async function saveTool(
   let policyStatus: string = "newly_discovered";
   let euFlag: string = "none";
 
+  // NOTE: Voorlopig gebruiken we tools_library.id als tool_code omdat
+  // tools_library nog geen aparte tool_code-kolom heeft. org_tool_policy moet
+  // dezelfde sleutel gebruiken totdat tools_library een stabiele tool_code krijgt.
   if (!tool.isCustom && tool.toolCode) {
     const { data: policy, error: policyError } = await supabase
       .from("org_tool_policy")
