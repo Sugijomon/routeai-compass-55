@@ -211,35 +211,39 @@ const EXCLUDED_USE_CASE_CODES = new Set<string>([
 // Beperkt de keuzes tot wat voor die toolsoort logisch is.
 const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
   // ── Canonieke 11 HTML-categorieën (gebruikt door catalogus) ──
-  tekst_chat: [
+  algemene_ai: [
     "teksten_schrijven",
     "samenvatten_redigeren",
     "brainstormen",
     "informatie_opzoeken",
     "vertalen",
+    "data_analyseren",
     "klantenservice",
   ],
-  beeld: [
+  agentic_ai: [
+    "informatie_opzoeken",
+    "samenvatten_redigeren",
+    "data_analyseren",
+    "teksten_schrijven",
+    "brainstormen",
+  ],
+  schrijven: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "vertalen",
+    "brainstormen",
+  ],
+  presentaties: [
+    "presentaties_design",
+    "afbeeldingen_genereren",
+    "brainstormen",
+    "teksten_schrijven",
+  ],
+  beeld_video: [
     "afbeeldingen_genereren",
     "video_genereren",
     "presentaties_design",
     "brainstormen",
-  ],
-  code: [], // code-tools gebruiken contexten i.p.v. use cases
-  zoeken_rag: [
-    "informatie_opzoeken",
-    "samenvatten_redigeren",
-    "data_analyseren",
-  ],
-  analyse: [
-    "data_analyseren",
-    "informatie_opzoeken",
-    "presentaties_design",
-  ],
-  notulen: [
-    "vergaderingen_notuleren",
-    "samenvatten_redigeren",
-    "informatie_opzoeken",
   ],
   audio_spraak: [
     "audio_genereren",
@@ -247,31 +251,31 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
     "klantenservice",
     "presentaties_design",
   ],
-  automatisering: [
-    "informatie_opzoeken",
-    "data_analyseren",
-    "code_schrijven",
-  ],
-  crm_klant: [
-    "klantenservice",
-    "data_analyseren",
+  notulen: [
+    "vergaderingen_notuleren",
     "samenvatten_redigeren",
-    "teksten_schrijven",
+    "informatie_opzoeken",
   ],
-  werkplek_embedded: [
+  code: [], // code-tools gebruiken contexten i.p.v. use cases
+  data_auto: [
+    "data_analyseren",
+    "informatie_opzoeken",
+    "code_schrijven",
+    "samenvatten_redigeren",
+  ],
+  werkplek: [
     "teksten_schrijven",
     "samenvatten_redigeren",
     "data_analyseren",
     "vergaderingen_notuleren",
     "presentaties_design",
-    "klantenservice",
     "brainstormen",
     "informatie_opzoeken",
   ],
-  overig: [
-    "vergaderingen_notuleren",
+  crm_klant: [
+    "klantenservice",
+    "data_analyseren",
     "samenvatten_redigeren",
-    "vertalen",
     "teksten_schrijven",
   ],
   // ── Legacy DB-categorieën (back-compat) ──
