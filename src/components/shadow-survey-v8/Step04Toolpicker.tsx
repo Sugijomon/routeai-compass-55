@@ -585,6 +585,7 @@ export function Step04Toolpicker({
       toolName: tool.name,
       categoryCode: tool.htmlCategory, // gebruik HTML-categorie voor modal-allowlist
       icon: iconForTool(tool.name, tool.htmlCategory),
+      logoUrl: logoUrlFor(tool.name),
       isCustom: false,
       isCodeTool: isCode,
       selections: [],
