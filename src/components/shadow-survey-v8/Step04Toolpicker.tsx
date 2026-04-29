@@ -686,7 +686,7 @@ export function Step04Toolpicker({
                         style={{ background: "#f1f4f6" }}
                       >
                         <Icon
-                          name={iconFor(tool.category)}
+                          name={iconForTool(tool.name, tool.category)}
                           style={{ fontSize: 18, color: "#00658b" }}
                         />
                       </div>
