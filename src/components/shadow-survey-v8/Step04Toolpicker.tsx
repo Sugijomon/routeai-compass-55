@@ -374,12 +374,16 @@ export function Step04Toolpicker({
         if (ctxRes.error) throw ctxRes.error;
 
         setCatalogTools(
-          (toolsRes.data ?? []).map((t) => ({
-            id: t.id,
-            name: t.name,
-            category: t.category ?? "other",
-            vendor: t.vendor ?? null,
-          })),
+          (toolsRes.data ?? []).map((t) => {
+            const dbCat = t.category ?? "other";
+            return {
+              id: t.id,
+              name: t.name,
+              category: dbCat,
+              htmlCategory: htmlCategoryFor(t.name, dbCat),
+              vendor: t.vendor ?? null,
+            };
+          }),
         );
         setUseCases(
           (ucRes.data ?? [])
@@ -407,7 +411,8 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const filteredCatalog = useMemo(() => {
     if (activeCategory === "all") return catalogTools;
-    return catalogTools.filter((t) => t.category === activeCategory);
+    // Filteren op canonieke HTML-categorie (UI-only).
+    return catalogTools.filter((t) => t.htmlCategory === activeCategory);
   }, [catalogTools, activeCategory]);
 
   const usedToolCodes = useMemo(
@@ -430,14 +435,18 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const addCatalogTool = (tool: CatalogTool) => {
     if (usedToolCodes.has(tool.id)) return;
+    // isCodeTool wordt bepaald op zowel DB-categorie als HTML-categorie
+    // (HTML 'code' = DB 'code_assistant').
+    const isCode =
+      isCodeCategory(tool.category) || isCodeCategory(tool.htmlCategory);
     const newTool: WorkspaceTool = {
       localId: nextLocalId(),
       toolCode: tool.id,
       toolName: tool.name,
-      categoryCode: tool.category,
-      icon: iconForTool(tool.name, tool.category),
+      categoryCode: tool.htmlCategory, // gebruik HTML-categorie voor modal-allowlist
+      icon: iconForTool(tool.name, tool.htmlCategory),
       isCustom: false,
-      isCodeTool: isCodeCategory(tool.category),
+      isCodeTool: isCode,
       selections: [],
     };
     setWorkspace((prev) => [...prev, newTool]);
