@@ -771,11 +771,18 @@ export function Step04Toolpicker({
   const modalChips: RefOption[] = useMemo(() => {
     if (!modalTool) return [];
     if (modalTool.isCodeTool) return contexts;
-    const allow = USE_CASES_PER_CATEGORY[modalTool.categoryCode];
-    if (!allow || allow.length === 0) return useCases;
+
+    // Resolutie-volgorde:
+    // 1. tool-level mapping (TOOL_USE_CASES_PER_TOOL) — wint altijd
+    // 2. categorie-allowlist (USE_CASES_PER_CATEGORY[htmlCategory])
+    // De categorie-allowlist mag een tool-level mapping nooit verbreden.
+    const toolLevel = toolLevelUseCases(modalTool.toolName, modalTool.toolCode);
+    const allow = toolLevel ?? USE_CASES_PER_CATEGORY[modalTool.categoryCode] ?? [];
+    if (allow.length === 0) return [];
+
     const allowSet = new Set(allow);
-    // Behoud volgorde van de allowlist zodat de modal voorspelbaar oogt.
     const byCode = new Map(useCases.map((u) => [u.code, u]));
+    // Behoud volgorde van de allowlist zodat de modal voorspelbaar oogt.
     return allow
       .map((code) => byCode.get(code))
       .filter((u): u is RefOption => !!u && allowSet.has(u.code));
