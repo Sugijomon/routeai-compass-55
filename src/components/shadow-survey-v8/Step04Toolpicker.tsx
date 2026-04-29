@@ -318,7 +318,7 @@ export function Step04Toolpicker({
       toolCode: tool.id,
       toolName: tool.name,
       categoryCode: tool.category,
-      icon: iconFor(tool.category),
+      icon: iconForTool(tool.name, tool.category),
       isCustom: false,
       isCodeTool: isCodeCategory(tool.category),
       selections: [],
