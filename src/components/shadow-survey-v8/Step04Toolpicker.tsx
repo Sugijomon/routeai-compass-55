@@ -52,7 +52,8 @@ interface WorkspaceTool {
   toolCode: string | null;     // null voor custom
   toolName: string;
   categoryCode: string;        // categorie-code voor groepering & code-detectie
-  icon: string;                // material-symbol naam
+  icon: string;                // material-symbol naam (fallback)
+  logoUrl: string | null;      // expliciete logo-URL (null = fallback naar icon)
   isCustom: boolean;
   isCodeTool: boolean;
   selections: string[];        // use_case_codes (gewoon) of context_codes (code-tool)
