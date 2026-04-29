@@ -107,6 +107,33 @@ const CATEGORY_ICON: Record<string, string> = {
 // Zowel DB-categorie code_assistant als HTML-categorie 'code' triggeren dit.
 const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
 
+// Helptekst per context-chip (alleen code-tools). Verschijnt als tooltip bij
+// hover/focus op het i-icoon in de chip. Bron: screen-04-toolpicker-fixed.html.
+const CONTEXT_HELP: Record<string, string> = {
+  intern_gebruik:
+    "Software die alleen door collega's intern wordt gebruikt. Bijvoorbeeld interne tools, dashboards of scripts.",
+  klantgerichte_toepassing:
+    "Software die klanten of externen direct gebruiken. Bijvoorbeeld een chatbot, klantportaal of publieke webapp.",
+  externe_systemen:
+    "Software die koppelt met systemen buiten de organisatie, zoals API's van leveranciers of partners.",
+  kritieke_systemen:
+    "Software in processen waar uitval of fouten grote impact hebben (productie, betalingen, veiligheid).",
+  besluiten_over_personen:
+    "Code die meebepaalt over personen — bv. selectie, beoordeling, toegang of sortering van mensen.",
+  hr_evaluatie:
+    "Toepassingen rond werving, selectie, beoordeling of monitoring van medewerkers.",
+  financieel_juridisch:
+    "Software die financiële of juridische beslissingen ondersteunt of automatiseert.",
+  beslisondersteuning:
+    "Code die mensen helpt beslissen, maar de mens neemt het uiteindelijke besluit.",
+  menselijke_review_verplicht:
+    "Output van de software wordt altijd door een mens gecontroleerd vóór gebruik.",
+  autonome_uitvoering:
+    "Software die zelfstandig handelt of beslissingen uitvoert zonder menselijke tussenkomst.",
+  nog_niet_duidelijk:
+    "Weet je nog niet precies waarvoor de code wordt gebruikt? Kies dit en bespreek later met je DPO.",
+};
+
 // ──────────────────────────────────────────────────────────────────────────
 // HTML-categorie mapping per tool (canon uit tools.json + categories.json).
 // Match op tool-naam (case-insensitive, exact normalized). Onbekende tools
