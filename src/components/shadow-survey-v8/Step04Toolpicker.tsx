@@ -214,6 +214,80 @@ const EXCLUDED_USE_CASE_CODES = new Set<string>([
 // Per-categorie allowlist van toepassingen die in de modal mogen verschijnen.
 // Beperkt de keuzes tot wat voor die toolsoort logisch is.
 const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
+  // ── HTML/JSON-categorieën (gebruikt door catalogus) ──
+  algemene_ai: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "informatie_opzoeken",
+    "vertalen",
+    "data_analyseren",
+    "code_schrijven",
+    "afbeeldingen_genereren",
+  ],
+  agentic_ai: [
+    "informatie_opzoeken",
+    "data_analyseren",
+    "automatisering",
+    "code_schrijven",
+  ],
+  schrijven: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "vertalen",
+    "klantenservice",
+    "informatie_opzoeken",
+  ],
+  presentaties: [
+    "presentaties_design",
+    "afbeeldingen_genereren",
+    "brainstormen",
+    "samenvatten_redigeren",
+    "video_genereren",
+  ],
+  beeld_video: [
+    "afbeeldingen_genereren",
+    "video_genereren",
+    "presentaties_design",
+    "brainstormen",
+  ],
+  audio_spraak: [
+    "audio_genereren",
+    "video_genereren",
+    "klantenservice",
+    "presentaties_design",
+  ],
+  notulen: [
+    "vergaderingen_notuleren",
+    "samenvatten_redigeren",
+    "informatie_opzoeken",
+  ],
+  code: [], // code-tools gebruiken contexten i.p.v. use cases
+  data_auto: [
+    "data_analyseren",
+    "automatisering",
+    "informatie_opzoeken",
+    "code_schrijven",
+  ],
+  werkplek: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "data_analyseren",
+    "vergaderingen_notuleren",
+    "presentaties_design",
+    "klantenservice",
+    "brainstormen",
+    "informatie_opzoeken",
+  ],
+  crm_klant: [
+    "klantenservice",
+    "data_analyseren",
+    "automatisering",
+    "samenvatten_redigeren",
+    "teksten_schrijven",
+  ],
+  // ── Legacy DB-categorieën (back-compat) ──
   llm: [
     "teksten_schrijven",
     "samenvatten_redigeren",
@@ -230,7 +304,7 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
     "audio_genereren",
     "brainstormen",
   ],
-  code_assistant: [], // code_assistant gebruikt contexten i.p.v. use cases
+  code_assistant: [],
   rag: [
     "informatie_opzoeken",
     "samenvatten_redigeren",
