@@ -423,16 +423,20 @@ export function Step04Toolpicker({
         if (ctxRes.error) throw ctxRes.error;
 
         setCatalogTools(
-          (toolsRes.data ?? []).map((t) => {
-            const dbCat = t.category ?? "other";
-            return {
-              id: t.id,
-              name: t.name,
-              category: dbCat,
-              htmlCategory: htmlCategoryFor(t.name, dbCat),
-              vendor: t.vendor ?? null,
-            };
-          }),
+          (toolsRes.data ?? [])
+            .map((t) => {
+              const dbCat = t.category ?? "other";
+              const htmlCategory = htmlCategoryFor(t.name, dbCat);
+              if (!htmlCategory) return null; // niet in HTML-canon → niet tonen
+              return {
+                id: t.id,
+                name: t.name,
+                category: dbCat,
+                htmlCategory,
+                vendor: t.vendor ?? null,
+              };
+            })
+            .filter((t): t is NonNullable<typeof t> => t !== null),
         );
         setUseCases(
           (ucRes.data ?? [])
