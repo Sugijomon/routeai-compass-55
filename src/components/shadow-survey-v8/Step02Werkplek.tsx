@@ -77,7 +77,7 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
   const handleSubmit = async () => {
     if (isLoading || !selected) return;
     if (andersEmpty) {
-      setError("Vul je afdeling in");
+      setError("Vul je vakgebied in");
       return;
     }
     setIsLoading(true);
