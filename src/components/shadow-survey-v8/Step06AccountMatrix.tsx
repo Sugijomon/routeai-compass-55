@@ -429,18 +429,6 @@ export function Step06AccountMatrix({
                               >
                                 {tool.name}
                               </div>
-                              {subtitle && (
-                                <div
-                                  style={{
-                                    fontSize: 12,
-                                    color: "#40484e",
-                                    marginTop: 2,
-                                    lineHeight: 1.35,
-                                  }}
-                                >
-                                  {subtitle}
-                                </div>
-                              )}
                             </div>
                           </div>
                         </td>
