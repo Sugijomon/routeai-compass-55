@@ -471,8 +471,7 @@ export function Step04Toolpicker({
   // Afgeleide waarden
   // ──────────────────────────────────────────────────────────────────────────
   const filteredCatalog = useMemo(() => {
-    if (activeCategory === "all") return catalogTools;
-    // Filteren op canonieke HTML-categorie (UI-only).
+    // Filteren op canonieke HTML-categorie (UI-only). Geen "Alles"-modus.
     return catalogTools.filter((t) => t.htmlCategory === activeCategory);
   }, [catalogTools, activeCategory]);
 
