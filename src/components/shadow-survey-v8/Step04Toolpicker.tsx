@@ -398,7 +398,7 @@ export function Step04Toolpicker({
 
   // UI-state
   const [workspace, setWorkspace] = useState<WorkspaceTool[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("algemene_ai");
   const [modalToolLocalId, setModalToolLocalId] = useState<string | null>(null);
   const [modalSelections, setModalSelections] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState("");
