@@ -954,12 +954,16 @@ export function Step04Toolpicker({
             </div>
 
             {/* Tool-lijst */}
+            {/* paddingTop voorkomt dat de hover-lift (translateY(-1px)) en
+                schaduw van het eerste tool-item door overflow-y wordt afgekapt. */}
             <div
               className="space-y-2"
               style={{
-                maxHeight: 350,
+                maxHeight: 358,
                 overflowY: "auto",
                 paddingRight: 4,
+                paddingTop: 8,
+                paddingBottom: 8,
               }}
             >
               {refsLoading && (
