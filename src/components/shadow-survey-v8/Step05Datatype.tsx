@@ -430,44 +430,6 @@ export function Step05Datatype({
                         {opt.label}
                       </span>
 
-                      {isSelected && opt.risk === "mid" && (
-                        <div
-                          style={{
-                            marginTop: 8,
-                            padding: "10px 12px",
-                            borderRadius: "0.75rem",
-                            fontSize: 12,
-                            fontWeight: 500,
-                            lineHeight: 1.5,
-                            background: "#e0f2fe",
-                            color: "#0c4a6e",
-                            border: "1px solid #bae6fd",
-                            animation: "step05TipIn .22s ease both",
-                          }}
-                        >
-                          Let op: overweeg of dit echt nodig is voor je taak.
-                        </div>
-                      )}
-
-                      {isSelected && opt.risk === "high" && (
-                        <div
-                          style={{
-                            marginTop: 8,
-                            padding: "10px 12px",
-                            borderRadius: "0.75rem",
-                            fontSize: 12,
-                            fontWeight: 500,
-                            lineHeight: 1.5,
-                            background: "#dbeafe",
-                            color: "#1e3a5f",
-                            border: "1px solid #93c5fd",
-                            animation: "step05TipIn .22s ease both",
-                          }}
-                        >
-                          Hoog risico: gebruik bij voorkeur een zakelijk account of
-                          geanonimiseerde versie.
-                        </div>
-                      )}
                     </div>
                   </button>
                 );

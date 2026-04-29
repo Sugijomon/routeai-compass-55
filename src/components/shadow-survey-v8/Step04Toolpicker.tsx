@@ -94,12 +94,87 @@ const EXCLUDED_USE_CASE_CODES = new Set<string>([
   "taken_automatisch_afhandelen",
 ]);
 
+// Per-categorie allowlist van toepassingen die in de modal mogen verschijnen.
+// Beperkt de keuzes tot wat voor die toolsoort logisch is.
+const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
+  llm: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "informatie_opzoeken",
+    "vertalen",
+    "klantenservice",
+    "vergaderingen_notuleren",
+  ],
+  image_gen: [
+    "afbeeldingen_genereren",
+    "presentaties_design",
+    "video_genereren",
+    "audio_genereren",
+    "brainstormen",
+  ],
+  code_assistant: [], // code_assistant gebruikt contexten i.p.v. use cases
+  rag: [
+    "informatie_opzoeken",
+    "samenvatten_redigeren",
+    "data_analyseren",
+  ],
+  analytics: [
+    "data_analyseren",
+    "informatie_opzoeken",
+    "presentaties_design",
+  ],
+  other: [
+    "vergaderingen_notuleren",
+    "samenvatten_redigeren",
+    "vertalen",
+    "teksten_schrijven",
+  ],
+  custom: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "informatie_opzoeken",
+    "vertalen",
+    "data_analyseren",
+    "afbeeldingen_genereren",
+    "presentaties_design",
+    "vergaderingen_notuleren",
+    "klantenservice",
+  ],
+};
+
+// Tool-naam → material-symbol icon. Vervangt de generieke categorie-icon
+// wanneer een specifiekere keuze beter past. Match is case-insensitive op
+// substring van de toolnaam.
+const TOOL_ICON_BY_NAME: Array<{ match: RegExp; icon: string }> = [
+  { match: /chatgpt|openai/i, icon: "smart_toy" },
+  { match: /claude|anthropic/i, icon: "psychology" },
+  { match: /gemini|bard/i, icon: "auto_awesome" },
+  { match: /copilot/i, icon: "assistant" },
+  { match: /notion/i, icon: "edit_note" },
+  { match: /grammarly/i, icon: "spellcheck" },
+  { match: /perplexity|you\.com/i, icon: "search" },
+  { match: /midjourney|dall-?e|firefly|stable/i, icon: "image" },
+  { match: /github|cursor|tabnine/i, icon: "code" },
+  { match: /deepl/i, icon: "translate" },
+  { match: /otter|fireflies|read\.ai/i, icon: "graphic_eq" },
+  { match: /julius|excel/i, icon: "analytics" },
+];
+
 function isCodeCategory(code: string) {
   return CODE_CATEGORIES.has(code);
 }
 
 function iconFor(category: string) {
   return CATEGORY_ICON[category] ?? CATEGORY_ICON.other;
+}
+
+function iconForTool(name: string, category: string): string {
+  for (const entry of TOOL_ICON_BY_NAME) {
+    if (entry.match.test(name)) return entry.icon;
+  }
+  return iconFor(category);
 }
 
 // ============================================================================
@@ -243,7 +318,7 @@ export function Step04Toolpicker({
       toolCode: tool.id,
       toolName: tool.name,
       categoryCode: tool.category,
-      icon: iconFor(tool.category),
+      icon: iconForTool(tool.name, tool.category),
       isCustom: false,
       isCodeTool: isCodeCategory(tool.category),
       selections: [],
@@ -364,7 +439,15 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const modalChips: RefOption[] = useMemo(() => {
     if (!modalTool) return [];
-    return modalTool.isCodeTool ? contexts : useCases;
+    if (modalTool.isCodeTool) return contexts;
+    const allow = USE_CASES_PER_CATEGORY[modalTool.categoryCode];
+    if (!allow || allow.length === 0) return useCases;
+    const allowSet = new Set(allow);
+    // Behoud volgorde van de allowlist zodat de modal voorspelbaar oogt.
+    const byCode = new Map(useCases.map((u) => [u.code, u]));
+    return allow
+      .map((code) => byCode.get(code))
+      .filter((u): u is RefOption => !!u && allowSet.has(u.code));
   }, [modalTool, contexts, useCases]);
 
   return (
@@ -603,7 +686,7 @@ export function Step04Toolpicker({
                         style={{ background: "#f1f4f6" }}
                       >
                         <Icon
-                          name={iconFor(tool.category)}
+                          name={iconForTool(tool.name, tool.category)}
                           style={{ fontSize: 18, color: "#00658b" }}
                         />
                       </div>

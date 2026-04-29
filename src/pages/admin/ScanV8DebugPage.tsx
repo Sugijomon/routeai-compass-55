@@ -25,23 +25,34 @@ type RunReport = {
   toolCount: number;
   toolAccountCount: number;
   dataTypeCount: number;
-  hasMotivations: boolean;
-  hasConcerns: boolean;
-  hasSupport: boolean;
-  hasProfile: boolean;
-  hasPreferenceReasons: boolean;
   toolUseCaseCount: number;
+  motivationCount: number;
+  motivationCodes: string[];
+  concernCount: number;
+  concernCodes: string[];
+  supportCount: number;
+  supportCodes: string[];
+  prefReasonCount: number;
+  prefReasonCodes: string[];
+  hasProfile: boolean;
   missing: string[];
 };
+
+function first<T>(rows: T[] | null | undefined, n = 3): T[] {
+  return (rows ?? []).slice(0, n);
+}
 
 async function buildReport(run: RunRow): Promise<RunReport> {
   const runId = run.id;
 
+  // We halen daadwerkelijke rijen op (geen head:true count). Dat is
+  // robuuster: count + sample codes uit dezelfde response, en geen
+  // verwarring over of de count via HEAD wel terugkomt.
   const [
     profileRes,
     toolRes,
     toolUseCaseRes,
-    toolAccountCountRes,
+    toolAccountRes,
     dataTypeRes,
     motivationRes,
     prefReasonRes,
@@ -55,39 +66,35 @@ async function buildReport(run: RunRow): Promise<RunReport> {
       .maybeSingle(),
     supabase
       .from("survey_tool")
-      .select("id", { count: "exact" })
+      .select("id")
       .eq("survey_run_id", runId),
-    // use_case telt via join: survey_tool_use_case heeft survey_tool_id, niet survey_run_id
     supabase
       .from("survey_tool_use_case")
-      .select("id, survey_tool!inner(survey_run_id)", { count: "exact", head: true })
+      .select("id, survey_tool!inner(survey_run_id)")
       .eq("survey_tool.survey_run_id", runId),
     supabase
       .from("survey_tool_account")
-      .select("survey_tool_id, survey_tool!inner(survey_run_id)", {
-        count: "exact",
-        head: true,
-      })
+      .select("survey_tool_id, survey_tool!inner(survey_run_id)")
       .eq("survey_tool.survey_run_id", runId),
     supabase
       .from("survey_data_type")
-      .select("id", { count: "exact", head: true })
+      .select("data_type_code")
       .eq("survey_run_id", runId),
     supabase
       .from("survey_motivation")
-      .select("id", { count: "exact", head: true })
+      .select("motivation_code")
       .eq("survey_run_id", runId),
     supabase
       .from("survey_tool_preference_reason")
-      .select("id", { count: "exact", head: true })
+      .select("preference_reason_code")
       .eq("survey_run_id", runId),
     supabase
       .from("survey_top_concern")
-      .select("id", { count: "exact", head: true })
+      .select("top_concern_code")
       .eq("survey_run_id", runId),
     supabase
       .from("survey_support_need")
-      .select("id", { count: "exact", head: true })
+      .select("support_need_code")
       .eq("survey_run_id", runId),
   ]);
 
@@ -96,14 +103,33 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     profile?.department_other_text || profile?.department_code || null;
   const frequency = profile?.ai_frequency_code ?? null;
 
-  const toolCount = toolRes.count ?? 0;
-  const toolUseCaseCount = toolUseCaseRes.count ?? 0;
-  const toolAccountCount = toolAccountCountRes.count ?? 0;
-  const dataTypeCount = dataTypeRes.count ?? 0;
-  const motivationCount = motivationRes.count ?? 0;
-  const prefReasonCount = prefReasonRes.count ?? 0;
-  const concernCount = concernRes.count ?? 0;
-  const supportCount = supportRes.count ?? 0;
+  const toolCount = (toolRes.data ?? []).length;
+  const toolUseCaseCount = (toolUseCaseRes.data ?? []).length;
+  const toolAccountCount = (toolAccountRes.data ?? []).length;
+  const dataTypeCount = (dataTypeRes.data ?? []).length;
+
+  const motivationRows = motivationRes.data ?? [];
+  const concernRows = concernRes.data ?? [];
+  const supportRows = supportRes.data ?? [];
+  const prefReasonRows = prefReasonRes.data ?? [];
+
+  const motivationCount = motivationRows.length;
+  const concernCount = concernRows.length;
+  const supportCount = supportRows.length;
+  const prefReasonCount = prefReasonRows.length;
+
+  const motivationCodes = first(motivationRows).map(
+    (r) => (r as { motivation_code: string }).motivation_code,
+  );
+  const concernCodes = first(concernRows).map(
+    (r) => (r as { top_concern_code: string }).top_concern_code,
+  );
+  const supportCodes = first(supportRows).map(
+    (r) => (r as { support_need_code: string }).support_need_code,
+  );
+  const prefReasonCodes = first(prefReasonRows).map(
+    (r) => (r as { preference_reason_code: string }).preference_reason_code,
+  );
 
   const missing: string[] = [];
   if (!profile) missing.push("survey_profile ontbreekt");
@@ -129,16 +155,27 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     toolUseCaseCount,
     toolAccountCount,
     dataTypeCount,
-    hasMotivations: motivationCount > 0,
-    hasConcerns: concernCount > 0,
-    hasSupport: supportCount > 0,
+    motivationCount,
+    motivationCodes,
+    concernCount,
+    concernCodes,
+    supportCount,
+    supportCodes,
+    prefReasonCount,
+    prefReasonCodes,
     hasProfile: !!profile,
-    hasPreferenceReasons: prefReasonCount > 0,
     missing,
   };
 }
 
 type OrgRow = { id: string; name: string };
+
+type CatalogSourceInfo = {
+  table: string;
+  filter: string;
+  count: number | null;
+  error: string | null;
+};
 
 export default function ScanV8DebugPage() {
   const [loading, setLoading] = useState(true);
@@ -148,6 +185,9 @@ export default function ScanV8DebugPage() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [catalogSource, setCatalogSource] = useState<CatalogSourceInfo | null>(
+    null,
+  );
 
   useEffect(() => {
     (async () => {
@@ -162,6 +202,26 @@ export default function ScanV8DebugPage() {
       const preferred =
         list.find((o) => /test/i.test(o.name)) ?? list[0] ?? null;
       if (preferred) setSelectedOrgId(preferred.id);
+    })();
+  }, []);
+
+  // Catalogus-bronregel: laat zien waar Step04Toolpicker zijn tools vandaan
+  // haalt zodat we direct kunnen zien of het echte platform-catalogus is en
+  // niet een vereenvoudigde fallback.
+  useEffect(() => {
+    (async () => {
+      const { data, count, error: cErr } = await supabase
+        .from("tools_library")
+        .select("id", { count: "exact", head: false })
+        .eq("status", "published")
+        .is("org_id", null)
+        .limit(1);
+      setCatalogSource({
+        table: "tools_library",
+        filter: "status=published AND org_id IS NULL",
+        count: typeof count === "number" ? count : 0,
+        error: cErr ? cErr.message : null,
+      });
     })();
   }, []);
 
@@ -227,6 +287,36 @@ export default function ScanV8DebugPage() {
         zijn gevuld. Geen scoring, geen risico-classificatie. Alleen bouw- en
         datacontrole.
       </p>
+
+      {/* Catalogusbron — laat zien uit welke tabel Step04Toolpicker laadt. */}
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #cbd5e1",
+          borderRadius: 6,
+          padding: "8px 12px",
+          marginBottom: 12,
+          fontSize: 12,
+          color: "#334155",
+        }}
+      >
+        <strong>Toolcatalogus-bron:</strong>{" "}
+        {catalogSource ? (
+          catalogSource.error ? (
+            <span style={{ color: "#b91c1c" }}>
+              fout bij laden ({catalogSource.error})
+            </span>
+          ) : (
+            <>
+              <code>{catalogSource.table}</code> ·{" "}
+              <code>{catalogSource.filter}</code> ·{" "}
+              <strong>{catalogSource.count ?? "?"}</strong> tools beschikbaar
+            </>
+          )
+        ) : (
+          "laden…"
+        )}
+      </div>
 
       {/* Tijdelijk: actieve survey-uitnodigingslink voor smoke test */}
       <div
@@ -392,10 +482,10 @@ export default function ScanV8DebugPage() {
                         )}
                       </td>
                       <td style={td}>{r.dataTypeCount}</td>
-                      <td style={td}>{badge(r.hasMotivations)}</td>
-                      <td style={td}>{badge(r.hasConcerns)}</td>
-                      <td style={td}>{badge(r.hasSupport)}</td>
-                      <td style={td}>{badge(r.hasPreferenceReasons)}</td>
+                      <td style={td}>{countCell(r.motivationCount, r.motivationCodes)}</td>
+                      <td style={td}>{countCell(r.concernCount, r.concernCodes)}</td>
+                      <td style={td}>{countCell(r.supportCount, r.supportCodes)}</td>
+                      <td style={td}>{countCell(r.prefReasonCount, r.prefReasonCodes)}</td>
                       <td style={td}>
                         {r.missing.length === 0 ? (
                           <span style={{ color: "#0a0" }}>✓ compleet</span>
@@ -429,10 +519,19 @@ const td: React.CSSProperties = {
   verticalAlign: "top",
 };
 
-function badge(ok: boolean) {
-  return ok ? (
-    <span style={{ color: "#0a0" }}>ja</span>
-  ) : (
-    <span style={{ color: "#c00" }}>nee</span>
+function countCell(count: number, sample: string[]) {
+  if (count === 0) {
+    return <span style={{ color: "#c00" }}>0</span>;
+  }
+  return (
+    <span style={{ color: "#0a0" }}>
+      {count}
+      {sample.length > 0 && (
+        <span style={{ color: "#666", fontSize: 10, marginLeft: 4 }}>
+          ({sample.join(", ")}
+          {count > sample.length ? "…" : ""})
+        </span>
+      )}
+    </span>
   );
 }
