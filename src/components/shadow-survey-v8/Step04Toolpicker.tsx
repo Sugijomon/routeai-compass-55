@@ -115,39 +115,38 @@ const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
 // vallen terug op DB-categorie via DB_TO_HTML_FALLBACK hieronder.
 // ──────────────────────────────────────────────────────────────────────────
 const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
-  // algemene_ai
-  "chatgpt": "algemene_ai",
-  "chatgpt enterprise": "algemene_ai",
-  "claude": "algemene_ai",
-  "google gemini": "algemene_ai",
-  "gemini": "algemene_ai",
-  "microsoft copilot": "algemene_ai",
-  "notebooklm": "algemene_ai",
-  "perplexity": "algemene_ai",
-  "perplexity ai": "algemene_ai",
-  "deepseek": "algemene_ai",
-  "mistral le chat": "algemene_ai",
-  // agentic_ai
-  "perplexity computer": "agentic_ai",
-  "claude cowork": "agentic_ai",
-  // schrijven
-  "grammarly": "schrijven",
-  "jasper": "schrijven",
-  "copy.ai": "schrijven",
-  "notion ai": "schrijven",
-  // presentaties
-  "gamma": "presentaties",
-  "canva ai": "presentaties",
-  "google stitch": "presentaties",
-  "adobe firefly": "presentaties",
-  // beeld_video
-  "midjourney": "beeld_video",
-  "dall-e": "beeld_video",
-  "dall-e 3": "beeld_video",
-  "stable diffusion": "beeld_video",
-  "runway": "beeld_video",
-  "synthesia": "beeld_video",
-  "nano banana pro": "beeld_video",
+  // tekst_chat — algemene chat/LLM + schrijfassistenten
+  "chatgpt": "tekst_chat",
+  "chatgpt enterprise": "tekst_chat",
+  "claude": "tekst_chat",
+  "google gemini": "tekst_chat",
+  "gemini": "tekst_chat",
+  "microsoft copilot": "tekst_chat",
+  "notebooklm": "tekst_chat",
+  "deepseek": "tekst_chat",
+  "mistral le chat": "tekst_chat",
+  "grammarly": "tekst_chat",
+  "jasper": "tekst_chat",
+  "copy.ai": "tekst_chat",
+  "notion ai": "tekst_chat",
+  "deepl": "tekst_chat",
+  // zoeken_rag — search + RAG
+  "perplexity": "zoeken_rag",
+  "perplexity ai": "zoeken_rag",
+  "chatgpt search": "zoeken_rag",
+  "you.com": "zoeken_rag",
+  // beeld — image/video/presentatie generatie
+  "midjourney": "beeld",
+  "dall-e": "beeld",
+  "dall-e 3": "beeld",
+  "stable diffusion": "beeld",
+  "runway": "beeld",
+  "synthesia": "beeld",
+  "nano banana pro": "beeld",
+  "adobe firefly": "beeld",
+  "gamma": "beeld",
+  "canva ai": "beeld",
+  "google stitch": "beeld",
   // audio_spraak
   "elevenlabs": "audio_spraak",
   "murf ai": "audio_spraak",
@@ -164,40 +163,36 @@ const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
   "cursor": "code",
   "claude code": "code",
   "tabnine": "code",
-  // data_auto
-  "julius ai": "data_auto",
-  "akkio": "data_auto",
-  "n8n": "data_auto",
-  "make": "data_auto",
-  "zapier ai": "data_auto",
-  "microsoft copilot for excel": "data_auto",
-  // werkplek
-  "m365 copilot": "werkplek",
-  "google workspace ai": "werkplek",
-  "salesforce einstein": "werkplek",
-  "hubspot ai": "werkplek",
+  // analyse
+  "julius ai": "analyse",
+  "akkio": "analyse",
+  "microsoft copilot for excel": "analyse",
+  // automatisering — agentic + workflow
+  "perplexity computer": "automatisering",
+  "claude cowork": "automatisering",
+  "n8n": "automatisering",
+  "make": "automatisering",
+  "zapier ai": "automatisering",
   // crm_klant
   "hubspot": "crm_klant",
+  "hubspot ai": "crm_klant",
   "salesforce": "crm_klant",
+  "salesforce einstein": "crm_klant",
   "pipedrive ai": "crm_klant",
   "monday.com ai": "crm_klant",
-  // overige in DB die geen 1-op-1 HTML-equivalent hebben:
-  // "chatgpt search" → algemene_ai (zoekvariant van ChatGPT)
-  "chatgpt search": "algemene_ai",
-  // "you.com" → algemene_ai (chat + zoek)
-  "you.com": "algemene_ai",
-  // "deepl" → schrijven (vertaal-tool, dichtst bij schrijven; agentic past niet)
-  "deepl": "schrijven",
+  // werkplek_embedded — Office/Workspace embedded AI
+  "m365 copilot": "werkplek_embedded",
+  "google workspace ai": "werkplek_embedded",
 };
 
 // Fallback: DB-categorie → HTML-categorie wanneer naam-mapping faalt.
 const DB_TO_HTML_FALLBACK: Record<string, string> = {
-  llm: "algemene_ai",
-  image_gen: "beeld_video",
+  llm: "tekst_chat",
+  image_gen: "beeld",
   code_assistant: "code",
-  rag: "algemene_ai",
-  analytics: "data_auto",
-  other: "werkplek",
+  rag: "zoeken_rag",
+  analytics: "analyse",
+  other: "overig",
 };
 
 function htmlCategoryFor(name: string, dbCategory: string): string {
