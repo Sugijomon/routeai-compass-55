@@ -33,6 +33,10 @@ export default function ShadowSurveyV8Page() {
   const [surveyRunId, setSurveyRunId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [savedToolIds, setSavedToolIds] = useState<string[]>([]);
+  // Onthoudt of we via het exitpad (geen AI-gebruik) bij stap 8 zijn beland.
+  // Bepaalt de back-route van Step08 (terug naar 3 i.p.v. 7) en past de
+  // copy van Step08 aan zodat geen AI-gebruik wordt verondersteld.
+  const [isExitPath, setIsExitPath] = useState(false);
 
   // Reset scroll bij elke step-wissel — nieuwe schermen moeten altijd
   // bovenaan starten in plaats van de scrollpositie van het vorige scherm
@@ -98,14 +102,21 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
-  // Stap 3: Gebruik & frequentie (kan vertakken naar exitpad → stap 9)
+  // Stap 3: Gebruik & frequentie (kan vertakken naar exitpad → stap 8 → 9).
+  // Toolafhankelijke stappen 4–7 worden overgeslagen voor non-users.
   if (currentStep === 3) {
     return (
       <Step03Frequentie
         surveyRunId={surveyRunId}
-        onContinue={() => setCurrentStep(4)}
+        onContinue={() => {
+          setIsExitPath(false);
+          setCurrentStep(4);
+        }}
         onBack={() => setCurrentStep(2)}
-        onExit={() => setCurrentStep(9)}
+        onExit={() => {
+          setIsExitPath(true);
+          setCurrentStep(8);
+        }}
       />
     );
   }
@@ -169,13 +180,14 @@ export default function ShadowSurveyV8Page() {
     );
   }
 
-  // Stap 8: Toekomst & ambities
+  // Stap 8: Toekomst & ambities (gedeeld eindpunt voor normaal én exitpad).
   if (currentStep === 8) {
     return (
       <Step08Toekomst
         surveyRunId={surveyRunId}
+        isExitPath={isExitPath}
         onContinue={() => setCurrentStep(9)}
-        onBack={() => setCurrentStep(7)}
+        onBack={() => setCurrentStep(isExitPath ? 3 : 7)}
       />
     );
   }
