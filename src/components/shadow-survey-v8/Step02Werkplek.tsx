@@ -195,15 +195,15 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
                 lineHeight: 1.25,
               }}
             >
-              Op welke afdeling werk je voornamelijk?
+              Binnen welk vakgebied ben je voornamelijk actief?
             </h2>
             <p className="mt-2 text-sm" style={{ color: "#40484e" }}>
-              Dit helpt ons om de behoeften per domein beter te begrijpen. Je antwoord blijft anoniem.
+              Kies het domein dat het beste aansluit bij jouw rol of expertise, ook als je in wisselende projectteams werkt.
             </p>
           </div>
 
           {/* Keuzekaarten */}
-          <div role="radiogroup" aria-label="Selecteer je afdeling">
+          <div role="radiogroup" aria-label="Selecteer je vakgebied">
             {DEPARTMENTS.map((opt) => {
               const isSelected = selected === opt.code;
               return (
