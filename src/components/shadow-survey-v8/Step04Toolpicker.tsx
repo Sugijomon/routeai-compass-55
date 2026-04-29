@@ -953,9 +953,11 @@ export function Step04Toolpicker({
                         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
                         style={{ background: "#f1f4f6" }}
                       >
-                        <Icon
-                          name={iconForTool(tool.name, tool.htmlCategory)}
-                          style={{ fontSize: 18, color: "#00658b" }}
+                        <ToolLogo
+                          logoUrl={logoUrlFor(tool.name)}
+                          iconName={iconForTool(tool.name, tool.htmlCategory)}
+                          size={18}
+                          alt={`${tool.name} logo`}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
