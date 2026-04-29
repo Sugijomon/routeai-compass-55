@@ -131,7 +131,7 @@ export function Step09Afronding({
     }
   }
 
-  function handleClose() {
+  function performClose() {
     try {
       window.close();
     } catch {
@@ -141,6 +141,29 @@ export function Step09Afronding({
     setTimeout(() => {
       setShowCloseHint(true);
     }, 300);
+  }
+
+  function handleClose() {
+    if (hasUnsavedEmail) {
+      setShowCloseConfirm(true);
+      return;
+    }
+    performClose();
+  }
+
+  async function handleConfirmSaveAndClose() {
+    await handleEmailSave();
+    // Alleen sluiten als opslaan succesvol was (emailSaved wordt sync gezet).
+    // We checken state via een kleine vertraging om re-render mee te nemen.
+    setTimeout(() => {
+      setShowCloseConfirm(false);
+      performClose();
+    }, 50);
+  }
+
+  function handleConfirmDiscardAndClose() {
+    setShowCloseConfirm(false);
+    performClose();
   }
 
   return (
