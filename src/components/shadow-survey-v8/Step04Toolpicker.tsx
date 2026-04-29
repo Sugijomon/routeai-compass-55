@@ -22,6 +22,12 @@ import {
   saveToolUseCaseContext,
 } from "@/lib/shadowSurveyEngineV8";
 import { SurveyProgressBar } from "./SurveyProgressBar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // ============================================================================
 // Types
