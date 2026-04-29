@@ -390,7 +390,6 @@ export function Step06AccountMatrix({
                 ) : (
                   tools.map((tool, idx) => {
                     const isLast = idx === tools.length - 1;
-                    const subtitle = tool.useCaseLabels.join(", ");
                     return (
                       <tr
                         key={tool.id}
