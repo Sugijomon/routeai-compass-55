@@ -115,7 +115,7 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
           </div>
         )}
 
-        <div className="mx-auto mb-10 max-w-3xl text-center">
+        <div className="mx-auto mb-10 max-w-3xl text-center pt-2">
           <h1
             className="mb-5 text-4xl md:text-5xl lg:text-6xl"
             style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, color: "#00658b", lineHeight: 1.1 }}
