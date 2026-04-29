@@ -31,6 +31,9 @@ interface Step08ToekomstProps {
   surveyRunId: string;
   onContinue: () => void;
   onBack: () => void;
+  /** True wanneer respondent via stap 3 'geen AI-gebruik' hier is geland.
+   * In dat geval verbergen we tekst die AI-gebruik veronderstelt. */
+  isExitPath?: boolean;
 }
 
 // ============================================================================
@@ -241,6 +244,7 @@ export function Step08Toekomst({
   surveyRunId,
   onContinue,
   onBack,
+  isExitPath = false,
 }: Step08ToekomstProps) {
   const [zorgen, setZorgen] = useState<string | null>(null);
   const [andersZorgenText, setAndersZorgenText] = useState("");
