@@ -31,6 +31,9 @@ interface Step08ToekomstProps {
   surveyRunId: string;
   onContinue: () => void;
   onBack: () => void;
+  /** True wanneer respondent via stap 3 'geen AI-gebruik' hier is geland.
+   * In dat geval verbergen we tekst die AI-gebruik veronderstelt. */
+  isExitPath?: boolean;
 }
 
 // ============================================================================
@@ -241,6 +244,7 @@ export function Step08Toekomst({
   surveyRunId,
   onContinue,
   onBack,
+  isExitPath = false,
 }: Step08ToekomstProps) {
   const [zorgen, setZorgen] = useState<string | null>(null);
   const [andersZorgenText, setAndersZorgenText] = useState("");
@@ -349,7 +353,9 @@ export function Step08Toekomst({
                 marginBottom: "0.45rem",
               }}
             >
-              Wat is jouw grootste zorg bij AI-tools op het werk?
+              {isExitPath
+                ? "Wat is jouw grootste zorg of drempel als het om AI-tools op het werk gaat?"
+                : "Wat is jouw grootste zorg bij AI-tools op het werk?"}
             </h3>
             <p
               style={{
@@ -511,7 +517,9 @@ export function Step08Toekomst({
                 marginBottom: "0.45rem",
               }}
             >
-              Hoe kunnen we je het beste ondersteunen?
+              {isExitPath
+                ? "Hoe kunnen we je het beste op weg helpen?"
+                : "Hoe kunnen we je het beste ondersteunen?"}
             </h3>
             <p
               style={{
@@ -521,8 +529,9 @@ export function Step08Toekomst({
                 marginBottom: "0.75rem",
               }}
             >
-              Wat heb jij nodig om AI op een veilige en effectieve manier in te
-              zetten voor je werk?
+              {isExitPath
+                ? "Wat zou jou helpen om — als dat past bij je werk — straks wél met AI aan de slag te kunnen?"
+                : "Wat heb jij nodig om AI op een veilige en effectieve manier in te zetten voor je werk?"}
             </p>
             <span
               style={{
