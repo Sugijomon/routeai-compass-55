@@ -1267,7 +1267,7 @@ export function Step04Toolpicker({
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
                 style={{ background: "#f1f4f6" }}
               >
-                <Icon name={modalTool.icon} style={{ fontSize: 22, color: "#00658b" }} />
+                <ToolLogo logoUrl={modalTool.logoUrl} iconName={modalTool.icon} size={22} alt={`${modalTool.toolName} logo`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div
