@@ -57,6 +57,12 @@ export function Step09Afronding({
   const [neeSaving, setNeeSaving] = useState(false);
   const [neeError, setNeeError] = useState<string | null>(null);
   const [showCloseHint, setShowCloseHint] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
+  // Heeft de respondent ingetypt e-mail dat nog niet is opgeslagen?
+  const hasUnsavedEmail =
+    ambassadorChoice === "ja" && emailInput.trim().length > 0 && !emailSaved;
+  const emailValid = isValidEmail(emailInput);
 
   // Bij mount: zet completed_at en ruim sessionStorage op.
   useEffect(() => {
