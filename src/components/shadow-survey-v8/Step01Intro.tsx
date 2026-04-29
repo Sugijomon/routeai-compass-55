@@ -115,29 +115,31 @@ export function Step01Intro({ orgId, waveId, waveClosesAt, onStart }: Step01Intr
           </div>
         )}
 
-        <h1
-          className="mb-5 text-3xl md:text-5xl"
-          style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, color: "#00658b", lineHeight: 1.1 }}
-        >
-          Breng{" "}
-          <span
-            style={{
-              background: "linear-gradient(to right, #00658b, #396379)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <h1
+            className="mb-5 text-4xl md:text-5xl lg:text-6xl"
+            style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, color: "#00658b", lineHeight: 1.1 }}
           >
-            jouw AI-gebruik
-          </span>{" "}
-          veilig in kaart
-        </h1>
+            Breng{" "}
+            <span
+              style={{
+                background: "linear-gradient(to right, #00658b, #396379)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              jouw AI-gebruik
+            </span>{" "}
+            veilig in kaart
+          </h1>
 
-        <p className="mb-10 max-w-xl text-base md:text-lg" style={{ color: "#40484e", lineHeight: 1.6 }}>
-          AI-tools bieden enorme kansen, maar brengen ook vragen met zich mee over dataveiligheid.
-          Met deze korte scan inventariseren we welke tools we binnen de organisatie gebruiken.
-          Jouw input helpt ons om de juiste, veilige faciliteiten en licenties voor je te regelen.
-        </p>
+          <p className="mx-auto max-w-3xl text-base md:text-lg" style={{ color: "#40484e", lineHeight: 1.6 }}>
+            AI-tools bieden enorme kansen, maar brengen ook vragen met zich mee over dataveiligheid.
+            Met deze korte scan inventariseren we welke tools we binnen de organisatie gebruiken.
+            Jouw input helpt ons om de juiste, veilige faciliteiten en licenties voor je te regelen.
+          </p>
+        </div>
 
         {/* Drie kaarten */}
         <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-3">
