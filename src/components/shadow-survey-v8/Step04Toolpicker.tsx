@@ -63,10 +63,9 @@ interface WorkspaceTool {
 // ============================================================================
 
 // Tabs op basis van canonieke HTML/JSON-categorieën (UI-only).
-// 11 canonieke categorieën + "Alles" — exact in volgorde en met labels uit
-// screen-04-toolpicker-fixed.html. "Alles" is alleen UI, geen DB-categorie.
+// Exact 11 canonieke categorieën uit screen-04-toolpicker-fixed.html,
+// in deze volgorde. Geen "Alles"-tab — respondent kiest altijd één categorie.
 const CATEGORY_TABS: Array<{ code: string; label: string }> = [
-  { code: "all", label: "Alles" },
   { code: "algemene_ai", label: "Algemene AI" },
   { code: "agentic_ai", label: "Agentic AI" },
   { code: "schrijven", label: "Schrijven" },
@@ -399,7 +398,7 @@ export function Step04Toolpicker({
 
   // UI-state
   const [workspace, setWorkspace] = useState<WorkspaceTool[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("algemene_ai");
   const [modalToolLocalId, setModalToolLocalId] = useState<string | null>(null);
   const [modalSelections, setModalSelections] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState("");
@@ -472,8 +471,7 @@ export function Step04Toolpicker({
   // Afgeleide waarden
   // ──────────────────────────────────────────────────────────────────────────
   const filteredCatalog = useMemo(() => {
-    if (activeCategory === "all") return catalogTools;
-    // Filteren op canonieke HTML-categorie (UI-only).
+    // Filteren op canonieke HTML-categorie (UI-only). Geen "Alles"-modus.
     return catalogTools.filter((t) => t.htmlCategory === activeCategory);
   }, [catalogTools, activeCategory]);
 
