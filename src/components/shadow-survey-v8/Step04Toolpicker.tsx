@@ -22,6 +22,12 @@ import {
   saveToolUseCaseContext,
 } from "@/lib/shadowSurveyEngineV8";
 import { SurveyProgressBar } from "./SurveyProgressBar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // ============================================================================
 // Types
@@ -106,6 +112,33 @@ const CATEGORY_ICON: Record<string, string> = {
 // Categorieën die als "code-tool" tellen (modal toont contexten i.p.v. use cases).
 // Zowel DB-categorie code_assistant als HTML-categorie 'code' triggeren dit.
 const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
+
+// Helptekst per context-chip (alleen code-tools). Verschijnt als tooltip bij
+// hover/focus op het i-icoon in de chip. Bron: screen-04-toolpicker-fixed.html.
+const CONTEXT_HELP: Record<string, string> = {
+  intern_gebruik:
+    "Software die alleen door collega's intern wordt gebruikt. Bijvoorbeeld interne tools, dashboards of scripts.",
+  klantgerichte_toepassing:
+    "Software die klanten of externen direct gebruiken. Bijvoorbeeld een chatbot, klantportaal of publieke webapp.",
+  externe_systemen:
+    "Software die koppelt met systemen buiten de organisatie, zoals API's van leveranciers of partners.",
+  kritieke_systemen:
+    "Software in processen waar uitval of fouten grote impact hebben (productie, betalingen, veiligheid).",
+  besluiten_over_personen:
+    "Code die meebepaalt over personen — bv. selectie, beoordeling, toegang of sortering van mensen.",
+  hr_evaluatie:
+    "Toepassingen rond werving, selectie, beoordeling of monitoring van medewerkers.",
+  financieel_juridisch:
+    "Software die financiële of juridische beslissingen ondersteunt of automatiseert.",
+  beslisondersteuning:
+    "Code die mensen helpt beslissen, maar de mens neemt het uiteindelijke besluit.",
+  menselijke_review_verplicht:
+    "Output van de software wordt altijd door een mens gecontroleerd vóór gebruik.",
+  autonome_uitvoering:
+    "Software die zelfstandig handelt of beslissingen uitvoert zonder menselijke tussenkomst.",
+  nog_niet_duidelijk:
+    "Weet je nog niet precies waarvoor de code wordt gebruikt? Kies dit en bespreek later met je DPO.",
+};
 
 // ──────────────────────────────────────────────────────────────────────────
 // HTML-categorie mapping per tool (canon uit tools.json + categories.json).
@@ -1298,15 +1331,98 @@ export function Step04Toolpicker({
 
             {/* Modal-body */}
             <div className="overflow-y-auto px-6 py-5" style={{ flex: 1 }}>
+              <div
+                className="mb-3 text-xs font-semibold uppercase tracking-wider"
+                style={{ color: "#6993aa" }}
+              >
+                {modalTool.isCodeTool
+                  ? "In welke context schrijf je code?"
+                  : "Waarvoor gebruik je deze tool?"}
+              </div>
+
+              <TooltipProvider delayDuration={150}>
+                <div className="flex flex-wrap gap-2.5">
+                  {modalChips.map((chip) => {
+                    const selected = modalSelections.includes(chip.code);
+                    const helpText = modalTool.isCodeTool
+                      ? CONTEXT_HELP[chip.code]
+                      : undefined;
+                    return (
+                      <div
+                        key={chip.code}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => toggleModalSelection(chip.code)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleModalSelection(chip.code);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 transition-all"
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 99,
+                          background: selected ? "#00658b" : "#f1f4f6",
+                          border: `1px solid ${selected ? "#00658b" : "#bfc7cf"}`,
+                          color: selected ? "#fff" : "#40484e",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        <Icon
+                          name={selected ? "check_circle" : "add_circle"}
+                          style={{ fontSize: 16 }}
+                        />
+                        <span>{chip.label}</span>
+                        {modalTool.isCodeTool && helpText && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                role="img"
+                                aria-label={`Uitleg: ${chip.label}`}
+                                tabIndex={0}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => e.stopPropagation()}
+                                className="ml-1 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full"
+                                style={{
+                                  background: selected
+                                    ? "rgba(255,255,255,0.25)"
+                                    : "rgba(0,101,139,0.1)",
+                                  color: selected ? "#fff" : "#00658b",
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                }}
+                              >
+                                i
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              className="max-w-[260px] text-xs leading-snug"
+                            >
+                              {helpText}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+
+              {/* Info box voor code-tools — onder de chips, vóór de AI-suggestie. */}
               {modalTool.isCodeTool && (
                 <div
-                  className="mb-5"
+                  className="mt-5"
                   style={{
-                    borderRadius: 24,
+                    borderRadius: 16,
                     border: "1px solid rgba(0,101,139,0.12)",
                     background:
                       "linear-gradient(180deg, rgba(241,244,246,0.95), rgba(235,238,240,0.95))",
-                    padding: "18px 20px",
+                    padding: "16px 18px",
                   }}
                 >
                   <div
@@ -1321,63 +1437,11 @@ export function Step04Toolpicker({
                   </div>
                   <p className="text-xs" style={{ color: "#40484e", lineHeight: 1.55 }}>
                     Deze tools helpen bij het schrijven van code. Het risico zit niet in de
-                    tool zelf, maar in wat je ermee bouwt.
+                    tool zelf, maar in wat je ermee bouwt. Kies de categorie die het beste past
+                    bij de uiteindelijke toepassing.
                   </p>
                 </div>
               )}
-
-              <div
-                className="mb-3 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#6993aa" }}
-              >
-                Waarvoor gebruik je deze tool?
-              </div>
-
-              <div className="flex flex-wrap gap-2.5">
-                {modalChips.map((chip) => {
-                  const selected = modalSelections.includes(chip.code);
-                  return (
-                    <button
-                      key={chip.code}
-                      type="button"
-                      onClick={() => toggleModalSelection(chip.code)}
-                      className="inline-flex items-center gap-1.5 transition-all"
-                      title={modalTool.isCodeTool ? chip.label : undefined}
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: 99,
-                        background: selected ? "#00658b" : "#f1f4f6",
-                        border: `1px solid ${selected ? "#00658b" : "#bfc7cf"}`,
-                        color: selected ? "#fff" : "#40484e",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Icon
-                        name={selected ? "check_circle" : "add_circle"}
-                        style={{ fontSize: 16 }}
-                      />
-                      <span>{chip.label}</span>
-                      {modalTool.isCodeTool && (
-                        <span
-                          className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full"
-                          style={{
-                            background: selected
-                              ? "rgba(255,255,255,0.25)"
-                              : "rgba(0,101,139,0.1)",
-                            color: selected ? "#fff" : "#00658b",
-                            fontSize: 10,
-                          }}
-                          aria-hidden="true"
-                        >
-                          i
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
 
               {/* AI-suggestie (visueel; nog niet functioneel in V8.1) */}
               <button
