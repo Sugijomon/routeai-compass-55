@@ -439,7 +439,15 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const modalChips: RefOption[] = useMemo(() => {
     if (!modalTool) return [];
-    return modalTool.isCodeTool ? contexts : useCases;
+    if (modalTool.isCodeTool) return contexts;
+    const allow = USE_CASES_PER_CATEGORY[modalTool.categoryCode];
+    if (!allow || allow.length === 0) return useCases;
+    const allowSet = new Set(allow);
+    // Behoud volgorde van de allowlist zodat de modal voorspelbaar oogt.
+    const byCode = new Map(useCases.map((u) => [u.code, u]));
+    return allow
+      .map((code) => byCode.get(code))
+      .filter((u): u is RefOption => !!u && allowSet.has(u.code));
   }, [modalTool, contexts, useCases]);
 
   return (
