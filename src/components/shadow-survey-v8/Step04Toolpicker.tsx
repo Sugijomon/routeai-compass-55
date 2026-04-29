@@ -63,35 +63,37 @@ interface WorkspaceTool {
 // ============================================================================
 
 // Tabs op basis van canonieke HTML/JSON-categorieën (UI-only).
-// 'all' = alle catalogus-tools. Volgorde komt uit categories.json.
+// 11 canonieke categorieën + "Alles" — altijd zichtbaar als chips boven de
+// catalogus. Een eventuele "Filters"-knop blijft secundair/mobile fallback en
+// vervangt deze tabs niet.
 const CATEGORY_TABS: Array<{ code: string; label: string }> = [
   { code: "all", label: "Alles" },
-  { code: "algemene_ai", label: "Algemene AI" },
-  { code: "agentic_ai", label: "Agentic AI" },
-  { code: "schrijven", label: "Schrijven" },
-  { code: "presentaties", label: "Presentaties" },
-  { code: "beeld_video", label: "Beeld & Video" },
-  { code: "audio_spraak", label: "Audio & Spraak" },
-  { code: "notulen", label: "Notulen" },
+  { code: "tekst_chat", label: "Tekst & chat" },
+  { code: "beeld", label: "Beeld" },
   { code: "code", label: "Code" },
-  { code: "data_auto", label: "Data & Auto" },
-  { code: "werkplek", label: "Werkplek" },
-  { code: "crm_klant", label: "CRM & Klant" },
+  { code: "zoeken_rag", label: "Zoeken & RAG" },
+  { code: "analyse", label: "Analyse" },
+  { code: "notulen", label: "Notulen" },
+  { code: "audio_spraak", label: "Audio & Spraak" },
+  { code: "automatisering", label: "Automatisering" },
+  { code: "crm_klant", label: "CRM/Klant" },
+  { code: "werkplek_embedded", label: "Werkplek/Embedded" },
+  { code: "overig", label: "Overig" },
 ];
 
 // Material-symbol per HTML-categorie (UI fallback).
 const CATEGORY_ICON: Record<string, string> = {
-  algemene_ai: "auto_awesome",
-  agentic_ai: "smart_toy",
-  schrijven: "edit_note",
-  presentaties: "slideshow",
-  beeld_video: "image",
-  audio_spraak: "record_voice_over",
-  notulen: "mic",
+  tekst_chat: "chat",
+  beeld: "image",
   code: "code",
-  data_auto: "analytics",
-  werkplek: "work",
+  zoeken_rag: "search",
+  analyse: "analytics",
+  notulen: "mic",
+  audio_spraak: "record_voice_over",
+  automatisering: "smart_toy",
   crm_klant: "hub",
+  werkplek_embedded: "work",
+  overig: "extension",
   // legacy DB-codes (fallback wanneer html_category onbekend is)
   llm: "chat",
   image_gen: "image",
