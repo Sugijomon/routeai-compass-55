@@ -57,6 +57,12 @@ export function Step09Afronding({
   const [neeSaving, setNeeSaving] = useState(false);
   const [neeError, setNeeError] = useState<string | null>(null);
   const [showCloseHint, setShowCloseHint] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
+  // Heeft de respondent ingetypt e-mail dat nog niet is opgeslagen?
+  const hasUnsavedEmail =
+    ambassadorChoice === "ja" && emailInput.trim().length > 0 && !emailSaved;
+  const emailValid = isValidEmail(emailInput);
 
   // Bij mount: zet completed_at en ruim sessionStorage op.
   useEffect(() => {
@@ -125,7 +131,7 @@ export function Step09Afronding({
     }
   }
 
-  function handleClose() {
+  function performClose() {
     try {
       window.close();
     } catch {
@@ -135,6 +141,29 @@ export function Step09Afronding({
     setTimeout(() => {
       setShowCloseHint(true);
     }, 300);
+  }
+
+  function handleClose() {
+    if (hasUnsavedEmail) {
+      setShowCloseConfirm(true);
+      return;
+    }
+    performClose();
+  }
+
+  async function handleConfirmSaveAndClose() {
+    await handleEmailSave();
+    // Alleen sluiten als opslaan succesvol was (emailSaved wordt sync gezet).
+    // We checken state via een kleine vertraging om re-render mee te nemen.
+    setTimeout(() => {
+      setShowCloseConfirm(false);
+      performClose();
+    }, 50);
+  }
+
+  function handleConfirmDiscardAndClose() {
+    setShowCloseConfirm(false);
+    performClose();
   }
 
   return (
@@ -286,7 +315,7 @@ export function Step09Afronding({
                   {/* E-mail reveal */}
                   <div
                     style={{
-                      maxHeight: ambassadorChoice === "ja" ? 180 : 0,
+                      maxHeight: ambassadorChoice === "ja" ? 280 : 0,
                       opacity: ambassadorChoice === "ja" ? 1 : 0,
                       overflow: "hidden",
                       transition: "max-height 300ms ease, opacity 300ms ease",
@@ -314,11 +343,11 @@ export function Step09Afronding({
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            handleEmailSave();
+                            if (emailValid && !emailSaving) handleEmailSave();
                           }
                         }}
                         placeholder="E-mailadres"
-                        disabled={emailSaving}
+                        disabled={emailSaving || emailSaved}
                         style={{
                           width: "100%",
                           padding: 8,
@@ -332,28 +361,35 @@ export function Step09Afronding({
                       <button
                         type="button"
                         onClick={handleEmailSave}
-                        disabled={emailSaving}
+                        disabled={emailSaving || !emailValid || emailSaved}
                         aria-label="E-mailadres opslaan"
+                        title={
+                          !emailValid
+                            ? "Voer een geldig e-mailadres in"
+                            : "E-mailadres opslaan"
+                        }
                         style={{
                           width: 34,
                           height: 34,
                           borderRadius: 9999,
                           border: "1.5px solid #00658b",
-                          background: emailSaving ? "#004c6a" : "#00658b",
+                          background:
+                            emailSaving || !emailValid || emailSaved
+                              ? "#9bb6c2"
+                              : "#00658b",
+                          borderColor:
+                            emailSaving || !emailValid || emailSaved
+                              ? "#9bb6c2"
+                              : "#00658b",
                           color: "#fff",
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          cursor: emailSaving ? "not-allowed" : "pointer",
+                          cursor:
+                            emailSaving || !emailValid || emailSaved
+                              ? "not-allowed"
+                              : "pointer",
                           flexShrink: 0,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!emailSaving)
-                            e.currentTarget.style.background = "#004c6a";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!emailSaving)
-                            e.currentTarget.style.background = "#00658b";
                         }}
                       >
                         {emailSaving ? (
@@ -364,9 +400,56 @@ export function Step09Afronding({
                       </button>
                     </div>
 
+                    {/* Expliciete Opslaan-knop — primaire opslagactie */}
+                    <div className="mt-3 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={handleEmailSave}
+                        disabled={emailSaving || !emailValid || emailSaved}
+                        style={{
+                          padding: "10px 20px",
+                          borderRadius: 9999,
+                          fontFamily: "'Manrope', sans-serif",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          border: "1.5px solid #00658b",
+                          background:
+                            emailSaving || !emailValid || emailSaved
+                              ? "#9bb6c2"
+                              : "#00658b",
+                          borderColor:
+                            emailSaving || !emailValid || emailSaved
+                              ? "#9bb6c2"
+                              : "#00658b",
+                          color: "#fff",
+                          cursor:
+                            emailSaving || !emailValid || emailSaved
+                              ? "not-allowed"
+                              : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        {emailSaving ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Opslaan...
+                          </>
+                        ) : emailSaved ? (
+                          <>
+                            <Check style={{ width: 16, height: 16 }} />
+                            Opgeslagen
+                          </>
+                        ) : (
+                          "Opslaan"
+                        )}
+                      </button>
+                    </div>
+
                     {emailSaved && !emailError && (
                       <p
-                        className="text-left"
+                        className="text-center"
                         style={{ fontSize: 12, color: "#00658b", marginTop: 8 }}
                       >
                         E-mailadres opgeslagen.
@@ -380,6 +463,77 @@ export function Step09Afronding({
                         {emailError}
                       </p>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Bevestigingsdialoog: sluiten met niet-opgeslagen e-mail */}
+              {showCloseConfirm && (
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  className="fixed inset-0 z-50 flex items-center justify-center px-4"
+                  style={{ background: "rgba(15, 23, 42, 0.45)" }}
+                >
+                  <div
+                    className="w-full max-w-md rounded-2xl bg-white p-6 text-left shadow-xl"
+                    style={{ border: "1px solid rgba(191,199,207,0.4)" }}
+                  >
+                    <h4
+                      style={{
+                        fontFamily: "'Manrope', sans-serif",
+                        fontWeight: 800,
+                        fontSize: 18,
+                        color: "#00658b",
+                        marginBottom: 8,
+                      }}
+                    >
+                      Nog niet opgeslagen
+                    </h4>
+                    <p style={{ fontSize: 14, color: "#40484e", marginBottom: 20 }}>
+                      Je e-mailadres is nog niet opgeslagen. Sluiten zonder opslaan?
+                    </p>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={handleConfirmDiscardAndClose}
+                        style={{
+                          padding: "10px 16px",
+                          borderRadius: 9999,
+                          fontFamily: "'Manrope', sans-serif",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          border: "1.5px solid #bfc7cf",
+                          background: "transparent",
+                          color: "#40484e",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Sluiten zonder opslaan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleConfirmSaveAndClose}
+                        disabled={!emailValid || emailSaving}
+                        style={{
+                          padding: "10px 16px",
+                          borderRadius: 9999,
+                          fontFamily: "'Manrope', sans-serif",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          border: "1.5px solid #00658b",
+                          background:
+                            !emailValid || emailSaving ? "#9bb6c2" : "#00658b",
+                          borderColor:
+                            !emailValid || emailSaving ? "#9bb6c2" : "#00658b",
+                          color: "#fff",
+                          cursor:
+                            !emailValid || emailSaving ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        {emailSaving ? "Opslaan..." : "Opslaan"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
