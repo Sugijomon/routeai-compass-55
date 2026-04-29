@@ -138,11 +138,47 @@ async function buildReport(run: RunRow): Promise<RunReport> {
   };
 }
 
+type OrgRow = { id: string; name: string };
+
 export default function ScanV8DebugPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reports, setReports] = useState<RunReport[]>([]);
   const [runCount, setRunCount] = useState(0);
+  const [orgs, setOrgs] = useState<OrgRow[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id, name")
+        .order("created_at", { ascending: false })
+        .limit(25);
+      const list = (data ?? []) as OrgRow[];
+      setOrgs(list);
+      // default: eerste org met "test" in naam, anders eerste
+      const preferred =
+        list.find((o) => /test/i.test(o.name)) ?? list[0] ?? null;
+      if (preferred) setSelectedOrgId(preferred.id);
+    })();
+  }, []);
+
+  const inviteUrl = selectedOrgId
+    ? `${window.location.origin}/shadow-survey-v8?org=${selectedOrgId}`
+    : "";
+
+  async function copyInvite() {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // negeer
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
