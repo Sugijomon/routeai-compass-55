@@ -131,17 +131,24 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     (r) => (r as { preference_reason_code: string }).preference_reason_code,
   );
 
+  // Exitpad: respondent koos op stap 3 'ik gebruik geen AI-tools'. De flow
+  // slaat dan stappen 4–7 over, dus tools/use_cases/accounts/datatypes/
+  // motivations/pref_reasons zijn bewust leeg en mogen geen warning geven.
+  const isExitRun = frequency === "nooit";
+
   const missing: string[] = [];
   if (!profile) missing.push("survey_profile ontbreekt");
-  if (toolCount === 0) missing.push("geen tools");
-  if (toolCount > 0 && toolUseCaseCount === 0) missing.push("geen tool use cases");
-  if (toolCount > 0 && toolAccountCount < toolCount)
-    missing.push(
-      `accounttypes incompleet (${toolAccountCount}/${toolCount})`,
-    );
-  if (dataTypeCount === 0) missing.push("geen datatypes");
-  if (motivationCount === 0) missing.push("geen motivations");
-  if (prefReasonCount === 0) missing.push("geen tool_preference_reason");
+  if (!isExitRun) {
+    if (toolCount === 0) missing.push("geen tools");
+    if (toolCount > 0 && toolUseCaseCount === 0) missing.push("geen tool use cases");
+    if (toolCount > 0 && toolAccountCount < toolCount)
+      missing.push(
+        `accounttypes incompleet (${toolAccountCount}/${toolCount})`,
+      );
+    if (dataTypeCount === 0) missing.push("geen datatypes");
+    if (motivationCount === 0) missing.push("geen motivations");
+    if (prefReasonCount === 0) missing.push("geen tool_preference_reason");
+  }
   if (concernCount === 0) missing.push("geen top_concern");
   if (supportCount === 0) missing.push("geen support_need");
   if (!run.completed_at) missing.push("completed_at ontbreekt");
