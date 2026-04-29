@@ -1331,15 +1331,98 @@ export function Step04Toolpicker({
 
             {/* Modal-body */}
             <div className="overflow-y-auto px-6 py-5" style={{ flex: 1 }}>
+              <div
+                className="mb-3 text-xs font-semibold uppercase tracking-wider"
+                style={{ color: "#6993aa" }}
+              >
+                {modalTool.isCodeTool
+                  ? "In welke context schrijf je code?"
+                  : "Waarvoor gebruik je deze tool?"}
+              </div>
+
+              <TooltipProvider delayDuration={150}>
+                <div className="flex flex-wrap gap-2.5">
+                  {modalChips.map((chip) => {
+                    const selected = modalSelections.includes(chip.code);
+                    const helpText = modalTool.isCodeTool
+                      ? CONTEXT_HELP[chip.code]
+                      : undefined;
+                    return (
+                      <div
+                        key={chip.code}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => toggleModalSelection(chip.code)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleModalSelection(chip.code);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 transition-all"
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 99,
+                          background: selected ? "#00658b" : "#f1f4f6",
+                          border: `1px solid ${selected ? "#00658b" : "#bfc7cf"}`,
+                          color: selected ? "#fff" : "#40484e",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        <Icon
+                          name={selected ? "check_circle" : "add_circle"}
+                          style={{ fontSize: 16 }}
+                        />
+                        <span>{chip.label}</span>
+                        {modalTool.isCodeTool && helpText && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                role="img"
+                                aria-label={`Uitleg: ${chip.label}`}
+                                tabIndex={0}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => e.stopPropagation()}
+                                className="ml-1 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full"
+                                style={{
+                                  background: selected
+                                    ? "rgba(255,255,255,0.25)"
+                                    : "rgba(0,101,139,0.1)",
+                                  color: selected ? "#fff" : "#00658b",
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                }}
+                              >
+                                i
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              className="max-w-[260px] text-xs leading-snug"
+                            >
+                              {helpText}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+
+              {/* Info box voor code-tools — onder de chips, vóór de AI-suggestie. */}
               {modalTool.isCodeTool && (
                 <div
-                  className="mb-5"
+                  className="mt-5"
                   style={{
-                    borderRadius: 24,
+                    borderRadius: 16,
                     border: "1px solid rgba(0,101,139,0.12)",
                     background:
                       "linear-gradient(180deg, rgba(241,244,246,0.95), rgba(235,238,240,0.95))",
-                    padding: "18px 20px",
+                    padding: "16px 18px",
                   }}
                 >
                   <div
@@ -1359,59 +1442,6 @@ export function Step04Toolpicker({
                   </p>
                 </div>
               )}
-
-              <div
-                className="mb-3 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#6993aa" }}
-              >
-                Waarvoor gebruik je deze tool?
-              </div>
-
-              <div className="flex flex-wrap gap-2.5">
-                {modalChips.map((chip) => {
-                  const selected = modalSelections.includes(chip.code);
-                  return (
-                    <button
-                      key={chip.code}
-                      type="button"
-                      onClick={() => toggleModalSelection(chip.code)}
-                      className="inline-flex items-center gap-1.5 transition-all"
-                      title={modalTool.isCodeTool ? chip.label : undefined}
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: 99,
-                        background: selected ? "#00658b" : "#f1f4f6",
-                        border: `1px solid ${selected ? "#00658b" : "#bfc7cf"}`,
-                        color: selected ? "#fff" : "#40484e",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Icon
-                        name={selected ? "check_circle" : "add_circle"}
-                        style={{ fontSize: 16 }}
-                      />
-                      <span>{chip.label}</span>
-                      {modalTool.isCodeTool && (
-                        <span
-                          className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full"
-                          style={{
-                            background: selected
-                              ? "rgba(255,255,255,0.25)"
-                              : "rgba(0,101,139,0.1)",
-                            color: selected ? "#fff" : "#00658b",
-                            fontSize: 10,
-                          }}
-                          aria-hidden="true"
-                        >
-                          i
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
 
               {/* AI-suggestie (visueel; nog niet functioneel in V8.1) */}
               <button
