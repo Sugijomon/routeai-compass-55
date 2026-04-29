@@ -219,7 +219,7 @@ export default function ScanV8DebugPage() {
       setCatalogSource({
         table: "tools_library",
         filter: "status=published AND org_id IS NULL",
-        count: typeof count === "number" ? count : (data?.length ?? 0),
+        count: typeof count === "number" ? count : (Array.isArray(data) ? data.length : 0),
         error: cErr ? cErr.message : null,
       });
     })();
