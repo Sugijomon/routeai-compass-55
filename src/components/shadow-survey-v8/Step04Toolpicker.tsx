@@ -605,6 +605,7 @@ export function Step04Toolpicker({
       toolName: name,
       categoryCode: "custom",
       icon: iconFor("custom"),
+      logoUrl: null,
       isCustom: true,
       isCodeTool: false,
       selections: [],
