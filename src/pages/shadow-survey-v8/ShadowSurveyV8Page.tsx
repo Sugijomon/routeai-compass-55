@@ -34,6 +34,23 @@ export default function ShadowSurveyV8Page() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [savedToolIds, setSavedToolIds] = useState<string[]>([]);
 
+  // Reset scroll bij elke step-wissel — nieuwe schermen moeten altijd
+  // bovenaan starten in plaats van de scrollpositie van het vorige scherm
+  // te erven.
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (typeof document !== "undefined" && document.documentElement) {
+      document.documentElement.scrollTop = 0;
+    }
+    if (typeof document !== "undefined" && document.body) {
+      document.body.scrollTop = 0;
+    }
+  }, [currentStep]);
+
   // Hervat bestaande run uit sessionStorage als org/wave matchen.
   useEffect(() => {
     if (!orgId) return;
