@@ -212,48 +212,30 @@ const EXCLUDED_USE_CASE_CODES = new Set<string>([
 // Per-categorie allowlist van toepassingen die in de modal mogen verschijnen.
 // Beperkt de keuzes tot wat voor die toolsoort logisch is.
 const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
-  // ── HTML/JSON-categorieën (gebruikt door catalogus) ──
-  algemene_ai: [
+  // ── Canonieke 11 HTML-categorieën (gebruikt door catalogus) ──
+  tekst_chat: [
     "teksten_schrijven",
     "samenvatten_redigeren",
     "brainstormen",
     "informatie_opzoeken",
     "vertalen",
-    "data_analyseren",
-    "code_schrijven",
-    "afbeeldingen_genereren",
-  ],
-  agentic_ai: [
-    "informatie_opzoeken",
-    "data_analyseren",
-    "automatisering",
-    "code_schrijven",
-  ],
-  schrijven: [
-    "teksten_schrijven",
-    "samenvatten_redigeren",
-    "brainstormen",
-    "vertalen",
     "klantenservice",
-    "informatie_opzoeken",
   ],
-  presentaties: [
-    "presentaties_design",
-    "afbeeldingen_genereren",
-    "brainstormen",
-    "samenvatten_redigeren",
-    "video_genereren",
-  ],
-  beeld_video: [
+  beeld: [
     "afbeeldingen_genereren",
     "video_genereren",
     "presentaties_design",
     "brainstormen",
   ],
-  audio_spraak: [
-    "audio_genereren",
-    "video_genereren",
-    "klantenservice",
+  code: [], // code-tools gebruiken contexten i.p.v. use cases
+  zoeken_rag: [
+    "informatie_opzoeken",
+    "samenvatten_redigeren",
+    "data_analyseren",
+  ],
+  analyse: [
+    "data_analyseren",
+    "informatie_opzoeken",
     "presentaties_design",
   ],
   notulen: [
@@ -261,14 +243,24 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
     "samenvatten_redigeren",
     "informatie_opzoeken",
   ],
-  code: [], // code-tools gebruiken contexten i.p.v. use cases
-  data_auto: [
-    "data_analyseren",
-    "automatisering",
+  audio_spraak: [
+    "audio_genereren",
+    "video_genereren",
+    "klantenservice",
+    "presentaties_design",
+  ],
+  automatisering: [
     "informatie_opzoeken",
+    "data_analyseren",
     "code_schrijven",
   ],
-  werkplek: [
+  crm_klant: [
+    "klantenservice",
+    "data_analyseren",
+    "samenvatten_redigeren",
+    "teksten_schrijven",
+  ],
+  werkplek_embedded: [
     "teksten_schrijven",
     "samenvatten_redigeren",
     "data_analyseren",
@@ -278,11 +270,10 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
     "brainstormen",
     "informatie_opzoeken",
   ],
-  crm_klant: [
-    "klantenservice",
-    "data_analyseren",
-    "automatisering",
+  overig: [
+    "vergaderingen_notuleren",
     "samenvatten_redigeren",
+    "vertalen",
     "teksten_schrijven",
   ],
   // ── Legacy DB-categorieën (back-compat) ──
