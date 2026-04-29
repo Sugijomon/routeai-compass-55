@@ -37,7 +37,8 @@ interface Step04ToolpickerProps {
 interface CatalogTool {
   id: string;            // tools_library.id (uuid) — wordt gebruikt als tool_code
   name: string;
-  category: string;      // tools_library.category (llm/image_gen/code_assistant/rag/analytics/other)
+  category: string;      // tools_library.category (DB: 6 technische categorieën)
+  htmlCategory: string;  // canonieke HTML/JSON-categorie (11 categorieën, UI-only)
   vendor: string | null;
 }
 
@@ -61,19 +62,37 @@ interface WorkspaceTool {
 // Statische config
 // ============================================================================
 
-// Categorieën die zichtbaar zijn als tab. 'all' = alle catalogus-tools.
+// Tabs op basis van canonieke HTML/JSON-categorieën (UI-only).
+// 'all' = alle catalogus-tools. Volgorde komt uit categories.json.
 const CATEGORY_TABS: Array<{ code: string; label: string }> = [
   { code: "all", label: "Alles" },
-  { code: "llm", label: "Tekst & chat" },
-  { code: "image_gen", label: "Beeld" },
-  { code: "code_assistant", label: "Code" },
-  { code: "rag", label: "Zoeken & RAG" },
-  { code: "analytics", label: "Analyse" },
-  { code: "other", label: "Overig" },
+  { code: "algemene_ai", label: "Algemene AI" },
+  { code: "agentic_ai", label: "Agentic AI" },
+  { code: "schrijven", label: "Schrijven" },
+  { code: "presentaties", label: "Presentaties" },
+  { code: "beeld_video", label: "Beeld & Video" },
+  { code: "audio_spraak", label: "Audio & Spraak" },
+  { code: "notulen", label: "Notulen" },
+  { code: "code", label: "Code" },
+  { code: "data_auto", label: "Data & Auto" },
+  { code: "werkplek", label: "Werkplek" },
+  { code: "crm_klant", label: "CRM & Klant" },
 ];
 
-// Material-symbol per categorie.
+// Material-symbol per HTML-categorie (UI fallback).
 const CATEGORY_ICON: Record<string, string> = {
+  algemene_ai: "auto_awesome",
+  agentic_ai: "smart_toy",
+  schrijven: "edit_note",
+  presentaties: "slideshow",
+  beeld_video: "image",
+  audio_spraak: "record_voice_over",
+  notulen: "mic",
+  code: "code",
+  data_auto: "analytics",
+  werkplek: "work",
+  crm_klant: "hub",
+  // legacy DB-codes (fallback wanneer html_category onbekend is)
   llm: "chat",
   image_gen: "image",
   code_assistant: "code",
@@ -84,7 +103,105 @@ const CATEGORY_ICON: Record<string, string> = {
 };
 
 // Categorieën die als "code-tool" tellen (modal toont contexten i.p.v. use cases).
-const CODE_CATEGORIES = new Set<string>(["code_assistant"]);
+// Zowel DB-categorie code_assistant als HTML-categorie 'code' triggeren dit.
+const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
+
+// ──────────────────────────────────────────────────────────────────────────
+// HTML-categorie mapping per tool (canon uit tools.json + categories.json).
+// Match op tool-naam (case-insensitive, exact normalized). Onbekende tools
+// vallen terug op DB-categorie via DB_TO_HTML_FALLBACK hieronder.
+// ──────────────────────────────────────────────────────────────────────────
+const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
+  // algemene_ai
+  "chatgpt": "algemene_ai",
+  "chatgpt enterprise": "algemene_ai",
+  "claude": "algemene_ai",
+  "google gemini": "algemene_ai",
+  "gemini": "algemene_ai",
+  "microsoft copilot": "algemene_ai",
+  "notebooklm": "algemene_ai",
+  "perplexity": "algemene_ai",
+  "perplexity ai": "algemene_ai",
+  "deepseek": "algemene_ai",
+  "mistral le chat": "algemene_ai",
+  // agentic_ai
+  "perplexity computer": "agentic_ai",
+  "claude cowork": "agentic_ai",
+  // schrijven
+  "grammarly": "schrijven",
+  "jasper": "schrijven",
+  "copy.ai": "schrijven",
+  "notion ai": "schrijven",
+  // presentaties
+  "gamma": "presentaties",
+  "canva ai": "presentaties",
+  "google stitch": "presentaties",
+  "adobe firefly": "presentaties",
+  // beeld_video
+  "midjourney": "beeld_video",
+  "dall-e": "beeld_video",
+  "dall-e 3": "beeld_video",
+  "stable diffusion": "beeld_video",
+  "runway": "beeld_video",
+  "synthesia": "beeld_video",
+  "nano banana pro": "beeld_video",
+  // audio_spraak
+  "elevenlabs": "audio_spraak",
+  "murf ai": "audio_spraak",
+  // notulen
+  "otter.ai": "notulen",
+  "fireflies.ai": "notulen",
+  "tl;dv": "notulen",
+  "fathom": "notulen",
+  "tactiq": "notulen",
+  "jamie": "notulen",
+  "read.ai": "notulen",
+  // code
+  "github copilot": "code",
+  "cursor": "code",
+  "claude code": "code",
+  "tabnine": "code",
+  // data_auto
+  "julius ai": "data_auto",
+  "akkio": "data_auto",
+  "n8n": "data_auto",
+  "make": "data_auto",
+  "zapier ai": "data_auto",
+  "microsoft copilot for excel": "data_auto",
+  // werkplek
+  "m365 copilot": "werkplek",
+  "google workspace ai": "werkplek",
+  "salesforce einstein": "werkplek",
+  "hubspot ai": "werkplek",
+  // crm_klant
+  "hubspot": "crm_klant",
+  "salesforce": "crm_klant",
+  "pipedrive ai": "crm_klant",
+  "monday.com ai": "crm_klant",
+  // overige in DB die geen 1-op-1 HTML-equivalent hebben:
+  // "chatgpt search" → algemene_ai (zoekvariant van ChatGPT)
+  "chatgpt search": "algemene_ai",
+  // "you.com" → algemene_ai (chat + zoek)
+  "you.com": "algemene_ai",
+  // "deepl" → schrijven (vertaal-tool, dichtst bij schrijven; agentic past niet)
+  "deepl": "schrijven",
+};
+
+// Fallback: DB-categorie → HTML-categorie wanneer naam-mapping faalt.
+const DB_TO_HTML_FALLBACK: Record<string, string> = {
+  llm: "algemene_ai",
+  image_gen: "beeld_video",
+  code_assistant: "code",
+  rag: "algemene_ai",
+  analytics: "data_auto",
+  other: "werkplek",
+};
+
+function htmlCategoryFor(name: string, dbCategory: string): string {
+  const key = name.trim().toLowerCase();
+  if (TOOL_NAME_TO_HTML_CATEGORY[key]) return TOOL_NAME_TO_HTML_CATEGORY[key];
+  return DB_TO_HTML_FALLBACK[dbCategory] ?? "werkplek";
+}
 
 // Use-cases die NIET als selecteerbare optie in de modal mogen verschijnen
 // (agentic workflows zijn uit scope voor V8.1).
@@ -97,6 +214,80 @@ const EXCLUDED_USE_CASE_CODES = new Set<string>([
 // Per-categorie allowlist van toepassingen die in de modal mogen verschijnen.
 // Beperkt de keuzes tot wat voor die toolsoort logisch is.
 const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
+  // ── HTML/JSON-categorieën (gebruikt door catalogus) ──
+  algemene_ai: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "informatie_opzoeken",
+    "vertalen",
+    "data_analyseren",
+    "code_schrijven",
+    "afbeeldingen_genereren",
+  ],
+  agentic_ai: [
+    "informatie_opzoeken",
+    "data_analyseren",
+    "automatisering",
+    "code_schrijven",
+  ],
+  schrijven: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "brainstormen",
+    "vertalen",
+    "klantenservice",
+    "informatie_opzoeken",
+  ],
+  presentaties: [
+    "presentaties_design",
+    "afbeeldingen_genereren",
+    "brainstormen",
+    "samenvatten_redigeren",
+    "video_genereren",
+  ],
+  beeld_video: [
+    "afbeeldingen_genereren",
+    "video_genereren",
+    "presentaties_design",
+    "brainstormen",
+  ],
+  audio_spraak: [
+    "audio_genereren",
+    "video_genereren",
+    "klantenservice",
+    "presentaties_design",
+  ],
+  notulen: [
+    "vergaderingen_notuleren",
+    "samenvatten_redigeren",
+    "informatie_opzoeken",
+  ],
+  code: [], // code-tools gebruiken contexten i.p.v. use cases
+  data_auto: [
+    "data_analyseren",
+    "automatisering",
+    "informatie_opzoeken",
+    "code_schrijven",
+  ],
+  werkplek: [
+    "teksten_schrijven",
+    "samenvatten_redigeren",
+    "data_analyseren",
+    "vergaderingen_notuleren",
+    "presentaties_design",
+    "klantenservice",
+    "brainstormen",
+    "informatie_opzoeken",
+  ],
+  crm_klant: [
+    "klantenservice",
+    "data_analyseren",
+    "automatisering",
+    "samenvatten_redigeren",
+    "teksten_schrijven",
+  ],
+  // ── Legacy DB-categorieën (back-compat) ──
   llm: [
     "teksten_schrijven",
     "samenvatten_redigeren",
@@ -113,7 +304,7 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
     "audio_genereren",
     "brainstormen",
   ],
-  code_assistant: [], // code_assistant gebruikt contexten i.p.v. use cases
+  code_assistant: [],
   rag: [
     "informatie_opzoeken",
     "samenvatten_redigeren",
@@ -257,12 +448,16 @@ export function Step04Toolpicker({
         if (ctxRes.error) throw ctxRes.error;
 
         setCatalogTools(
-          (toolsRes.data ?? []).map((t) => ({
-            id: t.id,
-            name: t.name,
-            category: t.category ?? "other",
-            vendor: t.vendor ?? null,
-          })),
+          (toolsRes.data ?? []).map((t) => {
+            const dbCat = t.category ?? "other";
+            return {
+              id: t.id,
+              name: t.name,
+              category: dbCat,
+              htmlCategory: htmlCategoryFor(t.name, dbCat),
+              vendor: t.vendor ?? null,
+            };
+          }),
         );
         setUseCases(
           (ucRes.data ?? [])
@@ -290,7 +485,8 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const filteredCatalog = useMemo(() => {
     if (activeCategory === "all") return catalogTools;
-    return catalogTools.filter((t) => t.category === activeCategory);
+    // Filteren op canonieke HTML-categorie (UI-only).
+    return catalogTools.filter((t) => t.htmlCategory === activeCategory);
   }, [catalogTools, activeCategory]);
 
   const usedToolCodes = useMemo(
@@ -313,14 +509,18 @@ export function Step04Toolpicker({
   // ──────────────────────────────────────────────────────────────────────────
   const addCatalogTool = (tool: CatalogTool) => {
     if (usedToolCodes.has(tool.id)) return;
+    // isCodeTool wordt bepaald op zowel DB-categorie als HTML-categorie
+    // (HTML 'code' = DB 'code_assistant').
+    const isCode =
+      isCodeCategory(tool.category) || isCodeCategory(tool.htmlCategory);
     const newTool: WorkspaceTool = {
       localId: nextLocalId(),
       toolCode: tool.id,
       toolName: tool.name,
-      categoryCode: tool.category,
-      icon: iconForTool(tool.name, tool.category),
+      categoryCode: tool.htmlCategory, // gebruik HTML-categorie voor modal-allowlist
+      icon: iconForTool(tool.name, tool.htmlCategory),
       isCustom: false,
-      isCodeTool: isCodeCategory(tool.category),
+      isCodeTool: isCode,
       selections: [],
     };
     setWorkspace((prev) => [...prev, newTool]);
@@ -686,7 +886,7 @@ export function Step04Toolpicker({
                         style={{ background: "#f1f4f6" }}
                       >
                         <Icon
-                          name={iconForTool(tool.name, tool.category)}
+                          name={iconForTool(tool.name, tool.htmlCategory)}
                           style={{ fontSize: 18, color: "#00658b" }}
                         />
                       </div>
