@@ -543,41 +543,46 @@ export function Step07VaardigheidSpelregels({
             ))}
           </div>
 
-          {/* Uitklapbaar informatieblok */}
-          <div
-            className="mb-2 mt-6 rounded-[1.25rem] p-1 shadow-sm"
+          {/* Uitklapbaar informatieblok — styling identiek aan Step05 (Data & Risico). */}
+          <details
+            className="step07-details mb-2 mt-6 p-4"
             style={{
               background: "#f1f4f6",
-              border: "1px solid rgba(191, 199, 207, 0.3)",
+              border: "1px solid rgba(191,199,207,0.3)",
+              borderRadius: "1.25rem",
             }}
           >
-            <button
-              type="button"
-              onClick={() => setIsInfoOpen((v) => !v)}
-              className="flex w-full items-center justify-between rounded-[1rem] px-4 py-3 text-left"
-              style={{ color: "#00658b", fontWeight: 600, fontSize: 13 }}
-            >
-              <span className="flex items-center gap-2">
-                <Info className="h-4 w-4" />
+            <summary className="flex items-center gap-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
+                <Info className="h-[18px] w-[18px]" style={{ color: "#00658b" }} />
+              </div>
+              <span
+                className="flex-1 text-[13px] font-semibold"
+                style={{ color: "#00658b" }}
+              >
                 Hou zelf de regie: vertrouwen is goed, controleren is beter
               </span>
               <ChevronDown
-                className="h-5 w-5 transition-transform duration-200"
-                style={{ transform: isInfoOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                className="step07-chev h-[18px] w-[18px]"
+                style={{ color: "#00658b" }}
               />
-            </button>
-            {isInfoOpen && (
-              <div
-                className="px-4 pb-4 pt-1"
-                style={{ color: "#40484e", fontSize: 13.5, lineHeight: 1.6 }}
-              >
-                AI kan overtuigend klinken, maar ook feiten verzinnen (hallucineren) of
-                onbewuste vooroordelen (bias) bevatten. Controle op juistheid is essentieel om
-                de kwaliteit te waarborgen en te voorkomen dat onjuiste informatie je werk
-                beïnvloedt.
-              </div>
-            )}
-          </div>
+            </summary>
+            <div
+              className="mt-3 border-t pt-3 text-[13px] leading-relaxed"
+              style={{ borderColor: "rgba(191,199,207,0.2)", color: "#40484e" }}
+            >
+              AI kan overtuigend klinken, maar ook feiten verzinnen (hallucineren) of
+              onbewuste vooroordelen (bias) bevatten. Controle op juistheid is essentieel om
+              de kwaliteit te waarborgen en te voorkomen dat onjuiste informatie je werk
+              beïnvloedt.
+            </div>
+          </details>
+          <style>{`
+            .step07-details > summary { list-style: none; cursor: pointer; }
+            .step07-details > summary::-webkit-details-marker { display: none; }
+            .step07-details[open] .step07-chev { transform: rotate(180deg); }
+            .step07-chev { transition: transform .22s; }
+          `}</style>
 
           {/* Footer */}
           <div
