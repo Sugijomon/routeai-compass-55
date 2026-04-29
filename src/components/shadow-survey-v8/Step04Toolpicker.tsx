@@ -111,92 +111,76 @@ const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
 // Match op tool-naam (case-insensitive, exact normalized). Onbekende tools
 // vallen terug op DB-categorie via DB_TO_HTML_FALLBACK hieronder.
 // ──────────────────────────────────────────────────────────────────────────
+// Canonieke mapping uit screen-04-toolpicker-fixed.html (48 tools, 11 categorieën).
+// Tools die hier niet in voorkomen worden NIET getoond in de V8 toolpicker.
 const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
-  // algemene_ai — algemene chat/LLM assistenten + zoek/RAG-frontends
+  // Algemene AI (8)
   "chatgpt": "algemene_ai",
-  "chatgpt enterprise": "algemene_ai",
-  "chatgpt search": "algemene_ai",
   "claude": "algemene_ai",
-  "google gemini": "algemene_ai",
   "gemini": "algemene_ai",
   "microsoft copilot": "algemene_ai",
   "notebooklm": "algemene_ai",
+  "perplexity": "algemene_ai",
   "deepseek": "algemene_ai",
   "mistral le chat": "algemene_ai",
-  "perplexity": "algemene_ai",
-  "perplexity ai": "algemene_ai",
-  "you.com": "algemene_ai",
-  "deepl": "algemene_ai",
-  // schrijven — schrijfassistenten
+  // Agentic AI (2)
+  "perplexity computer": "agentic_ai",
+  "claude cowork": "agentic_ai",
+  // Schrijven (4)
   "grammarly": "schrijven",
   "jasper": "schrijven",
   "copy.ai": "schrijven",
   "notion ai": "schrijven",
-  // presentaties
+  // Presentaties (4)
   "gamma": "presentaties",
   "canva ai": "presentaties",
   "google stitch": "presentaties",
-  // beeld_video — image/video generatie
+  "adobe firefly": "presentaties",
+  // Beeld & Video (5)
   "midjourney": "beeld_video",
+  "dall·e": "beeld_video",
   "dall-e": "beeld_video",
-  "dall-e 3": "beeld_video",
-  "stable diffusion": "beeld_video",
-  "adobe firefly": "beeld_video",
   "runway": "beeld_video",
   "synthesia": "beeld_video",
   "nano banana pro": "beeld_video",
-  // audio_spraak
+  // Audio & Spraak (2)
   "elevenlabs": "audio_spraak",
   "murf ai": "audio_spraak",
-  // notulen
+  // Notulen (6)
   "otter.ai": "notulen",
   "fireflies.ai": "notulen",
   "tl;dv": "notulen",
   "fathom": "notulen",
   "tactiq": "notulen",
   "jamie": "notulen",
-  "read.ai": "notulen",
-  // code
+  // Code (4)
   "github copilot": "code",
   "cursor": "code",
   "claude code": "code",
   "tabnine": "code",
-  // data_auto — data analyse + automatisering
+  // Data & Auto (5)
   "julius ai": "data_auto",
   "akkio": "data_auto",
-  "microsoft copilot for excel": "data_auto",
   "n8n": "data_auto",
   "make": "data_auto",
   "zapier ai": "data_auto",
-  // agentic_ai — autonoom uitvoerende agents
-  "perplexity computer": "agentic_ai",
-  "claude cowork": "agentic_ai",
-  // werkplek — Office/Workspace embedded AI
+  // Werkplek (4)
   "m365 copilot": "werkplek",
   "google workspace ai": "werkplek",
-  // crm_klant
+  "salesforce einstein": "werkplek",
+  "hubspot ai": "werkplek",
+  // CRM & Klant (4)
   "hubspot": "crm_klant",
-  "hubspot ai": "crm_klant",
   "salesforce": "crm_klant",
-  "salesforce einstein": "crm_klant",
   "pipedrive ai": "crm_klant",
   "monday.com ai": "crm_klant",
 };
 
-// Fallback: DB-categorie → HTML-categorie wanneer naam-mapping faalt.
-const DB_TO_HTML_FALLBACK: Record<string, string> = {
-  llm: "algemene_ai",
-  image_gen: "beeld_video",
-  code_assistant: "code",
-  rag: "algemene_ai",
-  analytics: "data_auto",
-  other: "werkplek",
-};
-
-function htmlCategoryFor(name: string, dbCategory: string): string {
+// Strikte canon: tools zonder mapping worden uitgefilterd in de UI
+// (dbCategory wordt genegeerd als argument behouden voor backward compat).
+function htmlCategoryFor(name: string, _dbCategory: string): string | null {
   const key = name.trim().toLowerCase();
-  if (TOOL_NAME_TO_HTML_CATEGORY[key]) return TOOL_NAME_TO_HTML_CATEGORY[key];
-  return DB_TO_HTML_FALLBACK[dbCategory] ?? "werkplek";
+  return TOOL_NAME_TO_HTML_CATEGORY[key] ?? null;
 }
 
 // Use-cases die NIET als selecteerbare optie in de modal mogen verschijnen
