@@ -1354,7 +1354,8 @@ export function Step04Toolpicker({
                   </div>
                   <p className="text-xs" style={{ color: "#40484e", lineHeight: 1.55 }}>
                     Deze tools helpen bij het schrijven van code. Het risico zit niet in de
-                    tool zelf, maar in wat je ermee bouwt.
+                    tool zelf, maar in wat je ermee bouwt. Kies de categorie die het beste past
+                    bij de uiteindelijke toepassing.
                   </p>
                 </div>
               )}
