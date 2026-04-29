@@ -344,6 +344,36 @@ const USE_CASES_PER_CATEGORY: Record<string, string[]> = {
   ],
 };
 
+// Tool-level allowlist (wint altijd van USE_CASES_PER_CATEGORY).
+// Match op genormaliseerde toolnaam (lowercase + getrimd). Categorie-
+// allowlist mag deze NOOIT verbreden. Tools die hier niet in voorkomen
+// vallen terug op de categorie-allowlist.
+const TOOL_USE_CASES_PER_TOOL: Record<string, string[]> = {
+  "dall·e": ["afbeeldingen_genereren"],
+  "dall-e": ["afbeeldingen_genereren"],
+  "dalle": ["afbeeldingen_genereren"],
+  "midjourney": ["afbeeldingen_genereren"],
+  "nano banana pro": ["afbeeldingen_genereren"],
+  "adobe firefly": ["afbeeldingen_genereren", "presentaties_design"],
+  "runway": ["video_genereren"],
+  "synthesia": ["video_genereren"],
+  "canva ai": ["presentaties_design", "afbeeldingen_genereren"],
+  "gamma": ["presentaties_design"],
+  "google stitch": ["presentaties_design", "afbeeldingen_genereren"],
+  "elevenlabs": ["audio_genereren"],
+  "murf ai": ["audio_genereren"],
+};
+
+function toolLevelUseCases(name: string, toolCode: string | null): string[] | null {
+  const byName = TOOL_USE_CASES_PER_TOOL[name.trim().toLowerCase()];
+  if (byName) return byName;
+  if (toolCode) {
+    const byCode = TOOL_USE_CASES_PER_TOOL[toolCode.trim().toLowerCase()];
+    if (byCode) return byCode;
+  }
+  return null;
+}
+
 // Tool-naam → material-symbol icon. Vervangt de generieke categorie-icon
 // wanneer een specifiekere keuze beter past. Match is case-insensitive op
 // substring van de toolnaam.
