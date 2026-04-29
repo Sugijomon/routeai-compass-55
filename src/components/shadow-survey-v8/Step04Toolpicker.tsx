@@ -52,7 +52,8 @@ interface WorkspaceTool {
   toolCode: string | null;     // null voor custom
   toolName: string;
   categoryCode: string;        // categorie-code voor groepering & code-detectie
-  icon: string;                // material-symbol naam
+  icon: string;                // material-symbol naam (fallback)
+  logoUrl: string | null;      // expliciete logo-URL (null = fallback naar icon)
   isCustom: boolean;
   isCodeTool: boolean;
   selections: string[];        // use_case_codes (gewoon) of context_codes (code-tool)
@@ -328,6 +329,64 @@ const TOOL_ICON_BY_NAME: Array<{ match: RegExp; icon: string }> = [
   { match: /julius|excel/i, icon: "analytics" },
 ];
 
+// ---------------------------------------------------------------------------
+// Logo-mapping
+// ---------------------------------------------------------------------------
+// Expliciete mapping van toolnaam (lowercased, getrimd) → logo-URL.
+// We gebruiken Simple Icons (officiële merk-SVG's, geen gegenereerde logo's).
+// Tools zonder match vallen terug op het categorie-icon. Verzin GEEN slugs.
+const TOOL_LOGO_MAP: Record<string, string> = {
+  // Algemene AI
+  "chatgpt": "https://cdn.simpleicons.org/openai/00658b",
+  "claude": "https://cdn.simpleicons.org/anthropic/00658b",
+  "gemini": "https://cdn.simpleicons.org/googlegemini/00658b",
+  "microsoft copilot": "https://cdn.simpleicons.org/githubcopilot/00658b",
+  "perplexity": "https://cdn.simpleicons.org/perplexity/00658b",
+  "deepseek": "https://cdn.simpleicons.org/deepseek/00658b",
+  "mistral le chat": "https://cdn.simpleicons.org/mistralai/00658b",
+  "notebooklm": "https://cdn.simpleicons.org/googlenotebooklm/00658b",
+  // Agentic AI (geen officieel Simple Icons logo → fallback naar icon)
+  // "claude cowork", "perplexity computer" → fallback
+  // Schrijven
+  "grammarly": "https://cdn.simpleicons.org/grammarly/00658b",
+  "jasper": "https://cdn.simpleicons.org/jasper/00658b",
+  "notion ai": "https://cdn.simpleicons.org/notion/00658b",
+  // Presentaties
+  "canva ai": "https://cdn.simpleicons.org/canva/00658b",
+  "adobe firefly": "https://cdn.simpleicons.org/adobe/00658b",
+  // Beeld & Video
+  "midjourney": "https://cdn.simpleicons.org/midjourney/00658b",
+  "runway": "https://cdn.simpleicons.org/runway/00658b",
+  // Audio & Spraak
+  "elevenlabs": "https://cdn.simpleicons.org/elevenlabs/00658b",
+  // Notulen
+  "otter.ai": "https://cdn.simpleicons.org/otter/00658b",
+  // Code
+  "github copilot": "https://cdn.simpleicons.org/githubcopilot/00658b",
+  "cursor": "https://cdn.simpleicons.org/cursor/00658b",
+  "claude code": "https://cdn.simpleicons.org/anthropic/00658b",
+  "tabnine": "https://cdn.simpleicons.org/tabnine/00658b",
+  // Data & Auto
+  "n8n": "https://cdn.simpleicons.org/n8n/00658b",
+  "make": "https://cdn.simpleicons.org/make/00658b",
+  "zapier ai": "https://cdn.simpleicons.org/zapier/00658b",
+  // Werkplek
+  "m365 copilot": "https://cdn.simpleicons.org/microsoft365/00658b",
+  "google workspace ai": "https://cdn.simpleicons.org/googleworkspace/00658b",
+  "salesforce einstein": "https://cdn.simpleicons.org/salesforce/00658b",
+  "hubspot ai": "https://cdn.simpleicons.org/hubspot/00658b",
+  // CRM & Klant
+  "hubspot": "https://cdn.simpleicons.org/hubspot/00658b",
+  "salesforce": "https://cdn.simpleicons.org/salesforce/00658b",
+  "pipedrive ai": "https://cdn.simpleicons.org/pipedrive/00658b",
+  "monday.com ai": "https://cdn.simpleicons.org/mondaydotcom/00658b",
+};
+
+function logoUrlFor(name: string): string | null {
+  const key = name.trim().toLowerCase();
+  return TOOL_LOGO_MAP[key] ?? null;
+}
+
 function isCodeCategory(code: string) {
   return CODE_CATEGORIES.has(code);
 }
@@ -341,6 +400,35 @@ function iconForTool(name: string, category: string): string {
     if (entry.match.test(name)) return entry.icon;
   }
   return iconFor(category);
+}
+
+// Render een tool-logo (img) of valt terug op een material-symbol icon.
+function ToolLogo({
+  logoUrl,
+  iconName,
+  size = 18,
+  alt,
+}: {
+  logoUrl: string | null;
+  iconName: string;
+  size?: number;
+  alt: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (logoUrl && !failed) {
+    return (
+      <img
+        src={logoUrl}
+        alt={alt}
+        width={size}
+        height={size}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        style={{ width: size, height: size, objectFit: "contain" }}
+      />
+    );
+  }
+  return <Icon name={iconName} style={{ fontSize: size, color: "#00658b" }} />;
 }
 
 // ============================================================================
@@ -497,6 +585,7 @@ export function Step04Toolpicker({
       toolName: tool.name,
       categoryCode: tool.htmlCategory, // gebruik HTML-categorie voor modal-allowlist
       icon: iconForTool(tool.name, tool.htmlCategory),
+      logoUrl: logoUrlFor(tool.name),
       isCustom: false,
       isCodeTool: isCode,
       selections: [],
@@ -516,6 +605,7 @@ export function Step04Toolpicker({
       toolName: name,
       categoryCode: "custom",
       icon: iconFor("custom"),
+      logoUrl: null,
       isCustom: true,
       isCodeTool: false,
       selections: [],
@@ -863,9 +953,11 @@ export function Step04Toolpicker({
                         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
                         style={{ background: "#f1f4f6" }}
                       >
-                        <Icon
-                          name={iconForTool(tool.name, tool.htmlCategory)}
-                          style={{ fontSize: 18, color: "#00658b" }}
+                        <ToolLogo
+                          logoUrl={logoUrlFor(tool.name)}
+                          iconName={iconForTool(tool.name, tool.htmlCategory)}
+                          size={18}
+                          alt={`${tool.name} logo`}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -999,7 +1091,7 @@ export function Step04Toolpicker({
                         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
                         style={{ background: "#e0f2fe" }}
                       >
-                        <Icon name={w.icon} style={{ fontSize: 18, color: "#00658b" }} />
+                        <ToolLogo logoUrl={w.logoUrl} iconName={w.icon} size={18} alt={`${w.toolName} logo`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div
@@ -1175,7 +1267,7 @@ export function Step04Toolpicker({
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
                 style={{ background: "#f1f4f6" }}
               >
-                <Icon name={modalTool.icon} style={{ fontSize: 22, color: "#00658b" }} />
+                <ToolLogo logoUrl={modalTool.logoUrl} iconName={modalTool.icon} size={22} alt={`${modalTool.toolName} logo`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div
