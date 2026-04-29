@@ -107,6 +107,7 @@ const CATEGORY_ICON: Record<string, string> = {
 // Categorieën die als "code-tool" tellen (modal toont contexten i.p.v. use cases).
 // Zowel DB-categorie code_assistant als HTML-categorie 'code' triggeren dit.
 const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
+// (HTML-categorie 'code' blijft als code-tool herkend.)
 
 // ──────────────────────────────────────────────────────────────────────────
 // HTML-categorie mapping per tool (canon uit tools.json + categories.json).
