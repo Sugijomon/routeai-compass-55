@@ -257,7 +257,7 @@ export function Step07VaardigheidSpelregels({
   const [toolRedenen, setToolRedenen] = useState<Set<string>>(new Set());
   const [skill, setSkill] = useState<string | null>(null);
   const [outputVerwerking, setOutputVerwerking] = useState<string | null>(null);
-  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  // Info-blok gebruikt native <details>; geen lokale state nodig.
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
