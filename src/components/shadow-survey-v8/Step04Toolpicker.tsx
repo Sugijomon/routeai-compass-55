@@ -63,37 +63,36 @@ interface WorkspaceTool {
 // ============================================================================
 
 // Tabs op basis van canonieke HTML/JSON-categorieën (UI-only).
-// 11 canonieke categorieën + "Alles" — altijd zichtbaar als chips boven de
-// catalogus. Een eventuele "Filters"-knop blijft secundair/mobile fallback en
-// vervangt deze tabs niet.
+// 11 canonieke categorieën + "Alles" — exact in volgorde en met labels uit
+// screen-04-toolpicker-fixed.html. "Alles" is alleen UI, geen DB-categorie.
 const CATEGORY_TABS: Array<{ code: string; label: string }> = [
   { code: "all", label: "Alles" },
-  { code: "tekst_chat", label: "Tekst & chat" },
-  { code: "beeld", label: "Beeld" },
-  { code: "code", label: "Code" },
-  { code: "zoeken_rag", label: "Zoeken & RAG" },
-  { code: "analyse", label: "Analyse" },
-  { code: "notulen", label: "Notulen" },
+  { code: "algemene_ai", label: "Algemene AI" },
+  { code: "agentic_ai", label: "Agentic AI" },
+  { code: "schrijven", label: "Schrijven" },
+  { code: "presentaties", label: "Presentaties" },
+  { code: "beeld_video", label: "Beeld & Video" },
   { code: "audio_spraak", label: "Audio & Spraak" },
-  { code: "automatisering", label: "Automatisering" },
-  { code: "crm_klant", label: "CRM/Klant" },
-  { code: "werkplek_embedded", label: "Werkplek/Embedded" },
-  { code: "overig", label: "Overig" },
+  { code: "notulen", label: "Notulen" },
+  { code: "code", label: "Code" },
+  { code: "data_auto", label: "Data & Auto" },
+  { code: "werkplek", label: "Werkplek" },
+  { code: "crm_klant", label: "CRM & Klant" },
 ];
 
 // Material-symbol per HTML-categorie (UI fallback).
 const CATEGORY_ICON: Record<string, string> = {
-  tekst_chat: "chat",
-  beeld: "image",
-  code: "code",
-  zoeken_rag: "search",
-  analyse: "analytics",
-  notulen: "mic",
+  algemene_ai: "chat",
+  agentic_ai: "smart_toy",
+  schrijven: "edit_note",
+  presentaties: "slideshow",
+  beeld_video: "image",
   audio_spraak: "record_voice_over",
-  automatisering: "smart_toy",
+  notulen: "mic",
+  code: "code",
+  data_auto: "analytics",
+  werkplek: "work",
   crm_klant: "hub",
-  werkplek_embedded: "work",
-  overig: "extension",
   // legacy DB-codes (fallback wanneer html_category onbekend is)
   llm: "chat",
   image_gen: "image",
@@ -107,7 +106,6 @@ const CATEGORY_ICON: Record<string, string> = {
 // Categorieën die als "code-tool" tellen (modal toont contexten i.p.v. use cases).
 // Zowel DB-categorie code_assistant als HTML-categorie 'code' triggeren dit.
 const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
-// (HTML-categorie 'code' blijft als code-tool herkend.)
 
 // ──────────────────────────────────────────────────────────────────────────
 // HTML-categorie mapping per tool (canon uit tools.json + categories.json).
@@ -115,38 +113,39 @@ const CODE_CATEGORIES = new Set<string>(["code_assistant", "code"]);
 // vallen terug op DB-categorie via DB_TO_HTML_FALLBACK hieronder.
 // ──────────────────────────────────────────────────────────────────────────
 const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
-  // tekst_chat — algemene chat/LLM + schrijfassistenten
-  "chatgpt": "tekst_chat",
-  "chatgpt enterprise": "tekst_chat",
-  "claude": "tekst_chat",
-  "google gemini": "tekst_chat",
-  "gemini": "tekst_chat",
-  "microsoft copilot": "tekst_chat",
-  "notebooklm": "tekst_chat",
-  "deepseek": "tekst_chat",
-  "mistral le chat": "tekst_chat",
-  "grammarly": "tekst_chat",
-  "jasper": "tekst_chat",
-  "copy.ai": "tekst_chat",
-  "notion ai": "tekst_chat",
-  "deepl": "tekst_chat",
-  // zoeken_rag — search + RAG
-  "perplexity": "zoeken_rag",
-  "perplexity ai": "zoeken_rag",
-  "chatgpt search": "zoeken_rag",
-  "you.com": "zoeken_rag",
-  // beeld — image/video/presentatie generatie
-  "midjourney": "beeld",
-  "dall-e": "beeld",
-  "dall-e 3": "beeld",
-  "stable diffusion": "beeld",
-  "runway": "beeld",
-  "synthesia": "beeld",
-  "nano banana pro": "beeld",
-  "adobe firefly": "beeld",
-  "gamma": "beeld",
-  "canva ai": "beeld",
-  "google stitch": "beeld",
+  // algemene_ai — algemene chat/LLM assistenten + zoek/RAG-frontends
+  "chatgpt": "algemene_ai",
+  "chatgpt enterprise": "algemene_ai",
+  "chatgpt search": "algemene_ai",
+  "claude": "algemene_ai",
+  "google gemini": "algemene_ai",
+  "gemini": "algemene_ai",
+  "microsoft copilot": "algemene_ai",
+  "notebooklm": "algemene_ai",
+  "deepseek": "algemene_ai",
+  "mistral le chat": "algemene_ai",
+  "perplexity": "algemene_ai",
+  "perplexity ai": "algemene_ai",
+  "you.com": "algemene_ai",
+  "deepl": "algemene_ai",
+  // schrijven — schrijfassistenten
+  "grammarly": "schrijven",
+  "jasper": "schrijven",
+  "copy.ai": "schrijven",
+  "notion ai": "schrijven",
+  // presentaties
+  "gamma": "presentaties",
+  "canva ai": "presentaties",
+  "google stitch": "presentaties",
+  // beeld_video — image/video generatie
+  "midjourney": "beeld_video",
+  "dall-e": "beeld_video",
+  "dall-e 3": "beeld_video",
+  "stable diffusion": "beeld_video",
+  "adobe firefly": "beeld_video",
+  "runway": "beeld_video",
+  "synthesia": "beeld_video",
+  "nano banana pro": "beeld_video",
   // audio_spraak
   "elevenlabs": "audio_spraak",
   "murf ai": "audio_spraak",
@@ -163,16 +162,19 @@ const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
   "cursor": "code",
   "claude code": "code",
   "tabnine": "code",
-  // analyse
-  "julius ai": "analyse",
-  "akkio": "analyse",
-  "microsoft copilot for excel": "analyse",
-  // automatisering — agentic + workflow
-  "perplexity computer": "automatisering",
-  "claude cowork": "automatisering",
-  "n8n": "automatisering",
-  "make": "automatisering",
-  "zapier ai": "automatisering",
+  // data_auto — data analyse + automatisering
+  "julius ai": "data_auto",
+  "akkio": "data_auto",
+  "microsoft copilot for excel": "data_auto",
+  "n8n": "data_auto",
+  "make": "data_auto",
+  "zapier ai": "data_auto",
+  // agentic_ai — autonoom uitvoerende agents
+  "perplexity computer": "agentic_ai",
+  "claude cowork": "agentic_ai",
+  // werkplek — Office/Workspace embedded AI
+  "m365 copilot": "werkplek",
+  "google workspace ai": "werkplek",
   // crm_klant
   "hubspot": "crm_klant",
   "hubspot ai": "crm_klant",
@@ -180,19 +182,16 @@ const TOOL_NAME_TO_HTML_CATEGORY: Record<string, string> = {
   "salesforce einstein": "crm_klant",
   "pipedrive ai": "crm_klant",
   "monday.com ai": "crm_klant",
-  // werkplek_embedded — Office/Workspace embedded AI
-  "m365 copilot": "werkplek_embedded",
-  "google workspace ai": "werkplek_embedded",
 };
 
 // Fallback: DB-categorie → HTML-categorie wanneer naam-mapping faalt.
 const DB_TO_HTML_FALLBACK: Record<string, string> = {
-  llm: "tekst_chat",
-  image_gen: "beeld",
+  llm: "algemene_ai",
+  image_gen: "beeld_video",
   code_assistant: "code",
-  rag: "zoeken_rag",
-  analytics: "analyse",
-  other: "overig",
+  rag: "algemene_ai",
+  analytics: "data_auto",
+  other: "werkplek",
 };
 
 function htmlCategoryFor(name: string, dbCategory: string): string {
