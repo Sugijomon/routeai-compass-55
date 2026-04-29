@@ -298,8 +298,8 @@ export function Step02Werkplek({ surveyRunId, onContinue, onBack }: Step02Werkpl
                           setAndersText(e.target.value);
                           if (error) setError(null);
                         }}
-                        placeholder="Vul je afdeling in..."
-                        aria-label="Andere afdeling"
+                        placeholder="Vul je vakgebied in..."
+                        aria-label="Ander vakgebied"
                         style={{
                           width: "100%",
                           padding: "10px 14px",
