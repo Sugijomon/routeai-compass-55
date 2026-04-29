@@ -63,10 +63,9 @@ interface WorkspaceTool {
 // ============================================================================
 
 // Tabs op basis van canonieke HTML/JSON-categorieën (UI-only).
-// 11 canonieke categorieën + "Alles" — exact in volgorde en met labels uit
-// screen-04-toolpicker-fixed.html. "Alles" is alleen UI, geen DB-categorie.
+// Exact 11 canonieke categorieën uit screen-04-toolpicker-fixed.html,
+// in deze volgorde. Geen "Alles"-tab — respondent kiest altijd één categorie.
 const CATEGORY_TABS: Array<{ code: string; label: string }> = [
-  { code: "all", label: "Alles" },
   { code: "algemene_ai", label: "Algemene AI" },
   { code: "agentic_ai", label: "Agentic AI" },
   { code: "schrijven", label: "Schrijven" },
