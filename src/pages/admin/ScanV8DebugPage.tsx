@@ -232,7 +232,7 @@ export default function ScanV8DebugPage() {
                 <tr style={{ background: "#f3f3f3", textAlign: "left" }}>
                   <th style={th}>completed_at</th>
                   <th style={th}>run_id</th>
-                  <th style={th}>afdeling</th>
+                  <th style={th}>vakgebied</th>
                   <th style={th}>frequentie</th>
                   <th style={th}>tools</th>
                   <th style={th}>use cases</th>
