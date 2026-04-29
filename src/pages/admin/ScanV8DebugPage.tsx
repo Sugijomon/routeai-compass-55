@@ -138,11 +138,47 @@ async function buildReport(run: RunRow): Promise<RunReport> {
   };
 }
 
+type OrgRow = { id: string; name: string };
+
 export default function ScanV8DebugPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reports, setReports] = useState<RunReport[]>([]);
   const [runCount, setRunCount] = useState(0);
+  const [orgs, setOrgs] = useState<OrgRow[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id, name")
+        .order("created_at", { ascending: false })
+        .limit(25);
+      const list = (data ?? []) as OrgRow[];
+      setOrgs(list);
+      // default: eerste org met "test" in naam, anders eerste
+      const preferred =
+        list.find((o) => /test/i.test(o.name)) ?? list[0] ?? null;
+      if (preferred) setSelectedOrgId(preferred.id);
+    })();
+  }, []);
+
+  const inviteUrl = selectedOrgId
+    ? `${window.location.origin}/shadow-survey-v8?org=${selectedOrgId}`
+    : "";
+
+  async function copyInvite() {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // negeer
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -191,6 +227,84 @@ export default function ScanV8DebugPage() {
         zijn gevuld. Geen scoring, geen risico-classificatie. Alleen bouw- en
         datacontrole.
       </p>
+
+      {/* Tijdelijk: actieve survey-uitnodigingslink voor smoke test */}
+      <div
+        style={{
+          background: "#eef6ff",
+          border: "1px solid #b6d4fe",
+          borderRadius: 6,
+          padding: 12,
+          marginBottom: 20,
+          fontSize: 13,
+        }}
+      >
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>
+          🚀 Smoke test — survey-uitnodigingslink
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <label style={{ color: "#444" }}>Organisatie:</label>
+          <select
+            value={selectedOrgId}
+            onChange={(e) => setSelectedOrgId(e.target.value)}
+            style={{ padding: "4px 6px", fontSize: 13 }}
+          >
+            {orgs.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {inviteUrl && (
+          <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <code
+              style={{
+                background: "#fff",
+                border: "1px solid #cbd5e1",
+                padding: "4px 8px",
+                borderRadius: 4,
+                fontSize: 12,
+                wordBreak: "break-all",
+                flex: "1 1 320px",
+              }}
+            >
+              {inviteUrl}
+            </code>
+            <button
+              type="button"
+              onClick={copyInvite}
+              style={{
+                padding: "5px 10px",
+                fontSize: 12,
+                background: "#1d4ed8",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                cursor: "pointer",
+              }}
+            >
+              {copied ? "Gekopieerd ✓" : "Kopieer link"}
+            </button>
+            <a
+              href={inviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: "5px 10px",
+                fontSize: 12,
+                background: "#fff",
+                color: "#1d4ed8",
+                border: "1px solid #1d4ed8",
+                borderRadius: 4,
+                textDecoration: "none",
+              }}
+            >
+              Open in nieuw tabblad ↗
+            </a>
+          </div>
+        )}
+      </div>
 
       {loading && <p>Bezig met laden…</p>}
       {error && (
