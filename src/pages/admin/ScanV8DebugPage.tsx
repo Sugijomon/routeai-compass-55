@@ -20,17 +20,23 @@ type ScoreOutput = {
   warnings?: string[];
   exit_path?: boolean;
   error?: string;
+  last_calculated_at?: string | null;
 };
 
 type RunRow = {
   id: string;
   org_id: string;
+  started_at: string | null;
   completed_at: string | null;
 };
 
 type RunReport = {
   runId: string;
+  orgId: string;
+  startedAt: string | null;
   completedAt: string | null;
+  respondentEmail: string | null;
+  inviteId: string | null;
   department: string | null;
   frequency: string | null;
   toolCount: number;
@@ -47,6 +53,9 @@ type RunReport = {
   prefReasonCodes: string[];
   hasProfile: boolean;
   missing: string[];
+  riskResultCount: number;
+  riskResultToolCount: number;
+  lastCalculatedAt: string | null;
 };
 
 function first<T>(rows: T[] | null | undefined, n = 3): T[] {
