@@ -11,6 +11,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateScoresForRun } from "@/lib/v8ScoreEngine";
+import {
+  scenarioApprovedSpecialData,
+  scenarioProhibitedTool,
+  scenarioAgenticUseCase,
+  type ScenarioCode,
+  type ScenarioResult,
+  SCENARIO_LABELS,
+} from "@/lib/v8ScoreEngineFixtures";
 
 type ScoreOutput = {
   loading: boolean;
@@ -256,6 +264,46 @@ export default function ScanV8DebugPage() {
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [scores, setScores] = useState<Record<string, ScoreOutput>>({});
+  const [scenarioBusy, setScenarioBusy] = useState<ScenarioCode | null>(null);
+  const [scenarioLog, setScenarioLog] = useState<
+    Array<ScenarioResult & { error?: string }>
+  >([]);
+
+  async function runScenario(code: ScenarioCode) {
+    if (!selectedOrgId) {
+      alert("Kies eerst een organisatie.");
+      return;
+    }
+    setScenarioBusy(code);
+    try {
+      let res: ScenarioResult;
+      if (code === "approved_special_data")
+        res = await scenarioApprovedSpecialData(selectedOrgId);
+      else if (code === "prohibited_tool")
+        res = await scenarioProhibitedTool(selectedOrgId);
+      else res = await scenarioAgenticUseCase(selectedOrgId);
+
+      setScenarioLog((l) => [res, ...l]);
+      // direct ook score berekenen zodat trigger-codes meteen zichtbaar zijn
+      await runScoreCalc(res.surveyRunId);
+      // refresh runs-overzicht
+      await refetchReports();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setScenarioLog((l) => [
+        {
+          scenario: code,
+          surveyRunId: "",
+          surveyToolId: "",
+          notes: [],
+          error: msg,
+        },
+        ...l,
+      ]);
+    } finally {
+      setScenarioBusy(null);
+    }
+  }
 
   async function runScoreCalc(runId: string) {
     setScores((s) => ({ ...s, [runId]: { loading: true } }));
@@ -323,41 +371,41 @@ export default function ScanV8DebugPage() {
     }
   }
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data: runs, error: runsError } = await supabase
-          .from("survey_run")
-          .select("id, org_id, started_at, completed_at")
-          .not("completed_at", "is", null)
-          .order("completed_at", { ascending: false })
-          .limit(50);
+  async function loadReports() {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: runs, error: runsError } = await supabase
+        .from("survey_run")
+        .select("id, org_id, started_at, completed_at")
+        .not("completed_at", "is", null)
+        .order("completed_at", { ascending: false })
+        .limit(50);
 
-        if (runsError) throw runsError;
-        const runList = (runs ?? []) as RunRow[];
-        if (cancelled) return;
-        setRunCount(runList.length);
+      if (runsError) throw runsError;
+      const runList = (runs ?? []) as RunRow[];
+      setRunCount(runList.length);
 
-        const built: RunReport[] = [];
-        for (const r of runList) {
-          const rep = await buildReport(r);
-          if (cancelled) return;
-          built.push(rep);
-        }
-        if (!cancelled) setReports(built);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (!cancelled) setError(msg);
-      } finally {
-        if (!cancelled) setLoading(false);
+      const built: RunReport[] = [];
+      for (const r of runList) {
+        const rep = await buildReport(r);
+        built.push(rep);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+      setReports(built);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // alias gebruikt door scenario-runner
+  const refetchReports = loadReports;
+
+  useEffect(() => {
+    loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -475,6 +523,99 @@ export default function ScanV8DebugPage() {
             >
               Open in nieuw tabblad ↗
             </a>
+          </div>
+        )}
+      </div>
+
+      {/* Validatiescenario's — fixture-runs voor V8 score-engine. */}
+      <div
+        style={{
+          background: "#fef9c3",
+          border: "1px solid #facc15",
+          borderRadius: 6,
+          padding: 12,
+          marginBottom: 20,
+          fontSize: 13,
+        }}
+      >
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>
+          🧪 Score-engine validatiescenario's
+        </div>
+        <div style={{ marginBottom: 8, fontSize: 12, color: "#444" }}>
+          Maakt een fixture <code>survey_run</code> voor de gekozen organisatie
+          en draait <code>calculateScoresForRun</code> direct daarna. Controleer
+          per scenario de verwachte trigger-codes in de tabel hieronder.
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {(
+            [
+              "approved_special_data",
+              "prohibited_tool",
+              "agentic_use_case",
+            ] as ScenarioCode[]
+          ).map((code) => (
+            <button
+              key={code}
+              type="button"
+              disabled={!selectedOrgId || scenarioBusy !== null}
+              onClick={() => runScenario(code)}
+              style={{
+                padding: "5px 10px",
+                fontSize: 12,
+                background: scenarioBusy === code ? "#facc15" : "#a16207",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                cursor:
+                  scenarioBusy !== null || !selectedOrgId
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  scenarioBusy !== null && scenarioBusy !== code ? 0.5 : 1,
+              }}
+            >
+              {scenarioBusy === code ? "bezig…" : SCENARIO_LABELS[code]}
+            </button>
+          ))}
+        </div>
+        {scenarioLog.length > 0 && (
+          <div
+            style={{
+              marginTop: 10,
+              background: "#fff",
+              border: "1px solid #facc15",
+              borderRadius: 4,
+              padding: 8,
+              fontSize: 11,
+              maxHeight: 180,
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+              Recent aangemaakt:
+            </div>
+            {scenarioLog.map((l, i) => (
+              <div
+                key={i}
+                style={{ marginBottom: 6, paddingBottom: 6, borderBottom: "1px dashed #eee" }}
+              >
+                <strong>{SCENARIO_LABELS[l.scenario]}</strong>
+                {l.error ? (
+                  <div style={{ color: "#b91c1c" }}>✗ {l.error}</div>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: "monospace", fontSize: 10 }}>
+                      run: {l.surveyRunId}
+                    </div>
+                    <ul style={{ margin: "2px 0 0 14px", padding: 0 }}>
+                      {l.notes.map((n, j) => (
+                        <li key={j}>{n}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
