@@ -10,6 +10,17 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateScoresForRun } from "@/lib/v8ScoreEngine";
+
+type ScoreOutput = {
+  loading: boolean;
+  person_score?: number;
+  assigned_tier?: string;
+  review_trigger_codes?: string[];
+  warnings?: string[];
+  exit_path?: boolean;
+  error?: string;
+};
 
 type RunRow = {
   id: string;
