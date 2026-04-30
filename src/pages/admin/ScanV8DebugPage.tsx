@@ -527,6 +527,12 @@ export default function ScanV8DebugPage() {
                           </span>
                         )}
                       </td>
+                      <td style={td}>
+                        <ScoreCell
+                          state={scores[r.runId]}
+                          onRun={() => runScoreCalc(r.runId)}
+                        />
+                      </td>
                     </tr>
                   );
                 })}
