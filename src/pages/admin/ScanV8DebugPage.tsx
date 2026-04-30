@@ -517,8 +517,7 @@ export default function ScanV8DebugPage() {
             >
               <thead>
                 <tr style={{ background: "#f3f3f3", textAlign: "left" }}>
-                  <th style={th}>completed_at</th>
-                  <th style={th}>run_id</th>
+                  <th style={th}>identificatie</th>
                   <th style={th}>vakgebied</th>
                   <th style={th}>frequentie</th>
                   <th style={th}>tools</th>
@@ -529,6 +528,7 @@ export default function ScanV8DebugPage() {
                   <th style={th}>concerns</th>
                   <th style={th}>support</th>
                   <th style={th}>pref_reasons</th>
+                  <th style={th}>persistentie</th>
                   <th style={th}>warnings</th>
                   <th style={th}>v8 score</th>
                 </tr>
@@ -536,6 +536,12 @@ export default function ScanV8DebugPage() {
               <tbody>
                 {reports.map((r) => {
                   const ok = r.missing.length === 0;
+                  const rrDup = r.riskResultCount > 1;
+                  // risk_result_tool moet exact gelijk zijn aan tool-count
+                  // (1 rij per tool). Méér = duplicaten, minder = scoring
+                  // is nog niet gedraaid of partial.
+                  const rrtMismatch =
+                    r.toolCount > 0 && r.riskResultToolCount !== r.toolCount;
                   return (
                     <tr
                       key={r.runId}
@@ -544,13 +550,48 @@ export default function ScanV8DebugPage() {
                         background: ok ? "transparent" : "#fffbe6",
                       }}
                     >
-                      <td style={td}>
-                        {r.completedAt
-                          ? new Date(r.completedAt).toLocaleString("nl-NL")
-                          : "—"}
-                      </td>
-                      <td style={{ ...td, fontFamily: "monospace", fontSize: 11 }}>
-                        {r.runId.slice(0, 8)}…
+                      <td style={{ ...td, minWidth: 220 }}>
+                        <div
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: 11,
+                            wordBreak: "break-all",
+                            color: "#111",
+                          }}
+                          title="survey_run_id"
+                        >
+                          {r.runId}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                          <strong>respondent:</strong>{" "}
+                          {r.respondentEmail ? (
+                            <span>{r.respondentEmail}</span>
+                          ) : r.inviteId ? (
+                            <span style={{ color: "#666" }}>
+                              invite {r.inviteId.slice(0, 8)}…
+                            </span>
+                          ) : (
+                            <span style={{ color: "#999" }}>anoniem</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666", marginTop: 2 }}>
+                          <strong>org:</strong>{" "}
+                          <span style={{ fontFamily: "monospace" }}>
+                            {r.orgId.slice(0, 8)}…
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666", marginTop: 2 }}>
+                          <strong>started:</strong>{" "}
+                          {r.startedAt
+                            ? new Date(r.startedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666" }}>
+                          <strong>completed:</strong>{" "}
+                          {r.completedAt
+                            ? new Date(r.completedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
                       </td>
                       <td style={td}>{r.department ?? "—"}</td>
                       <td style={td}>{r.frequency ?? "—"}</td>
@@ -570,6 +611,51 @@ export default function ScanV8DebugPage() {
                       <td style={td}>{countCell(r.concernCount, r.concernCodes)}</td>
                       <td style={td}>{countCell(r.supportCount, r.supportCodes)}</td>
                       <td style={td}>{countCell(r.prefReasonCount, r.prefReasonCodes)}</td>
+                      <td style={{ ...td, fontSize: 11 }}>
+                        <div>
+                          <strong>risk_result:</strong>{" "}
+                          <span
+                            style={{
+                              color: rrDup
+                                ? "#b91c1c"
+                                : r.riskResultCount === 0
+                                  ? "#999"
+                                  : "#0a0",
+                              fontWeight: rrDup ? 600 : 400,
+                            }}
+                          >
+                            {r.riskResultCount}
+                            {rrDup && " ⚠ duplicaat"}
+                          </span>
+                        </div>
+                        <div>
+                          <strong>risk_result_tool:</strong>{" "}
+                          <span
+                            style={{
+                              color: rrtMismatch
+                                ? "#b91c1c"
+                                : r.riskResultToolCount === 0
+                                  ? "#999"
+                                  : "#0a0",
+                              fontWeight: rrtMismatch ? 600 : 400,
+                            }}
+                          >
+                            {r.riskResultToolCount}
+                            {r.toolCount > 0 && (
+                              <span style={{ color: "#888" }}>
+                                {" "}/ {r.toolCount} tools
+                              </span>
+                            )}
+                            {rrtMismatch && " ⚠"}
+                          </span>
+                        </div>
+                        <div style={{ color: "#666", fontSize: 10, marginTop: 2 }}>
+                          <strong>laatste calc:</strong>{" "}
+                          {r.lastCalculatedAt
+                            ? new Date(r.lastCalculatedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
+                      </td>
                       <td style={td}>
                         {r.missing.length === 0 ? (
                           <span style={{ color: "#0a0" }}>✓ compleet</span>
