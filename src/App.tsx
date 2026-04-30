@@ -40,6 +40,9 @@ import ScanOverzichtPage from "./pages/admin/ScanOverzichtPage";
 import ScanScoreboardPage from "./pages/admin/ScanScoreboardPage";
 import ScanInstellingenPage from "./pages/admin/ScanInstellingenPage";
 import ScanV8DebugPage from "./pages/admin/ScanV8DebugPage";
+import ActivatiePage from "./pages/admin/shadow/ActivatiePage";
+import ToolInventarisPage from "./pages/admin/shadow/ToolInventarisPage";
+import RisicoprofielPage from "./pages/admin/shadow/RisicoprofielPage";
 
 import DpoDashboard from "./pages/admin/DpoDashboard";
 
@@ -408,6 +411,9 @@ export default function App() {
         <Route path="/admin/shadow/scoreboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanScoreboardPage /></AuthRoute>} />
         <Route path="/admin/shadow/instellingen" element={<AuthRoute requireAdmin skipRijbewijsCheck><ScanInstellingenPage /></AuthRoute>} />
         <Route path="/admin/shadow/rapportage" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
+        <Route path="/admin/shadow/activatie" element={<AuthRoute requireAdmin skipRijbewijsCheck><ActivatiePage /></AuthRoute>} />
+        <Route path="/admin/shadow/tools" element={<AuthRoute requireAdmin skipRijbewijsCheck><ToolInventarisPage /></AuthRoute>} />
+        <Route path="/admin/shadow/risicoprofiel" element={<AuthRoute requireAdmin skipRijbewijsCheck><RisicoprofielPage /></AuthRoute>} />
         
         <Route path="/admin/dpo-dashboard" element={<AuthRoute requireAdmin skipRijbewijsCheck><DpoDashboard /></AuthRoute>} />
         <Route path="/admin/passport" element={<AuthRoute requireAdmin skipRijbewijsCheck><PassportPage /></AuthRoute>} />
