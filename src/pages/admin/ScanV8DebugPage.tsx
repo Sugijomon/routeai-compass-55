@@ -203,6 +203,19 @@ export default function ScanV8DebugPage() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [scores, setScores] = useState<Record<string, ScoreOutput>>({});
+
+  async function runScoreCalc(runId: string) {
+    setScores((s) => ({ ...s, [runId]: { loading: true } }));
+    try {
+      const res = await calculateScoresForRun(runId);
+      setScores((s) => ({ ...s, [runId]: { loading: false, ...res } }));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setScores((s) => ({ ...s, [runId]: { loading: false, error: msg } }));
+    }
+  }
+
   const [catalogSource, setCatalogSource] = useState<CatalogSourceInfo | null>(
     null,
   );
