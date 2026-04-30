@@ -463,6 +463,7 @@ export async function calculateScoresForRun(
   review_trigger_codes: string[];
   warnings: string[];
   exit_path: boolean;
+  last_calculated_at?: string | null;
 }> {
   const warnings: string[] = [];
 
