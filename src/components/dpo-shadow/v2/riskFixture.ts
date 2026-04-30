@@ -169,7 +169,7 @@ export function dataLabel(value: string): string {
   if (["interne_documenten", "broncode_logica", "interne_email", "notulen", "excel_sheets"].includes(value))
     return "Intern";
   if (value === "publiek") return "Publiek";
-  return value ? value.replaceAll("_", " ") : "Onbekend";
+  return value ? value.replace(/_/g, " ") : "Onbekend";
 }
 
 export function isHardReview(c: RiskClusterRow): boolean {
