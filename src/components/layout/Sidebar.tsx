@@ -97,6 +97,14 @@ export function Sidebar() {
           { label: 'Rapportage', href: '/admin/shadow/rapportage', icon: FileText },
         ],
       },
+      {
+        title: 'DPO Dashboard',
+        items: [
+          { label: 'Activatie', href: '/admin/shadow/activatie', icon: Rocket },
+          { label: 'Tools', href: '/admin/shadow/tools', icon: Wrench },
+          { label: 'Risicoprofiel', href: '/admin/shadow/risicoprofiel', icon: Shield },
+        ],
+      },
     ];
   } else if (isContentEditor) {
     sections = [
