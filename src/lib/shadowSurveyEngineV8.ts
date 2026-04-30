@@ -404,6 +404,22 @@ export async function completeSurveyRun(surveyRunId: string): Promise<void> {
     .eq("id", surveyRunId);
 
   if (error) failOn("completeSurveyRun", error);
+
+  // Score-engine wordt pas aangeroepen nadat completed_at succesvol is gezet.
+  // Scoring-fouten mogen de afsluiting van de survey nooit blokkeren —
+  // de respondent ziet het bedanksscherm ongeacht het resultaat.
+  // De handmatige knop op /admin/scan-v8-debug blijft beschikbaar voor
+  // herberekenen wanneer scoring hier zou falen.
+  try {
+    const { calculateScoresForRun } = await import("./v8ScoreEngine");
+    await calculateScoresForRun(surveyRunId);
+  } catch (scoringError) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[v8ScoreEngine] Scoring faalde voor survey_run_id=${surveyRunId}:`,
+      scoringError,
+    );
+  }
 }
 
 // ============================================================================
