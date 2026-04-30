@@ -28,7 +28,11 @@ export function AuthRoute({ children, requireAdmin = false, skipRijbewijsCheck =
 
   // Wacht ook tot de admin-check klaar is voor requireAdmin-routes
   const adminCheckPending = requireAdmin && !hasCheckedAdmin;
-  if (isLoading || profileLoading || planLoading || adminCheckPending) {
+  // profileLoading/planLoading hangen op `true` zolang er geen user is (TanStack Query
+  // pending+disabled). Negeer ze daarom als auth-check klaar is en er nog geen user is —
+  // anders blijft de spinner eeuwig draaien voor uitgelogde bezoekers.
+  const dependentLoading = user ? (profileLoading || planLoading) : false;
+  if (isLoading || dependentLoading || adminCheckPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
