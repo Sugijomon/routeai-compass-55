@@ -3192,6 +3192,19 @@ export type Database = {
         }
         Returns: Json
       }
+      dpo_risk_clusters: {
+        Args: { p_org_id: string }
+        Returns: {
+          assigned_tier: string
+          avg_exposure: number
+          avg_priority: number
+          avg_shadow: number
+          cluster_id: string
+          dominant_trigger: string
+          respondent_count: number
+          trigger_codes: string[]
+        }[]
+      }
       finalize_lesson_attempt: {
         Args: { p_attempt_id: string; p_quiz_answers: Json }
         Returns: Json
