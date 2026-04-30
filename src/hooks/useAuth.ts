@@ -149,6 +149,7 @@ export function useAuth() {
           session: null,
           isLoading: false,
           isAdmin: false,
+          hasCheckedAdmin: true, // geen sessie → admin-check is "klaar" (false)
         }));
       }
     });
