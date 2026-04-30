@@ -478,6 +478,7 @@ export default function ScanV8DebugPage() {
                   <th style={th}>support</th>
                   <th style={th}>pref_reasons</th>
                   <th style={th}>warnings</th>
+                  <th style={th}>v8 score</th>
                 </tr>
               </thead>
               <tbody>
