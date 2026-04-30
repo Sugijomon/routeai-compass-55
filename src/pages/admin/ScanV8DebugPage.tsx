@@ -20,17 +20,23 @@ type ScoreOutput = {
   warnings?: string[];
   exit_path?: boolean;
   error?: string;
+  last_calculated_at?: string | null;
 };
 
 type RunRow = {
   id: string;
   org_id: string;
+  started_at: string | null;
   completed_at: string | null;
 };
 
 type RunReport = {
   runId: string;
+  orgId: string;
+  startedAt: string | null;
   completedAt: string | null;
+  respondentEmail: string | null;
+  inviteId: string | null;
   department: string | null;
   frequency: string | null;
   toolCount: number;
@@ -47,6 +53,9 @@ type RunReport = {
   prefReasonCodes: string[];
   hasProfile: boolean;
   missing: string[];
+  riskResultCount: number;
+  riskResultToolCount: number;
+  lastCalculatedAt: string | null;
 };
 
 function first<T>(rows: T[] | null | undefined, n = 3): T[] {
@@ -69,6 +78,9 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     prefReasonRes,
     concernRes,
     supportRes,
+    participationRes,
+    riskResultRes,
+    riskResultToolRes,
   ] = await Promise.all([
     supabase
       .from("survey_profile")
@@ -106,6 +118,24 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     supabase
       .from("survey_support_need")
       .select("support_need_code")
+      .eq("survey_run_id", runId),
+    // Respondent identifier: survey_participation koppelt run aan invite,
+    // invite bevat e-mailadres. Optioneel — bij anonieme runs leeg.
+    supabase
+      .from("survey_participation")
+      .select("invite_id, survey_invite:invite_id(email)")
+      .eq("survey_run_id", runId)
+      .maybeSingle(),
+    // risk_result-rijen voor deze run (PK survey_run_id, dus altijd 0 of 1).
+    // We tellen via select+length om ook eventuele duplicaten te zien
+    // (zou nooit moeten voorkomen na correcte upsert).
+    supabase
+      .from("risk_result")
+      .select("survey_run_id, created_at")
+      .eq("survey_run_id", runId),
+    supabase
+      .from("risk_result_tool")
+      .select("survey_tool_id")
       .eq("survey_run_id", runId),
   ]);
 
@@ -164,9 +194,28 @@ async function buildReport(run: RunRow): Promise<RunReport> {
   if (supportCount === 0) missing.push("geen support_need");
   if (!run.completed_at) missing.push("completed_at ontbreekt");
 
+  const participation = participationRes.data ?? null;
+  const respondentEmail =
+    (participation as { survey_invite?: { email?: string | null } } | null)
+      ?.survey_invite?.email ?? null;
+  const inviteId =
+    (participation as { invite_id?: string | null } | null)?.invite_id ?? null;
+
+  const riskResultRows = (riskResultRes.data ?? []) as Array<{
+    created_at: string | null;
+  }>;
+  const riskResultCount = riskResultRows.length;
+  const riskResultToolCount = (riskResultToolRes.data ?? []).length;
+  const lastCalculatedAt =
+    riskResultRows.length > 0 ? riskResultRows[0].created_at ?? null : null;
+
   return {
     runId,
+    orgId: run.org_id,
+    startedAt: run.started_at,
     completedAt: run.completed_at,
+    respondentEmail,
+    inviteId,
     department,
     frequency,
     toolCount,
@@ -183,6 +232,9 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     prefReasonCodes,
     hasProfile: !!profile,
     missing,
+    riskResultCount,
+    riskResultToolCount,
+    lastCalculatedAt,
   };
 }
 
@@ -279,7 +331,7 @@ export default function ScanV8DebugPage() {
       try {
         const { data: runs, error: runsError } = await supabase
           .from("survey_run")
-          .select("id, org_id, completed_at")
+          .select("id, org_id, started_at, completed_at")
           .not("completed_at", "is", null)
           .order("completed_at", { ascending: false })
           .limit(50);
@@ -465,8 +517,7 @@ export default function ScanV8DebugPage() {
             >
               <thead>
                 <tr style={{ background: "#f3f3f3", textAlign: "left" }}>
-                  <th style={th}>completed_at</th>
-                  <th style={th}>run_id</th>
+                  <th style={th}>identificatie</th>
                   <th style={th}>vakgebied</th>
                   <th style={th}>frequentie</th>
                   <th style={th}>tools</th>
@@ -477,6 +528,7 @@ export default function ScanV8DebugPage() {
                   <th style={th}>concerns</th>
                   <th style={th}>support</th>
                   <th style={th}>pref_reasons</th>
+                  <th style={th}>persistentie</th>
                   <th style={th}>warnings</th>
                   <th style={th}>v8 score</th>
                 </tr>
@@ -484,6 +536,12 @@ export default function ScanV8DebugPage() {
               <tbody>
                 {reports.map((r) => {
                   const ok = r.missing.length === 0;
+                  const rrDup = r.riskResultCount > 1;
+                  // risk_result_tool moet exact gelijk zijn aan tool-count
+                  // (1 rij per tool). Méér = duplicaten, minder = scoring
+                  // is nog niet gedraaid of partial.
+                  const rrtMismatch =
+                    r.toolCount > 0 && r.riskResultToolCount !== r.toolCount;
                   return (
                     <tr
                       key={r.runId}
@@ -492,13 +550,48 @@ export default function ScanV8DebugPage() {
                         background: ok ? "transparent" : "#fffbe6",
                       }}
                     >
-                      <td style={td}>
-                        {r.completedAt
-                          ? new Date(r.completedAt).toLocaleString("nl-NL")
-                          : "—"}
-                      </td>
-                      <td style={{ ...td, fontFamily: "monospace", fontSize: 11 }}>
-                        {r.runId.slice(0, 8)}…
+                      <td style={{ ...td, minWidth: 220 }}>
+                        <div
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: 11,
+                            wordBreak: "break-all",
+                            color: "#111",
+                          }}
+                          title="survey_run_id"
+                        >
+                          {r.runId}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                          <strong>respondent:</strong>{" "}
+                          {r.respondentEmail ? (
+                            <span>{r.respondentEmail}</span>
+                          ) : r.inviteId ? (
+                            <span style={{ color: "#666" }}>
+                              invite {r.inviteId.slice(0, 8)}…
+                            </span>
+                          ) : (
+                            <span style={{ color: "#999" }}>anoniem</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666", marginTop: 2 }}>
+                          <strong>org:</strong>{" "}
+                          <span style={{ fontFamily: "monospace" }}>
+                            {r.orgId.slice(0, 8)}…
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666", marginTop: 2 }}>
+                          <strong>started:</strong>{" "}
+                          {r.startedAt
+                            ? new Date(r.startedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#666" }}>
+                          <strong>completed:</strong>{" "}
+                          {r.completedAt
+                            ? new Date(r.completedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
                       </td>
                       <td style={td}>{r.department ?? "—"}</td>
                       <td style={td}>{r.frequency ?? "—"}</td>
@@ -518,6 +611,51 @@ export default function ScanV8DebugPage() {
                       <td style={td}>{countCell(r.concernCount, r.concernCodes)}</td>
                       <td style={td}>{countCell(r.supportCount, r.supportCodes)}</td>
                       <td style={td}>{countCell(r.prefReasonCount, r.prefReasonCodes)}</td>
+                      <td style={{ ...td, fontSize: 11 }}>
+                        <div>
+                          <strong>risk_result:</strong>{" "}
+                          <span
+                            style={{
+                              color: rrDup
+                                ? "#b91c1c"
+                                : r.riskResultCount === 0
+                                  ? "#999"
+                                  : "#0a0",
+                              fontWeight: rrDup ? 600 : 400,
+                            }}
+                          >
+                            {r.riskResultCount}
+                            {rrDup && " ⚠ duplicaat"}
+                          </span>
+                        </div>
+                        <div>
+                          <strong>risk_result_tool:</strong>{" "}
+                          <span
+                            style={{
+                              color: rrtMismatch
+                                ? "#b91c1c"
+                                : r.riskResultToolCount === 0
+                                  ? "#999"
+                                  : "#0a0",
+                              fontWeight: rrtMismatch ? 600 : 400,
+                            }}
+                          >
+                            {r.riskResultToolCount}
+                            {r.toolCount > 0 && (
+                              <span style={{ color: "#888" }}>
+                                {" "}/ {r.toolCount} tools
+                              </span>
+                            )}
+                            {rrtMismatch && " ⚠"}
+                          </span>
+                        </div>
+                        <div style={{ color: "#666", fontSize: 10, marginTop: 2 }}>
+                          <strong>laatste calc:</strong>{" "}
+                          {r.lastCalculatedAt
+                            ? new Date(r.lastCalculatedAt).toLocaleString("nl-NL")
+                            : "—"}
+                        </div>
+                      </td>
                       <td style={td}>
                         {r.missing.length === 0 ? (
                           <span style={{ color: "#0a0" }}>✓ compleet</span>
@@ -664,6 +802,12 @@ function ScoreCell({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+      {state.last_calculated_at && (
+        <div style={{ color: "#666", fontSize: 10, marginTop: 2 }}>
+          <strong>calc:</strong>{" "}
+          {new Date(state.last_calculated_at).toLocaleString("nl-NL")}
         </div>
       )}
       <button

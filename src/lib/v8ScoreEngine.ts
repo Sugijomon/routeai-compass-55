@@ -463,6 +463,7 @@ export async function calculateScoresForRun(
   review_trigger_codes: string[];
   warnings: string[];
   exit_path: boolean;
+  last_calculated_at?: string | null;
 }> {
   const warnings: string[] = [];
 
@@ -522,6 +523,44 @@ export async function calculateScoresForRun(
   if (profErr) warnings.push(`survey_profile: ${profErr.message}`);
   if (!profile) warnings.push("survey_profile ontbreekt; alle boosts 0");
 
+  // ── Exitpad: geen tools ─────────────────────────────────────────────
+  // Eerst checken vóór we boost-warnings verzamelen: bij een exitpad zijn
+  // ontbrekende data_type / automation / extension geen probleem maar
+  // gewoon het verwachte gevolg (gebruiker koos "ik gebruik geen AI").
+  if (!tools || tools.length === 0) {
+    const exitWarnings = ["Exitpad: geen AI-tools geselecteerd; scoring op 0 gezet."];
+    await persistScores(
+      surveyRunId,
+      config,
+      [],
+      {
+        person_score: 0,
+        assigned_tier: "standard",
+        review_trigger_codes: [],
+        warnings: exitWarnings,
+        exit_path: true,
+        shadow_tool_count: 0,
+        highest_priority_score: 0,
+        highest_risk_tool: null,
+        highest_risk_use_case: null,
+        highest_risk_context: null,
+      },
+    );
+    const { data: rrExit } = await supabase
+      .from("risk_result")
+      .select("created_at")
+      .eq("survey_run_id", surveyRunId)
+      .maybeSingle();
+    return {
+      person_score: 0,
+      assigned_tier: "standard",
+      review_trigger_codes: [],
+      warnings: exitWarnings,
+      exit_path: true,
+      last_calculated_at: rrExit?.created_at ?? null,
+    };
+  }
+
   // 5. survey_data_type
   const { data: dataTypes, error: dtErr } = await supabase
     .from("survey_data_type")
@@ -555,34 +594,6 @@ export async function calculateScoresForRun(
     automation_boost,
     extension_boost,
   };
-
-  // ── Exitpad: geen tools ─────────────────────────────────────────────
-  if (!tools || tools.length === 0) {
-    await persistScores(
-      surveyRunId,
-      config,
-      [],
-      {
-        person_score: 0,
-        assigned_tier: "standard",
-        review_trigger_codes: [],
-        warnings,
-        exit_path: true,
-        shadow_tool_count: 0,
-        highest_priority_score: 0,
-        highest_risk_tool: null,
-        highest_risk_use_case: null,
-        highest_risk_context: null,
-      },
-    );
-    return {
-      person_score: 0,
-      assigned_tier: "standard",
-      review_trigger_codes: [],
-      warnings,
-      exit_path: true,
-    };
-  }
 
   const toolIds = tools.map((t) => t.id);
 
@@ -689,11 +700,18 @@ export async function calculateScoresForRun(
 
   await persistScores(surveyRunId, config, toolScores, runScore);
 
+  const { data: rrAfter } = await supabase
+    .from("risk_result")
+    .select("created_at")
+    .eq("survey_run_id", surveyRunId)
+    .maybeSingle();
+
   return {
     person_score: runScore.person_score,
     assigned_tier: runScore.assigned_tier,
     review_trigger_codes: runScore.review_trigger_codes,
     warnings,
     exit_path: false,
+    last_calculated_at: rrAfter?.created_at ?? null,
   };
 }
