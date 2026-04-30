@@ -359,13 +359,13 @@ export function calculateRunScore(
   }
 
   return {
-    person_score: maxPriority,
+    person_score: round2(maxPriority),
     assigned_tier,
     review_trigger_codes: Array.from(allTriggers),
     warnings: [],
     exit_path: false,
     shadow_tool_count: tools.length,
-    highest_priority_score: maxPriority,
+    highest_priority_score: round2(maxPriority),
     highest_risk_tool: topTool?.tool_code ?? topTool?.tool_name ?? null,
     highest_risk_use_case: null,
     highest_risk_context: null,
