@@ -78,6 +78,9 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     prefReasonRes,
     concernRes,
     supportRes,
+    participationRes,
+    riskResultRes,
+    riskResultToolRes,
   ] = await Promise.all([
     supabase
       .from("survey_profile")
@@ -115,6 +118,24 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     supabase
       .from("survey_support_need")
       .select("support_need_code")
+      .eq("survey_run_id", runId),
+    // Respondent identifier: survey_participation koppelt run aan invite,
+    // invite bevat e-mailadres. Optioneel — bij anonieme runs leeg.
+    supabase
+      .from("survey_participation")
+      .select("invite_id, survey_invite:invite_id(email)")
+      .eq("survey_run_id", runId)
+      .maybeSingle(),
+    // risk_result-rijen voor deze run (PK survey_run_id, dus altijd 0 of 1).
+    // We tellen via select+length om ook eventuele duplicaten te zien
+    // (zou nooit moeten voorkomen na correcte upsert).
+    supabase
+      .from("risk_result")
+      .select("survey_run_id, created_at")
+      .eq("survey_run_id", runId),
+    supabase
+      .from("risk_result_tool")
+      .select("survey_tool_id")
       .eq("survey_run_id", runId),
   ]);
 
