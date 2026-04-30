@@ -1,7 +1,7 @@
 // Tool Register — uitgebreide tabel met chips, quick-filters en kolomfilters.
 // Klik op een rij opent toolprofiel-drawer.
 import { useMemo, useState } from "react";
-import { Apps, AlertTriangle, ClipboardList, Flame, UserCog, FilterX, Shield, Search } from "lucide-react";
+import { LayoutGrid as Apps, TriangleAlert as AlertTriangle, ClipboardList, Flame, UserCog, FilterX, Shield, Search } from "lucide-react";
 import {
   ToolRow,
   RISK_CLASS_META,
