@@ -527,6 +527,99 @@ export default function ScanV8DebugPage() {
         )}
       </div>
 
+      {/* Validatiescenario's — fixture-runs voor V8 score-engine. */}
+      <div
+        style={{
+          background: "#fef9c3",
+          border: "1px solid #facc15",
+          borderRadius: 6,
+          padding: 12,
+          marginBottom: 20,
+          fontSize: 13,
+        }}
+      >
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>
+          🧪 Score-engine validatiescenario's
+        </div>
+        <div style={{ marginBottom: 8, fontSize: 12, color: "#444" }}>
+          Maakt een fixture <code>survey_run</code> voor de gekozen organisatie
+          en draait <code>calculateScoresForRun</code> direct daarna. Controleer
+          per scenario de verwachte trigger-codes in de tabel hieronder.
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {(
+            [
+              "approved_special_data",
+              "prohibited_tool",
+              "agentic_use_case",
+            ] as ScenarioCode[]
+          ).map((code) => (
+            <button
+              key={code}
+              type="button"
+              disabled={!selectedOrgId || scenarioBusy !== null}
+              onClick={() => runScenario(code)}
+              style={{
+                padding: "5px 10px",
+                fontSize: 12,
+                background: scenarioBusy === code ? "#facc15" : "#a16207",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                cursor:
+                  scenarioBusy !== null || !selectedOrgId
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  scenarioBusy !== null && scenarioBusy !== code ? 0.5 : 1,
+              }}
+            >
+              {scenarioBusy === code ? "bezig…" : SCENARIO_LABELS[code]}
+            </button>
+          ))}
+        </div>
+        {scenarioLog.length > 0 && (
+          <div
+            style={{
+              marginTop: 10,
+              background: "#fff",
+              border: "1px solid #facc15",
+              borderRadius: 4,
+              padding: 8,
+              fontSize: 11,
+              maxHeight: 180,
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+              Recent aangemaakt:
+            </div>
+            {scenarioLog.map((l, i) => (
+              <div
+                key={i}
+                style={{ marginBottom: 6, paddingBottom: 6, borderBottom: "1px dashed #eee" }}
+              >
+                <strong>{SCENARIO_LABELS[l.scenario]}</strong>
+                {l.error ? (
+                  <div style={{ color: "#b91c1c" }}>✗ {l.error}</div>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: "monospace", fontSize: 10 }}>
+                      run: {l.surveyRunId}
+                    </div>
+                    <ul style={{ margin: "2px 0 0 14px", padding: 0 }}>
+                      {l.notes.map((n, j) => (
+                        <li key={j}>{n}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {loading && <p>Bezig met laden…</p>}
       {error && (
         <pre
