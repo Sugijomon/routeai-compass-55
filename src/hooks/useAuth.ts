@@ -89,6 +89,8 @@ export function useAuth() {
           session,
           isLoading: session?.user ? true : false, // Keep loading if we need to check admin
           isAdmin: session?.user ? prev.isAdmin : false,
+          // Geen sessie → admin-check is meteen klaar (false). Met sessie wachten we op de timeout.
+          hasCheckedAdmin: session?.user ? prev.hasCheckedAdmin : true,
         }));
         
         // Defer Supabase calls with setTimeout to prevent deadlock
@@ -149,6 +151,7 @@ export function useAuth() {
           session: null,
           isLoading: false,
           isAdmin: false,
+          hasCheckedAdmin: true, // geen sessie → admin-check is "klaar" (false)
         }));
       }
     });
