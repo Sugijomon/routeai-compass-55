@@ -194,9 +194,28 @@ async function buildReport(run: RunRow): Promise<RunReport> {
   if (supportCount === 0) missing.push("geen support_need");
   if (!run.completed_at) missing.push("completed_at ontbreekt");
 
+  const participation = participationRes.data ?? null;
+  const respondentEmail =
+    (participation as { survey_invite?: { email?: string | null } } | null)
+      ?.survey_invite?.email ?? null;
+  const inviteId =
+    (participation as { invite_id?: string | null } | null)?.invite_id ?? null;
+
+  const riskResultRows = (riskResultRes.data ?? []) as Array<{
+    created_at: string | null;
+  }>;
+  const riskResultCount = riskResultRows.length;
+  const riskResultToolCount = (riskResultToolRes.data ?? []).length;
+  const lastCalculatedAt =
+    riskResultRows.length > 0 ? riskResultRows[0].created_at ?? null : null;
+
   return {
     runId,
+    orgId: run.org_id,
+    startedAt: run.started_at,
     completedAt: run.completed_at,
+    respondentEmail,
+    inviteId,
     department,
     frequency,
     toolCount,
@@ -213,6 +232,9 @@ async function buildReport(run: RunRow): Promise<RunReport> {
     prefReasonCodes,
     hasProfile: !!profile,
     missing,
+    riskResultCount,
+    riskResultToolCount,
+    lastCalculatedAt,
   };
 }
 
