@@ -700,11 +700,18 @@ export async function calculateScoresForRun(
 
   await persistScores(surveyRunId, config, toolScores, runScore);
 
+  const { data: rrAfter } = await supabase
+    .from("risk_result")
+    .select("created_at")
+    .eq("survey_run_id", surveyRunId)
+    .maybeSingle();
+
   return {
     person_score: runScore.person_score,
     assigned_tier: runScore.assigned_tier,
     review_trigger_codes: runScore.review_trigger_codes,
     warnings,
     exit_path: false,
+    last_calculated_at: rrAfter?.created_at ?? null,
   };
 }
