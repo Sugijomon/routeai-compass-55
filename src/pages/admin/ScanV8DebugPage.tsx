@@ -331,7 +331,7 @@ export default function ScanV8DebugPage() {
       try {
         const { data: runs, error: runsError } = await supabase
           .from("survey_run")
-          .select("id, org_id, completed_at")
+          .select("id, org_id, started_at, completed_at")
           .not("completed_at", "is", null)
           .order("completed_at", { ascending: false })
           .limit(50);
