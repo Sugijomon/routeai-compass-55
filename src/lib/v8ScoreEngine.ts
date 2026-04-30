@@ -65,6 +65,12 @@ export interface RunScoreResult {
   highest_risk_context: string | null;
 }
 
+/** Round to max 2 decimals; voorkomt 49.050000000000004-weergave. */
+function round2(n: number): number {
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n * 100) / 100;
+}
+
 const DEFAULT_CONFIG: ScoringConfig = {
   id: null,
   priority_review_threshold: 40,
@@ -271,21 +277,21 @@ export function calculateToolScore(
     tool_code: tool.tool_code,
     tool_name: tool.tool_name,
     shadow_base,
-    shadow_score,
+    shadow_score: round2(shadow_score),
     use_case_base,
-    context_multiplier,
-    account_multiplier,
+    context_multiplier: round2(context_multiplier),
+    account_multiplier: round2(account_multiplier),
     data_boost: run.data_boost,
     frequency_boost: run.frequency_boost,
     automation_boost: run.automation_boost,
     extension_boost: run.extension_boost,
     agentic_boost,
-    raw_exposure_score,
-    exposure_score,
+    raw_exposure_score: round2(raw_exposure_score),
+    exposure_score: round2(exposure_score),
     toxic_boost,
     review_boost,
-    priority_score_raw,
-    priority_score,
+    priority_score_raw: round2(priority_score_raw),
+    priority_score: round2(priority_score),
     review_trigger_codes: triggers,
     dpo_review_required: false, // wordt na config-drempel-toets bijgewerkt
   };
@@ -353,13 +359,13 @@ export function calculateRunScore(
   }
 
   return {
-    person_score: maxPriority,
+    person_score: round2(maxPriority),
     assigned_tier,
     review_trigger_codes: Array.from(allTriggers),
     warnings: [],
     exit_path: false,
     shadow_tool_count: tools.length,
-    highest_priority_score: maxPriority,
+    highest_priority_score: round2(maxPriority),
     highest_risk_tool: topTool?.tool_code ?? topTool?.tool_name ?? null,
     highest_risk_use_case: null,
     highest_risk_context: null,
