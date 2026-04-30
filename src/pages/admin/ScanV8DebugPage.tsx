@@ -10,6 +10,17 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateScoresForRun } from "@/lib/v8ScoreEngine";
+
+type ScoreOutput = {
+  loading: boolean;
+  person_score?: number;
+  assigned_tier?: string;
+  review_trigger_codes?: string[];
+  warnings?: string[];
+  exit_path?: boolean;
+  error?: string;
+};
 
 type RunRow = {
   id: string;
@@ -192,6 +203,19 @@ export default function ScanV8DebugPage() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [scores, setScores] = useState<Record<string, ScoreOutput>>({});
+
+  async function runScoreCalc(runId: string) {
+    setScores((s) => ({ ...s, [runId]: { loading: true } }));
+    try {
+      const res = await calculateScoresForRun(runId);
+      setScores((s) => ({ ...s, [runId]: { loading: false, ...res } }));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setScores((s) => ({ ...s, [runId]: { loading: false, error: msg } }));
+    }
+  }
+
   const [catalogSource, setCatalogSource] = useState<CatalogSourceInfo | null>(
     null,
   );
@@ -454,6 +478,7 @@ export default function ScanV8DebugPage() {
                   <th style={th}>support</th>
                   <th style={th}>pref_reasons</th>
                   <th style={th}>warnings</th>
+                  <th style={th}>v8 score</th>
                 </tr>
               </thead>
               <tbody>
@@ -502,6 +527,12 @@ export default function ScanV8DebugPage() {
                           </span>
                         )}
                       </td>
+                      <td style={td}>
+                        <ScoreCell
+                          state={scores[r.runId]}
+                          onRun={() => runScoreCalc(r.runId)}
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -540,5 +571,115 @@ function countCell(count: number, sample: string[]) {
         </span>
       )}
     </span>
+  );
+}
+
+function ScoreCell({
+  state,
+  onRun,
+}: {
+  state: ScoreOutput | undefined;
+  onRun: () => void;
+}) {
+  if (!state) {
+    return (
+      <button
+        type="button"
+        onClick={onRun}
+        style={{
+          padding: "4px 8px",
+          fontSize: 11,
+          background: "#0f766e",
+          color: "#fff",
+          border: "none",
+          borderRadius: 4,
+          cursor: "pointer",
+        }}
+      >
+        Bereken scores
+      </button>
+    );
+  }
+  if (state.loading) return <span style={{ color: "#666" }}>berekenen…</span>;
+  if (state.error)
+    return (
+      <span style={{ color: "#b91c1c", fontSize: 11 }}>
+        ✗ {state.error}
+        <br />
+        <button
+          type="button"
+          onClick={onRun}
+          style={{
+            marginTop: 4,
+            padding: "2px 6px",
+            fontSize: 10,
+            background: "#fff",
+            border: "1px solid #b91c1c",
+            color: "#b91c1c",
+            borderRadius: 3,
+            cursor: "pointer",
+          }}
+        >
+          opnieuw
+        </button>
+      </span>
+    );
+  return (
+    <div style={{ fontSize: 11, lineHeight: 1.4 }}>
+      <div>
+        <strong>person_score:</strong> {state.person_score}
+      </div>
+      <div>
+        <strong>tier:</strong>{" "}
+        <span
+          style={{
+            color:
+              state.assigned_tier === "toxic_shadow"
+                ? "#b91c1c"
+                : state.assigned_tier === "priority_review"
+                  ? "#b85c00"
+                  : "#0a0",
+          }}
+        >
+          {state.assigned_tier}
+        </span>
+      </div>
+      {state.exit_path && (
+        <div style={{ color: "#666" }}>(exit_path)</div>
+      )}
+      {state.review_trigger_codes && state.review_trigger_codes.length > 0 && (
+        <div style={{ color: "#444" }}>
+          <strong>triggers:</strong> {state.review_trigger_codes.join(", ")}
+        </div>
+      )}
+      {state.warnings && state.warnings.length > 0 && (
+        <details style={{ marginTop: 4, color: "#92400e" }}>
+          <summary style={{ cursor: "pointer", fontSize: 10 }}>
+            ⚠ {state.warnings.length} warning(s)
+          </summary>
+          <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 10 }}>
+            {state.warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <button
+        type="button"
+        onClick={onRun}
+        style={{
+          marginTop: 4,
+          padding: "2px 6px",
+          fontSize: 10,
+          background: "#fff",
+          border: "1px solid #0f766e",
+          color: "#0f766e",
+          borderRadius: 3,
+          cursor: "pointer",
+        }}
+      >
+        herberekenen
+      </button>
+    </div>
   );
 }
