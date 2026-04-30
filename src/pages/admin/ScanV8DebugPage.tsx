@@ -264,6 +264,46 @@ export default function ScanV8DebugPage() {
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [scores, setScores] = useState<Record<string, ScoreOutput>>({});
+  const [scenarioBusy, setScenarioBusy] = useState<ScenarioCode | null>(null);
+  const [scenarioLog, setScenarioLog] = useState<
+    Array<ScenarioResult & { error?: string }>
+  >([]);
+
+  async function runScenario(code: ScenarioCode) {
+    if (!selectedOrgId) {
+      alert("Kies eerst een organisatie.");
+      return;
+    }
+    setScenarioBusy(code);
+    try {
+      let res: ScenarioResult;
+      if (code === "approved_special_data")
+        res = await scenarioApprovedSpecialData(selectedOrgId);
+      else if (code === "prohibited_tool")
+        res = await scenarioProhibitedTool(selectedOrgId);
+      else res = await scenarioAgenticUseCase(selectedOrgId);
+
+      setScenarioLog((l) => [res, ...l]);
+      // direct ook score berekenen zodat trigger-codes meteen zichtbaar zijn
+      await runScoreCalc(res.surveyRunId);
+      // refresh runs-overzicht
+      await refetchReports();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setScenarioLog((l) => [
+        {
+          scenario: code,
+          surveyRunId: "",
+          surveyToolId: "",
+          notes: [],
+          error: msg,
+        },
+        ...l,
+      ]);
+    } finally {
+      setScenarioBusy(null);
+    }
+  }
 
   async function runScoreCalc(runId: string) {
     setScores((s) => ({ ...s, [runId]: { loading: true } }));
