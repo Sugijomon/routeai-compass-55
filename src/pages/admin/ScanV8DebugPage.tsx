@@ -371,41 +371,41 @@ export default function ScanV8DebugPage() {
     }
   }
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data: runs, error: runsError } = await supabase
-          .from("survey_run")
-          .select("id, org_id, started_at, completed_at")
-          .not("completed_at", "is", null)
-          .order("completed_at", { ascending: false })
-          .limit(50);
+  async function loadReports() {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: runs, error: runsError } = await supabase
+        .from("survey_run")
+        .select("id, org_id, started_at, completed_at")
+        .not("completed_at", "is", null)
+        .order("completed_at", { ascending: false })
+        .limit(50);
 
-        if (runsError) throw runsError;
-        const runList = (runs ?? []) as RunRow[];
-        if (cancelled) return;
-        setRunCount(runList.length);
+      if (runsError) throw runsError;
+      const runList = (runs ?? []) as RunRow[];
+      setRunCount(runList.length);
 
-        const built: RunReport[] = [];
-        for (const r of runList) {
-          const rep = await buildReport(r);
-          if (cancelled) return;
-          built.push(rep);
-        }
-        if (!cancelled) setReports(built);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (!cancelled) setError(msg);
-      } finally {
-        if (!cancelled) setLoading(false);
+      const built: RunReport[] = [];
+      for (const r of runList) {
+        const rep = await buildReport(r);
+        built.push(rep);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+      setReports(built);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // alias gebruikt door scenario-runner
+  const refetchReports = loadReports;
+
+  useEffect(() => {
+    loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
