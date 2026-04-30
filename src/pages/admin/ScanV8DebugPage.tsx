@@ -803,6 +803,7 @@ function ScoreCell({
             ))}
           </ul>
         </div>
+      )}
       {state.last_calculated_at && (
         <div style={{ color: "#666", fontSize: 10, marginTop: 2 }}>
           <strong>calc:</strong>{" "}
