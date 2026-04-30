@@ -653,16 +653,18 @@ function ScoreCell({
         </div>
       )}
       {state.warnings && state.warnings.length > 0 && (
-        <details style={{ marginTop: 4, color: "#92400e" }}>
-          <summary style={{ cursor: "pointer", fontSize: 10 }}>
-            ⚠ {state.warnings.length} warning(s)
-          </summary>
-          <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 10 }}>
+        <div style={{ marginTop: 4, color: "#92400e" }}>
+          <div style={{ fontSize: 10, fontWeight: 600 }}>
+            ⚠ {state.warnings.length} warning(s):
+          </div>
+          <ul style={{ margin: "2px 0 0 14px", padding: 0, fontSize: 10 }}>
             {state.warnings.map((w, i) => (
-              <li key={i}>{w}</li>
+              <li key={i} style={{ wordBreak: "break-word" }}>
+                {w}
+              </li>
             ))}
           </ul>
-        </details>
+        </div>
       )}
       <button
         type="button"
