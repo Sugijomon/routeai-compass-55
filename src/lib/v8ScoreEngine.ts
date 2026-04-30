@@ -546,12 +546,18 @@ export async function calculateScoresForRun(
         highest_risk_context: null,
       },
     );
+    const { data: rrExit } = await supabase
+      .from("risk_result")
+      .select("created_at")
+      .eq("survey_run_id", surveyRunId)
+      .maybeSingle();
     return {
       person_score: 0,
       assigned_tier: "standard",
       review_trigger_codes: [],
       warnings: exitWarnings,
       exit_path: true,
+      last_calculated_at: rrExit?.created_at ?? null,
     };
   }
 
