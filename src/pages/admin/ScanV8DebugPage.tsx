@@ -11,6 +11,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateScoresForRun } from "@/lib/v8ScoreEngine";
+import {
+  scenarioApprovedSpecialData,
+  scenarioProhibitedTool,
+  scenarioAgenticUseCase,
+  type ScenarioCode,
+  type ScenarioResult,
+  SCENARIO_LABELS,
+} from "@/lib/v8ScoreEngineFixtures";
 
 type ScoreOutput = {
   loading: boolean;
